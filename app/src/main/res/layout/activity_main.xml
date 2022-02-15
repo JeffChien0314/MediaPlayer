@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_music"
+    tools:context="com.example.sandra.a0117player.com.example.fxc.a0117player.MainActivity">
+
+    <com.example.fxc.mediaplayer.CSDMediaPlayer
+        android:id="@+id/mediaPlayer_csd"
+        android:layout_width="match_parent"
+        android:layout_height="486px"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent">
+        <!--LinearLayout
+            android:id="@+id/play_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="220dp"
+            android:layout_marginLeft="100px"
+            android:orientation="horizontal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <ImageButton
+                android:layout_width="60px"
+                android:layout_height="60px"
+                android:id="@+id/random"
+                android:onClick="onRandomOpenClick"
+                android:layout_marginRight="150px"
+                android:background="@drawable/random" />
+            <ImageButton
+                android:layout_width="60px"
+                android:layout_height="60px"
+                android:layout_marginLeft="150px"
+                android:onClick="onPlayModeClick"
+                android:id="@+id/single_loop"
+                android:background="@drawable/function" />
+        </LinearLayout>-->
+
+        <ImageView
+            android:id="@+id/previous"
+            android:layout_width="100px"
+            android:layout_height="100px"
+            android:layout_marginTop="200px"
+            android:layout_marginLeft="252px"
+            android:layout_gravity="left"
+            android:scaleType="fitXY"
+            android:onClick="onPreviousClick"
+            android:src="@drawable/icon_skip_back_normal" />
+        <ImageView
+            android:layout_width="100px"
+            android:layout_height="100px"
+            android:layout_gravity="right"
+            android:id="@+id/next"
+            android:layout_marginRight="252px"
+            android:onClick="onNextClick"
+            android:scaleType="fitXY"
+            android:src="@drawable/icon_skip_fwd_normal"
+            android:layout_marginTop="200px" />
+    </com.example.fxc.mediaplayer.CSDMediaPlayer>
+
+
+    <LinearLayout
+        android:id="@+id/input_source_related"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/fxc_input_source_bg"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd">
+
+        <View
+            android:id="@+id/input_source_indicated"
+            android:layout_width="108px"
+            android:layout_height="6px"
+            android:layout_marginLeft="486px"
+            android:layout_marginTop="10px"
+            android:background="#40FFFFFF" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/input_source_click_button_and_play_mode">
+        <ImageView
+            android:id="@+id/input_source_click_button"
+            android:layout_width="60px"
+            android:layout_height="60px"
+            android:layout_marginRight="25px"
+            android:layout_marginTop="30px"
+            android:background="@drawable/icon_input_source_normal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input_source_indicated" />
+
+        <TextView
+            android:layout_width="200px"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="550px"
+            android:layout_marginTop="45px"
+            android:text="Input Source"
+            android:textColor="#0F0"
+            android:textSize="30px" />
+
+        <ImageView
+            android:id="@+id/random"
+            android:layout_width="60px"
+            android:layout_height="60px"
+            android:layout_marginTop="30px"
+            android:background="@drawable/random"
+            android:onClick="onRandomOpenClick" />
+
+        <ImageView
+            android:id="@+id/single_loop"
+            android:layout_width="60px"
+            android:layout_height="60px"
+            android:layout_marginLeft="60px"
+            android:layout_marginTop="30px"
+            android:background="@drawable/repeat"
+            android:onClick="onPlayModeClick" />
+    </LinearLayout>
+        <ListView
+            android:id="@+id/input_source_list"
+            android:layout_width="match_parent"
+            android:layout_height="300px"
+            android:choiceMode="singleChoice"
+            android:drawSelectorOnTop="true"
+            android:scrollbars="vertical"
+            app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode" />
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="60px"
+            android:layout_marginBottom="30px"
+            android:layout_marginLeft="30px"
+            android:layout_marginRight="30px"
+            android:layout_marginTop="30px"
+            android:focusable="false"
+            app:tabBackground="@drawable/tab_background"
+            app:tabMode="fixed"
+            app:tabTextColor="#ffffffff">
+        </android.support.design.widget.TabLayout>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp_view"
+            android:layout_width="wrap_content"
+            android:background="#03000000"
+            android:orientation="vertical"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--被选中时的布局-->
+    <item
+        android:state_activated="true">
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#99BD4C"
+                android:startColor="#C1C125"
+                />
+            <corners
+                android:radius="8dp"
+                />
+        </shape>
+    </item>
+    <!--默认的布局-->
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#A8C3B0"
+                android:startColor="#C0CFCE"
+                />
+            <corners
+                android:radius="8dp"
+                />
+        </shape>
+    </item>
+
+</selector>
