@@ -2,9 +2,12 @@ package com.example.fxc.mediaplayer;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -16,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -28,6 +32,7 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -81,6 +86,16 @@ public class MainActivity extends AppCompatActivity {
     private List<Fragment> fragments;
     private List<TextView> listTextViews;
     private int currentTab = -1;
+    //Sandra@20220215
+    private ListView devicelistview;
+    private List<ExternalDeviceInfo> externalDeviceInfos =new ArrayList<ExternalDeviceInfo>();
+    private DeviceListAdapter deviceListAdapter;
+
+    private String currentStoragePath ="";
+
+    public String getCurrentStoragePath() {
+        return currentStoragePath;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,134 +113,102 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer = (CSDMediaPlayer) findViewById(R.id.mediaPlayer_csd);
 
         csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
-        searchMusicFile();//搜索音频文件
+        // searchMusicFile();//搜索音频文件
         initTabData();
         Log.i("main", "Jennifertest30=: " + csdMediaPlayer.getCurrentState());
-    }
-        public void playMusic(int position){
-            HashMap<String, String> map = list.get(position);
-            Long idChecked = Long.parseLong(map.get("id"));
-            //uriChecked:选中的歌曲相对应的Uri
-            uriChecked = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + nameChecked);
-            Log.i("main", "uriChecked=: " + uriChecked);
-            Log.i("main", "uriChecked=: ");
-            //randomOpen=true;
-
-            //      nameView.setText(nameChecked);
-            currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
-            Log.i("main", "Jennifertest4=: " + currPosition);
-            csdMediaPlayer.setUp(urls, true, currPosition);
-            if (playMode == 1) {
-                csdMediaPlayer.setLooping(true);
+        //Sandra@20220215 add-->
+        //創建設備列表獲取顯示存儲設備信息
+        devicelistview=(ListView) findViewById(R.id.input_source_list);
+        externalDeviceInfos= getExternalDeviceInfoList();
+        if (externalDeviceInfos!=null && externalDeviceInfos.size()>0){
+            currentStoragePath =externalDeviceInfos.get(0).getStoragePath();
+        }
+        deviceListAdapter=new DeviceListAdapter(this,externalDeviceInfos);
+        devicelistview.setAdapter(deviceListAdapter);
+        //根據選擇的設備刷新音視頻列表
+        devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                currentStoragePath =externalDeviceInfos.get(position).getStoragePath();
+                currentTab = mTabLayout.getSelectedTabPosition();
+                if (currentTab==0){
+                    ((ContentFragment)fragments.get(currentTab)).updateMusic(currentStoragePath);
+                }else if (currentTab==1){
+                    ((ContentFragment)fragments.get(currentTab)).updateVideo(currentStoragePath);
+                }
             }
+        });
 
-            csdMediaPlayer.startPlayLogic();
-
-            //   csdMediaPlayer. prepareVideo();
-        }
-
-    //Sandra@20210113 add 搜索视频文件-->
-    private void getVideo() {
-        ContentResolver contentResolver = getContentResolver();
-        String[] projection = {
-                MediaStore.Video.Media._ID,
-                MediaStore.Video.Media.TITLE,
-                MediaStore.Video.Media.DURATION,
-                MediaStore.Video.Media.MIME_TYPE,
-                MediaStore.Video.Media.DATA,
-        };
-        Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        Cursor cursor = contentResolver.query(uri, projection, null, null,
-                MediaStore.Video.Media.DEFAULT_SORT_ORDER);
-        while (cursor.moveToNext()) {
-            String id =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-            String title =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE));
-            String duration =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-            String mime_type =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));
-            String filePath =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
-            Log.i(TAG, "searchMusicFile: filePath" + cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-            HashMap<String, String> map = new HashMap<>();
-            map.put("id", id);
-            map.put("name", title);
-            map.put("duration", duration);
-            map.put("mime_type", mime_type);
-            map.put("data", filePath);
-            list.add(map);
-
-            String path = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.DATA));
-            mVideoPaths.add(path);
-            Log.i(TAG, "getVideo: path" + path);
-        }
-        cursor.close();
-        System.out.println("Video = " + mVideoPaths.toString());
-        cursor.close();
-        //搜索完毕之后，发一个message给Handler，对ListView的显示内容进行更新
-        Log.i(TAG, "找到" + mVideoPaths.size() + "份視頻频文件");
-        Toast.makeText(MainActivity.this, "找到" + mVideoPaths.size() + "份視頻频文件", Toast.LENGTH_LONG).show();
-
+        //Sandra@20220215 add<--
     }
 
-    private List<String> mVideoPaths = new ArrayList<String>();
-    //<--Sandra@20210113 add 搜索视频文件
+    //Sandra@20220215 add-->
+    private StorageManager mStorageManager;
+    List<StorageVolume> volumes;
+    /**
+     * 获取所有外置存储器的目录
+     *
+     * @return
+     */
+    List<ExternalDeviceInfo> getExternalDeviceInfoList() {
+        mStorageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+        //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
+        volumes = mStorageManager.getStorageVolumes();
+        try {
+            Class<?> storageVolumeClazz = Class
+                    .forName("android.os.storage.StorageVolume");
+            //通过反射调用系统hide的方法
+            Method getPath = storageVolumeClazz.getMethod("getPath");
+            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+            for (int i = 0; i < volumes.size(); i++) {
+                StorageVolume storageVolume = volumes.get(i);//获取每个挂
+                // 载的StorageVolume
+                //通过反射调用getPath、isRemovable
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    private void searchMusicFile() {
-//        如果list不是空的，就先清空
-        if (!list.isEmpty()) {
-            list.clear();
+                String storagePath = (String) getPath.invoke(storageVolume); //获取路径
+                boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
+                String description = storageVolume.getDescription(this);
+                Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
+                        + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);
+                ExternalDeviceInfo externalDeviceInfo= new  ExternalDeviceInfo();
+                //   if (isRemovableResult){//Sandra@20220210 剔除内部存储
+                externalDeviceInfo.setStoragePath(storagePath);
+                externalDeviceInfo.setRemovableResult(isRemovableResult);
+                externalDeviceInfo.setDescription(description);
+                externalDeviceInfo.
+                        setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
+                externalDeviceInfos.add(externalDeviceInfo);
+                //  }
+
+            }
+        } catch (Exception e) {
+            Log.d("jason", " e:" + e);
         }
-        ContentResolver contentResolver = this.getContentResolver();
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;  //搜索SD卡里的music文件
-        Log.i("main", "searchMusicFile: " + uri);
-
-        String[] projection = {
-                MediaStore.Audio.Media._ID,      //根据_ID可以定位歌曲
-                MediaStore.Audio.Media.TITLE,   //这个是歌曲名
-                MediaStore.Audio.Media.DISPLAY_NAME, //这个是文件名
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.IS_MUSIC,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.DURATION
-        };
-        String where = MediaStore.Audio.Media.IS_MUSIC + ">0";
-        Cursor cursor = contentResolver.query(uri, projection, where, null, MediaStore.Audio.Media.DATA);
-        while (cursor.moveToNext()) {
-            //将歌曲的信息保存到list中
-            String songName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)); //其中，TITLE和ARTIST是用来显示到ListView中的
-            String artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-            String id = Integer.toString(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));   // _ID和DATA都可以用来播放音乐，其实保存任一个就可以
-            String data = Integer.toString(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-            String duration = stringForTime(Integer.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION))));
-                //totaltimeView.setText(toTime(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-            //根据专辑ID获取到专辑封面图
-            //     Bitmap thumbBitmap = getAlbumArt(albumId);
-            HashMap<String, String> map = new HashMap<>();
-            //     map.put("thumbBitmap", thumbBitmap.toString());
-            map.put("name", songName);
-            map.put("artist", artistName);
-            map.put("id", id);
-            map.put("data", data);
-            map.put("duration", duration);
-            list.add(map);
-            nameChecked = map.get("name");
-            Long idChecked = Long.parseLong(map.get("id"));
-            urls.add(new GSYVideoModel((String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + idChecked))), nameChecked));
-            Log.i("main", "Jennifertest3=: " + (String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + idChecked))));
-        }
-        //  listRandom=getListRandom(list);
-        cursor.close();
-        Toast.makeText(getApplicationContext(), "找到" + list.size() + "份文件", Toast.LENGTH_LONG);
-        //搜索完毕之后，发一个message给Handler，对ListView的显示内容进行更新
-        //   handler.sendEmptyMessage(SEARCH_MUSIC_SUCCESS);
+        return externalDeviceInfos;
     }
 
+    //Sandra@20220215 add
+    public void playMusic(int position){
+        HashMap<String, String> map = list.get(position);
+        Long idChecked = Long.parseLong(map.get("id"));
+        //uriChecked:选中的歌曲相对应的Uri
+        uriChecked = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + nameChecked);
+        Log.i("main", "uriChecked=: " + uriChecked);
+        Log.i("main", "uriChecked=: ");
+        //randomOpen=true;
+
+        //      nameView.setText(nameChecked);
+        currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
+        Log.i("main", "Jennifertest4=: " + currPosition);
+        csdMediaPlayer.setUp(urls, true, currPosition);
+        if (playMode == 1) {
+            csdMediaPlayer.setLooping(true);
+        }
+
+        csdMediaPlayer.startPlayLogic();
+
+        //   csdMediaPlayer. prepareVideo();
+    }
 
     private void initTabData() {
         listTitles = new ArrayList<>();
@@ -262,6 +245,9 @@ public class MainActivity extends AppCompatActivity {
         };
         mViewPager.setAdapter(mAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+
+        mTabLayout.setupWithViewPager(mViewPager);//将TabLayout和ViewPager关联起来。
+        mTabLayout.setTabsFromPagerAdapter(mAdapter);//给Tabs设置适配器
         mTabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -271,29 +257,17 @@ public class MainActivity extends AppCompatActivity {
                 currPosition=-1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
+                if (currentTab ==0){//音樂
+                    ((ContentFragment)fragments.get(currentTab)).updateMusic(currentStoragePath);
+                }else if (currentTab ==1){//視頻
+                    ((ContentFragment)fragments.get(currentTab)).updateVideo(currentStoragePath);
+                }else {
+
+                }
                 Log.i("main", "Jennifertest20=: " + currentTab);
             }
         });
 
-        mTabLayout.setupWithViewPager(mViewPager);//将TabLayout和ViewPager关联起来。
-        mTabLayout.setTabsFromPagerAdapter(mAdapter);//给Tabs设置适配器
-
-    }
-   private String stringForTime(int timeMs){
-        if (timeMs <= 0 || timeMs >= 24 * 60 * 60 * 1000) {
-            return "00:00";
-        }
-        int totalSeconds = timeMs / 1000;
-        int seconds = totalSeconds % 60;
-        int minutes = (totalSeconds / 60) % 60;
-        int hours = totalSeconds / 3600;
-        StringBuilder stringBuilder = new StringBuilder();
-        Formatter mFormatter = new Formatter(stringBuilder, Locale.getDefault());
-        if (hours > 0) {
-            return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
-        } else {
-            return mFormatter.format("%02d:%02d", minutes, seconds).toString();
-        }
     }
 
 
@@ -338,7 +312,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onNextClick(View v) {
-
         next();
     }
 
