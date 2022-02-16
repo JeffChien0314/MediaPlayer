@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer = (CSDMediaPlayer) findViewById(R.id.mediaPlayer_csd);
 
         csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
+        // searchMusicFile();//搜索音频文件
+
         initTabData();
         Log.i("main", "Jennifertest30=: " + csdMediaPlayer.getCurrentState());
         //Sandra@20220215 add-->
@@ -163,8 +165,9 @@ public class MainActivity extends AppCompatActivity {
                 String storagePath = (String) getPath.invoke(storageVolume); //获取路径
                 boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
                 String description = storageVolume.getDescription(this);
-              /*  Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
-                        + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);*/
+
+                Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
+                        + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);
                 ExternalDeviceInfo externalDeviceInfo= new  ExternalDeviceInfo();
                 //   if (isRemovableResult){//Sandra@20220210 剔除内部存储
                 externalDeviceInfo.setStoragePath(storagePath);
