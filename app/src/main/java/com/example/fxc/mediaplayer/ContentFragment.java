@@ -21,12 +21,16 @@ import java.util.List;
  */
 public class ContentFragment extends Fragment {
     private View view;
-    private ListView musicListView;
+    //private ListView musicListView;
     private Context mContext;
     private List<HashMap<String, String>> mList;
-    private SimpleAdapter listAdapter;
-    private TextView totaltimeView;
-
+    //   private SimpleAdapter listAdapter;
+    //   private TextView totaltimeView;
+    //Sandra@20220215 add
+    private ListView mediaFile_list;
+    public List<MediaInfo> musicInfos = null;
+    public List<MediaInfo> videoInfos = null;
+    public MediaListAdapter Listadapter;
     public ContentFragment() {
         super();
     }
@@ -40,10 +44,13 @@ public class ContentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.contentfragment, container, false);
-        musicListView = (ListView) view.findViewById(R.id.list);
-   
-        initListView();
-        musicListView.setOnItemClickListener(onItemClickListener);
+        //音視頻列表
+        mediaFile_list = (ListView)view.findViewById(R.id.list);
+        String pathDefault= ((MainActivity)getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
+        musicInfos = MediaUtil.getMusicInfos(mContext,pathDefault);
+        Listadapter = new MediaListAdapter(mContext, musicInfos);
+        mediaFile_list.setAdapter(Listadapter);
+        mediaFile_list.setOnItemClickListener(onItemClickListener);
         return view;
     }
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -53,18 +60,26 @@ public class ContentFragment extends Fragment {
             ((MainActivity)getActivity()).playMusic(position);
         }
     };
-   public void initListView() {
-
-        listAdapter = new SimpleAdapter(mContext, mList, R.layout.music_list, new String[]{"name", "artist","duration"}, new int[]{R.id.songName, R.id.artistName,R.id.totalTime});
-        musicListView.setAdapter(listAdapter);
-    }
     public void smoothScrollToPosition(int position) {
         Log.i("main", "Jennifertest21=: " + position);
-        musicListView.smoothScrollToPosition( position);
-        musicListView.performItemClick(
-                musicListView.getAdapter().getView(position, null, null),
+        mediaFile_list.smoothScrollToPosition( position);
+        mediaFile_list.performItemClick(
+                mediaFile_list.getAdapter().getView(position, null, null),
                 position,
-                musicListView.getItemIdAtPosition(position));
+                mediaFile_list.getItemIdAtPosition(position));
     }
-
+    public void updateMusic(String path){
+        musicInfos = MediaUtil.getMusicInfos(mContext,path);
+        Listadapter = new MediaListAdapter(mContext, musicInfos);
+        if (mediaFile_list==null)return;
+        mediaFile_list.setAdapter(Listadapter);
+        Listadapter.notifyDataSetChanged();
+    }
+    public void updateVideo(String path){
+        videoInfos = MediaUtil.getVideoInfos(mContext,path);
+        Listadapter = new MediaListAdapter(mContext, videoInfos);
+        if (mediaFile_list==null)return;
+        mediaFile_list.setAdapter(Listadapter);
+        Listadapter.notifyDataSetChanged();
+    }
 }
