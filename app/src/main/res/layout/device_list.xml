@@ -4,7 +4,7 @@
     android:layout_height="80px"
     android:layout_marginLeft="30px"
     android:orientation="horizontal"
-    android:background="#55ee03">
+     >
     <ImageView
         android:id="@+id/device_icon"
         android:layout_width="72px"

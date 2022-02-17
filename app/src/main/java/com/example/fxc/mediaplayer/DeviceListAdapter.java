@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+
 /**
  * Created by Sandra on 2022/2/11.
  */
@@ -55,7 +57,12 @@ public class DeviceListAdapter extends BaseAdapter {
         }
         externalDeviceInfo = externalDeviceInfos.get(position);
         viewHolder.description.setText(externalDeviceInfo.getDescription());//設備名稱
-        viewHolder.deviceImage.setImageResource(externalDeviceInfo.getResImage());		//設備圖標
+        if(externalDeviceInfo.getType()== BLUETOOTH_DEVICE){
+            viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
+        }else {
+            viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);		//設備圖標
+        }
+
        // viewHolder.deviceImage.setImageBitmap(externalDeviceInfo.getThumbBitmap());
         return convertView;
     }

@@ -13,7 +13,9 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import com.example.fxc.mediaplayer.R;
+import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 /**
@@ -28,8 +30,9 @@ public class ContentFragment extends Fragment {
     //   private TextView totaltimeView;
     //Sandra@20220215 add
     private ListView mediaFile_list;
-    public List<MediaInfo> musicInfos = null;
-    public List<MediaInfo> videoInfos = null;
+    public List<MediaInfo> mediaInfos = null;
+    private List<GSYVideoModel> urls = new ArrayList<>();
+
     public MediaListAdapter Listadapter;
     public ContentFragment() {
         super();
@@ -47,12 +50,24 @@ public class ContentFragment extends Fragment {
         //音視頻列表
         mediaFile_list = (ListView)view.findViewById(R.id.list);
         String pathDefault= ((MainActivity)getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
-        musicInfos = MediaUtil.getMusicInfos(mContext,pathDefault);
-        Listadapter = new MediaListAdapter(mContext, musicInfos);
+        mediaInfos = MediaUtil.getMediaInfos(0,mContext,pathDefault);
+        Listadapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(Listadapter);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         return view;
     }
+
+    public List<GSYVideoModel> getUrls() {
+        for (int i=0;i<mediaInfos.size();i++){
+            urls.add(mediaInfos.get(i).getGsyVideoModel());
+        }
+        return urls;
+    }
+
+    public void setUrls(List<GSYVideoModel> urls) {
+        this.urls = urls;
+    }
+
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
@@ -68,18 +83,22 @@ public class ContentFragment extends Fragment {
                 position,
                 mediaFile_list.getItemIdAtPosition(position));
     }
-    public void updateMusic(String path){
-        musicInfos = MediaUtil.getMusicInfos(mContext,path);
-        Listadapter = new MediaListAdapter(mContext, musicInfos);
+    public void updateMediaList(int mediaType,String path){
+        if (mediaType==0){//音樂
+            mediaInfos  = MediaUtil.getMusicInfos(mContext,path);
+        }else {//視頻
+            mediaInfos = MediaUtil.getVideoInfos(mContext,path);
+        }
+        Listadapter = new MediaListAdapter(mContext, mediaInfos);
         if (mediaFile_list==null)return;
         mediaFile_list.setAdapter(Listadapter);
         Listadapter.notifyDataSetChanged();
+        if (urls!=null && urls.size()!=0){
+            urls.clear();
+            for (int i=0;i<mediaInfos.size();i++){
+                urls.add(mediaInfos.get(i).getGsyVideoModel());
+            }
+        }
     }
-    public void updateVideo(String path){
-        videoInfos = MediaUtil.getVideoInfos(mContext,path);
-        Listadapter = new MediaListAdapter(mContext, videoInfos);
-        if (mediaFile_list==null)return;
-        mediaFile_list.setAdapter(Listadapter);
-        Listadapter.notifyDataSetChanged();
-    }
+
 }

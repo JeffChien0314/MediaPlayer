@@ -1,21 +1,22 @@
 package com.example.fxc.mediaplayer;
 
 import android.Manifest;
-import android.content.ContentResolver;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,26 +25,34 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.fxc.mediaplayer.R;
+import com.example.fxc.bt.BtMusicManager;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 
+import org.lsposed.hiddenapibypass.HiddenApiBypass;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
-import permissions.dispatcher.NeedsPermission;
-
-import android.support.v4.app.Fragment;
+import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final int CURRENT_STATE_NORMAL = 0; //正常
+    private final int CURRENT_STATE_PREPAREING = 1; //准备中
+    private final int CURRENT_STATE_PLAYING = 2; //播放中
+    private final int CURRENT_STATE_PLAYING_BUFFERING_START = 3; //开始缓冲
+    private final int CURRENT_STATE_PAUSE = 5;//暂停
+    private final int CURRENT_STATE_AUTO_COMPLETE = 6;//自动播放结束
+    private final int CURRENT_STATE_ERROR = 7; //错误状态
+
+    private SimpleAdapter listAdapter;
+    private ListView musicListView;
     private List<HashMap<String, String>> list;
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
     private String TAG = "MainActivity";
@@ -54,26 +63,12 @@ public class MainActivity extends AppCompatActivity {
     private int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private int currState = -1;//当前播放器的状态
 
-    //正常
-    public static final int CURRENT_STATE_NORMAL = 0;
-    //准备中
-    public static final int CURRENT_STATE_PREPAREING = 1;
-    //播放中
-    public static final int CURRENT_STATE_PLAYING = 2;
-    //开始缓冲
-    public static final int CURRENT_STATE_PLAYING_BUFFERING_START = 3;
-    //暂停
-    public static final int CURRENT_STATE_PAUSE = 5;
-    //自动播放结束
-    public static final int CURRENT_STATE_AUTO_COMPLETE = 6;
-    //错误状态
-    public static final int CURRENT_STATE_ERROR = 7;
-    private static int playMode = 0;// 顺序播放，1单曲循环，2循环播放
+    private int playMode = 0;// 顺序播放，1单曲循环，2循环播放
     public static boolean randomOpen = false;
-    List<GSYVideoModel> urls = new ArrayList<>();
+    private GSYVideoModel url= new GSYVideoModel("","");
     protected ImageView mPreviousButton;
     protected ImageView mNextButton;
-    OrientationUtils orientationUtils;
+    private OrientationUtils orientationUtils;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private LayoutInflater mInflater;
@@ -83,13 +78,15 @@ public class MainActivity extends AppCompatActivity {
     private List<String> listTitles;
     private List<Fragment> fragments;
     private List<TextView> listTextViews;
-    private int currentTab = -1;
+    private int currentTab = 0;
     //Sandra@20220215
     private ListView devicelistview;
-    private List<ExternalDeviceInfo> externalDeviceInfos =new ArrayList<ExternalDeviceInfo>();
+    private List<ExternalDeviceInfo> externalDeviceInfos = new ArrayList<ExternalDeviceInfo>();
     private DeviceListAdapter deviceListAdapter;
 
-    private String currentStoragePath ="";
+    private String currentStoragePath = "";
+    private StorageManager mStorageManager;
+    private List<StorageVolume> volumes;
 
     public String getCurrentStoragePath() {
         return currentStoragePath;
@@ -98,62 +95,65 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestAllPower();
-        Log.i("main", "uriChecked2=: ");
+        initCondition();
         setContentView(R.layout.activity_main);
+        initView();
+    }
+
+    private void initView() {
         list = new ArrayList<HashMap<String, String>>();
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mPreviousButton = (ImageView) findViewById(R.id.previous);
         mNextButton = (ImageView) findViewById(R.id.next);
         csdMediaPlayer = (CSDMediaPlayer) findViewById(R.id.mediaPlayer_csd);
-
         csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
-        // searchMusicFile();//搜索音频文件
-
         initTabData();
         Log.i("main", "Jennifertest30=: " + csdMediaPlayer.getCurrentState());
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
-        devicelistview=(ListView) findViewById(R.id.input_source_list);
-        externalDeviceInfos= getExternalDeviceInfoList();
-        if (externalDeviceInfos!=null && externalDeviceInfos.size()>0){
-            currentStoragePath =externalDeviceInfos.get(0).getStoragePath();
+        devicelistview = (ListView) findViewById(R.id.input_source_list);
+        externalDeviceInfos = getExternalDeviceInfoList();
+        if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
+            currentStoragePath = externalDeviceInfos.get(0).getStoragePath();
         }
-        deviceListAdapter=new DeviceListAdapter(this,externalDeviceInfos);
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos);
         devicelistview.setAdapter(deviceListAdapter);
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                currentStoragePath =externalDeviceInfos.get(position).getStoragePath();
+                currentStoragePath = externalDeviceInfos.get(position).getStoragePath();
                 currentTab = mTabLayout.getSelectedTabPosition();
-                if (currentTab==0){
-                    ((ContentFragment)fragments.get(currentTab)).updateMusic(currentStoragePath);
-                }else if (currentTab==1){
-                    ((ContentFragment)fragments.get(currentTab)).updateVideo(currentStoragePath);
-                }
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,currentStoragePath);
             }
         });
-
         //Sandra@20220215 add<--
     }
 
+    private void initCondition() {
+        BtMusicManager.getInstance().initBtData(this);
+        //  if (!BtMusicManager.getInstance().isEnabled()) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.addHiddenApiExemptions("L");
+        }
+        requestAllPower();
+    }
+
     //Sandra@20220215 add-->
-    private StorageManager mStorageManager;
-    List<StorageVolume> volumes;
+
     /**
      * 获取所有外置存储器的目录
      *
      * @return
      */
     List<ExternalDeviceInfo> getExternalDeviceInfoList() {
+
         mStorageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
         //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
         volumes = mStorageManager.getStorageVolumes();
         try {
-            Class<?> storageVolumeClazz = Class
-                    .forName("android.os.storage.StorageVolume");
+            Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
             //通过反射调用系统hide的方法
             Method getPath = storageVolumeClazz.getMethod("getPath");
             Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
@@ -165,10 +165,9 @@ public class MainActivity extends AppCompatActivity {
                 String storagePath = (String) getPath.invoke(storageVolume); //获取路径
                 boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
                 String description = storageVolume.getDescription(this);
-
                 Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
                         + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);
-                ExternalDeviceInfo externalDeviceInfo= new  ExternalDeviceInfo();
+                ExternalDeviceInfo externalDeviceInfo = new ExternalDeviceInfo();
                 //   if (isRemovableResult){//Sandra@20220210 剔除内部存储
                 externalDeviceInfo.setStoragePath(storagePath);
                 externalDeviceInfo.setRemovableResult(isRemovableResult);
@@ -182,37 +181,40 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d("jason", " e:" + e);
         }
+
+        if (BtMusicManager.getInstance().isEnabled()) {
+            for(BluetoothDevice device:BtMusicManager.getInstance().getBondedDevices()){
+                ExternalDeviceInfo info = new ExternalDeviceInfo();
+                info.setDescription(device.getName()+(device.isConnected()?"(已连接)":""));
+                info.setBtDeviceAddress(BtMusicManager.getInstance().getBTDeviceAddress());
+                info.setType(BLUETOOTH_DEVICE);
+                externalDeviceInfos.add(info);
+            }
+
+            // info.setBtDeviceUUID(B);
+            //  info.setBluetoothDevice();
+        }
         return externalDeviceInfos;
     }
 
     //Sandra@20220215 add
-    public void playMusic(int position){
-        HashMap<String, String> map = list.get(position);
-        Long idChecked = Long.parseLong(map.get("id"));
-        //uriChecked:选中的歌曲相对应的Uri
-        uriChecked = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + nameChecked);
-        Log.i("main", "uriChecked=: " + uriChecked);
-        Log.i("main", "uriChecked=: ");
-        //randomOpen=true;
-
-        //      nameView.setText(nameChecked);
+    public void playMusic(int position) {
+       // HashMap<String, String> map = list.get(position);
+        uriChecked = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + nameChecked);  //uriChecked:选中的歌曲相对应的Uri
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
-        Log.i("main", "Jennifertest4=: " + currPosition);
-        csdMediaPlayer.setUp(urls, true, currPosition);
+         List<GSYVideoModel> urls = new ArrayList<>();
+        urls=((ContentFragment) fragments.get(currentTab)).getUrls();
+        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls() , true, currPosition);
         if (playMode == 1) {
             csdMediaPlayer.setLooping(true);
         }
-
         csdMediaPlayer.startPlayLogic();
-
-        //   csdMediaPlayer. prepareVideo();
     }
 
     private void initTabData() {
         listTitles = new ArrayList<>();
         fragments = new ArrayList<>();
         listTextViews = new ArrayList<>();
-
 
         listTitles.add("Music");
         listTitles.add("Video");
@@ -222,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             fragments.add(fragment);
         }
         //mTabLayout.setTabMode(TabLayout.SCROLL_AXIS_HORIZONTAL);//设置tab模式，当前为系统默认模式
-        for (int i=0;i<listTitles.size();i++){
+        for (int i = 0; i < listTitles.size(); i++) {
             mTabLayout.addTab(mTabLayout.newTab().setText(listTitles.get(i)));//添加tab选项
         }
         FragmentPagerAdapter mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
@@ -235,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
             public int getCount() {
                 return fragments.size();
             }
+
             //ViewPager与TabLayout绑定后，这里获取到PageTitle就是Tab的Text
             @Override
             public CharSequence getPageTitle(int position) {
@@ -252,16 +255,10 @@ public class MainActivity extends AppCompatActivity {
                 GSYVideoManager.releaseAllVideos();
                 if (orientationUtils != null)
                     orientationUtils.releaseListener();
-                currPosition=-1;
+                currPosition = -1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                if (currentTab ==0){//音樂
-                    ((ContentFragment)fragments.get(currentTab)).updateMusic(currentStoragePath);
-                }else if (currentTab ==1){//視頻
-                    ((ContentFragment)fragments.get(currentTab)).updateVideo(currentStoragePath);
-                }else {
-
-                }
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,currentStoragePath);
                 Log.i("main", "Jennifertest20=: " + currentTab);
             }
         });
@@ -281,13 +278,13 @@ public class MainActivity extends AppCompatActivity {
                 currPosition--;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         break;
                     case CURRENT_STATE_AUTO_COMPLETE:
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp(urls, true, currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        csdMediaPlayer.setUp( ((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                         break;
                 }
@@ -295,13 +292,13 @@ public class MainActivity extends AppCompatActivity {
                 currPosition = list.size() - 1;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         break;
                     case CURRENT_STATE_AUTO_COMPLETE:
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp(urls, true, currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                         break;
                 }
@@ -321,26 +318,26 @@ public class MainActivity extends AppCompatActivity {
                 currPosition++;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         break;
                     case CURRENT_STATE_AUTO_COMPLETE:
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
-                        ((ContentFragment)fragments.get(0)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp(urls, true, currPosition);
+                        ((ContentFragment) fragments.get(0)).smoothScrollToPosition(currPosition);
+                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
             } else {
                 currPosition = 0;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         break;
                     case CURRENT_STATE_AUTO_COMPLETE:
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
-                        ((ContentFragment)fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp(urls, true, currPosition);
+                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
             }
@@ -433,4 +430,5 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
     }
+
 }

@@ -1,4 +1,5 @@
 package com.example.fxc.mediaplayer;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -7,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
+
+import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +21,13 @@ import java.util.List;
  */
 
 public class MediaUtil {
-
+    public static List<MediaInfo> getMediaInfos(int mediaType,Context context, String path) {
+        if (mediaType==0){
+            return getMusicInfos(context,path);
+        }else {
+            return getVideoInfos(context,path);
+        }
+    }
     public static List<MediaInfo> getMusicInfos(Context context, String path) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
@@ -32,29 +41,21 @@ public class MediaUtil {
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
             MediaInfo musicInfo = new MediaInfo();
-            long id = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Audio.Media._ID));	//音樂id
-            String title = cursor.getString((cursor
-                    .getColumnIndex(MediaStore.Audio.Media.TITLE))); // 音樂標題
-            String artist = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.ARTIST)); // 藝術家
-            String album = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.ALBUM));	//專輯
-            String displayName = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+            long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID));    //音樂id
+            String title = cursor.getString((cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))); // 音樂標題
+            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)); // 藝術家
+            String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));    //專輯
+            String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
             long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
-            long duration = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.DURATION)); // 時長
-            long size = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.SIZE)); // 檔案大小
-            String url = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
-            int isMusic = cursor.getInt(cursor
-                    .getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂
+            long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)); // 時長
+            long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)); // 檔案大小
+            String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
+            int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂
+            GSYVideoModel gsyVideoModel =new GSYVideoModel( String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)),title);
 
             Bitmap thumbBitmap = null;
             if (url != null) {
-                       thumbBitmap = loadingCoverOfMusic(url); //根据专辑路径获取到专辑封面图
+                //  thumbBitmap = loadingCoverOfMusic(url); //根据专辑路径获取到专辑封面图
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
@@ -68,6 +69,7 @@ public class MediaUtil {
                 musicInfo.setSize(size);
                 musicInfo.setUrl(url);
                 musicInfo.setThumbBitmap(thumbBitmap);
+                musicInfo.setGsyVideoModel(gsyVideoModel);
                 musicInfos.add(musicInfo);
             }
         }
@@ -77,7 +79,7 @@ public class MediaUtil {
     public static List<HashMap<String, String>> getMusicMaps(
             List<MediaInfo> mp3Infos) {
         List<HashMap<String, String>> musiclist = new ArrayList<HashMap<String, String>>();
-        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext(); ) {
             MediaInfo musicInfo = (MediaInfo) iterator.next();
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("title", musicInfo.getTitle());
@@ -92,9 +94,10 @@ public class MediaUtil {
         }
         return musiclist;
     }
+
     public static List<MediaInfo> getVideoInfos(Context context, String path) {
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Video.Media.DATA+ " like ? ";
+        String selection = MediaStore.Video.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
         Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
@@ -103,16 +106,16 @@ public class MediaUtil {
             cursor.moveToNext();
             MediaInfo videoinfo = new MediaInfo();
             long id = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Video.Media._ID));	//音樂id
+                    .getColumnIndex(MediaStore.Video.Media._ID));    //音樂id
             String title = cursor.getString((cursor
                     .getColumnIndex(MediaStore.Video.Media.TITLE))); // 音樂標題
             String artist = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
             String album = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.ALBUM));	//專輯
+                    .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
             String displayName = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));
-          //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
+            //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
             long duration = cursor.getLong(cursor
                     .getColumnIndex(MediaStore.Video.Media.DURATION)); // 時長
             long size = cursor.getLong(cursor
@@ -124,7 +127,7 @@ public class MediaUtil {
 
             Bitmap thumbBitmap = null;
             if (url != null) {
-                thumbBitmap = loadingCoverOfVideo(url); //根据专辑路径获取到专辑封面图
+            //    thumbBitmap = loadingCoverOfVideo(url); //根据专辑路径获取到专辑封面图
 
             }
             if (mime_type != null) {
@@ -133,7 +136,7 @@ public class MediaUtil {
                 videoinfo.setArtist(artist);
                 videoinfo.setAlbum(album);
                 videoinfo.setDisplayName(displayName);
-             //   musicInfo.setAlbumId(albumId);
+                //   musicInfo.setAlbumId(albumId);
                 videoinfo.setDuration(duration);
                 videoinfo.setSize(size);
                 videoinfo.setUrl(url);
@@ -143,17 +146,18 @@ public class MediaUtil {
         }
         return VideoInfos;
     }
+
     public static List<HashMap<String, String>> getVideoMaps(
             List<MediaInfo> mp3Infos) {
         List<HashMap<String, String>> videolist = new ArrayList<HashMap<String, String>>();
-        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext(); ) {
             MediaInfo videoInfo = (MediaInfo) iterator.next();
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("title", videoInfo.getTitle());
             map.put("Artist", videoInfo.getArtist());
             map.put("album", videoInfo.getAlbum());
             map.put("displayName", videoInfo.getDisplayName());
-          //  map.put("albumId", String.valueOf(videoInfo.getAlbumId()));
+            //  map.put("albumId", String.valueOf(videoInfo.getAlbumId()));
             map.put("duration", formatTime(videoInfo.getDuration()));
             map.put("size", String.valueOf(videoInfo.getSize()));
             map.put("data", videoInfo.getUrl());
@@ -161,8 +165,10 @@ public class MediaUtil {
         }
         return videolist;
     }
+
     /**
      * 格式化時間，將毫秒轉換為分:秒格式
+     *
      * @param time
      * @return
      */
@@ -203,6 +209,7 @@ public class MediaUtil {
             return null;
         }
     }
+
     /**
      * 加载封面
      *

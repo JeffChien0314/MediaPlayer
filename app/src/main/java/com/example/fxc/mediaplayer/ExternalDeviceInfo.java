@@ -1,18 +1,35 @@
 package com.example.fxc.mediaplayer;
 
+import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
+
 /**
  * Created by Sandra on 2022/2/10.
  */
 
 public class ExternalDeviceInfo {
-    public ExternalDeviceInfo() {
-    }
 
     private String storagePath;//设备路径
     private String description;//设备名字
     private int resImage;//设备图片
-    private int type;//设备类型
-    private  boolean isRemovableResult;
+    private int type = USB_DEVICE;//设备类型 0:USB usb; 1:bluetooth
+    private boolean isRemovableResult;
+    private String btDeviceAddress;
+
+    public String getBtDeviceAddress() {
+        return btDeviceAddress;
+    }
+
+    public void setBtDeviceAddress(String btDeviceUUID) {
+        this.btDeviceAddress = btDeviceUUID;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
 
     public int getResImage() {

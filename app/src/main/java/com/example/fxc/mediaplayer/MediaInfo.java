@@ -1,6 +1,8 @@
 package com.example.fxc.mediaplayer;
 import android.graphics.Bitmap;
 
+import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
+
 /**
  * Created by Sandra on 2022/2/10.
  */
@@ -18,7 +20,15 @@ public class MediaInfo {
     private String lrcTitle; // 歌詞名稱
     private String lrcSize; // 歌詞大小
    private Bitmap thumbBitmap;
+    private GSYVideoModel gsyVideoModel;
 
+    public GSYVideoModel getGsyVideoModel() {
+        return gsyVideoModel;
+    }
+
+    public void setGsyVideoModel(GSYVideoModel gsyVideoModel) {
+        this.gsyVideoModel = gsyVideoModel;
+    }
     public Bitmap getThumbBitmap() {
         return thumbBitmap;
     }
