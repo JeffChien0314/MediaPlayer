@@ -62,7 +62,7 @@ public class MediaListAdapter extends BaseAdapter {
             viewHolder.musicTitle = (TextView) convertView.findViewById(R.id.songName);
             viewHolder.musicDuration = (TextView) convertView.findViewById(R.id.totalTime);
             viewHolder.musicArtist = (TextView) convertView.findViewById(R.id.artistName);
-            viewHolder.albumImage=(ImageView) convertView.findViewById(R.id.playlist_icon);
+           // viewHolder.albumImage=(ImageView) convertView.findViewById(R.id.playlist_icon);
             convertView.setTag(viewHolder);			//表示給View新增一個格外的資料，
         } else {
             viewHolder = (ViewHolder)convertView.getTag();//通過getTag的方法將資料取出來
@@ -71,7 +71,7 @@ public class MediaListAdapter extends BaseAdapter {
         viewHolder.musicTitle.setText(mediaInfo.getTitle());//顯示標題
         viewHolder.musicArtist.setText(mediaInfo.getArtist());//顯示藝術家
         viewHolder.musicDuration.setText(MediaUtil.formatTime(mediaInfo.getDuration()));//顯示時長
-        viewHolder.albumImage.setImageBitmap(mediaInfo.getThumbBitmap());
+        //viewHolder.albumImage.setImageBitmap(mediaInfo.getThumbBitmap());
 
         return convertView;
     }

@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initCondition();
+        //initCondition();
         setContentView(R.layout.activity_main);
         initView();
     }
@@ -143,8 +143,6 @@ public class MainActivity extends AppCompatActivity {
 
     //Sandra@20220215 add
     public void playMusic(int position) {
-       // HashMap<String, String> map = list.get(position);
-        uriChecked = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + nameChecked);  //uriChecked:选中的歌曲相对应的Uri
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
          List<GSYVideoModel> urls = new ArrayList<>();
         urls=((ContentFragment) fragments.get(currentTab)).getUrls();
@@ -217,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
     private void previous() {
         currState = csdMediaPlayer.getCurrentState();
         Log.i("main", "Jennifertest1=: " + currPosition);
-        if (list.size() > 0) {
+        if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
             if (currPosition > 0) {
                 currPosition--;
                 switch (currState) {
@@ -233,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             } else {
-                currPosition = list.size() - 1;
+                currPosition = ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
@@ -257,8 +255,8 @@ public class MainActivity extends AppCompatActivity {
     private void next() {
         currState = csdMediaPlayer.getCurrentState();
         Log.i("main", "Jennifertest2=: " + currPosition);
-        if (list.size() > 0) {
-            if (currPosition < list.size() - 1) {
+        if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
+            if (currPosition < ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1) {
                 currPosition++;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:

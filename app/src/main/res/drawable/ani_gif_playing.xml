@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:oneshot="false"
+  >
+	<item android:drawable="@drawable/gif_nowplaying_00024" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00025" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00026" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00027" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00028" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00029" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00030" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00031" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00032" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00033" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00034" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00035" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00036" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00037" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00038" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00039" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00040" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00041" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00042" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00043" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00044" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00045" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00046" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00047" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00048" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00049" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00050" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00051" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00052" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00053" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00054" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00055" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00056" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00057" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00058" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00059" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00060" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00061" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00062" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00063" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00064" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00065" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00042" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00067" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00068" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00069" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00070" android:duration="42"></item>
+  	<item android:drawable="@drawable/gif_nowplaying_00071" android:duration="42"></item>	
+
+</animation-list>
