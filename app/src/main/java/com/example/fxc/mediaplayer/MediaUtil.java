@@ -76,24 +76,7 @@ public class MediaUtil {
         return musicInfos;
     }
 
-    public static List<HashMap<String, String>> getMusicMaps(
-            List<MediaInfo> mp3Infos) {
-        List<HashMap<String, String>> musiclist = new ArrayList<HashMap<String, String>>();
-        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext(); ) {
-            MediaInfo musicInfo = (MediaInfo) iterator.next();
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("title", musicInfo.getTitle());
-            map.put("Artist", musicInfo.getArtist());
-            map.put("album", musicInfo.getAlbum());
-            map.put("displayName", musicInfo.getDisplayName());
-            map.put("albumId", String.valueOf(musicInfo.getAlbumId()));
-            map.put("duration", formatTime(musicInfo.getDuration()));
-            map.put("size", String.valueOf(musicInfo.getSize()));
-            map.put("data", musicInfo.getUrl());
-            musiclist.add(map);
-        }
-        return musiclist;
-    }
+
 
     public static List<MediaInfo> getVideoInfos(Context context, String path) {
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -147,24 +130,6 @@ public class MediaUtil {
         return VideoInfos;
     }
 
-    public static List<HashMap<String, String>> getVideoMaps(
-            List<MediaInfo> mp3Infos) {
-        List<HashMap<String, String>> videolist = new ArrayList<HashMap<String, String>>();
-        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext(); ) {
-            MediaInfo videoInfo = (MediaInfo) iterator.next();
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("title", videoInfo.getTitle());
-            map.put("Artist", videoInfo.getArtist());
-            map.put("album", videoInfo.getAlbum());
-            map.put("displayName", videoInfo.getDisplayName());
-            //  map.put("albumId", String.valueOf(videoInfo.getAlbumId()));
-            map.put("duration", formatTime(videoInfo.getDuration()));
-            map.put("size", String.valueOf(videoInfo.getSize()));
-            map.put("data", videoInfo.getUrl());
-            videolist.add(map);
-        }
-        return videolist;
-    }
 
     /**
      * 格式化時間，將毫秒轉換為分:秒格式

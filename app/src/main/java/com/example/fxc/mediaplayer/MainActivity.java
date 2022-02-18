@@ -85,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
     private DeviceListAdapter deviceListAdapter;
 
     private String currentStoragePath = "";
-    private StorageManager mStorageManager;
-    private List<StorageVolume> volumes;
-
     public String getCurrentStoragePath() {
         return currentStoragePath;
     }
@@ -113,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
-        externalDeviceInfos = getExternalDeviceInfoList();
+        externalDeviceInfos = ExternalStorageDeviceUtil.getInstance().getExternalDeviceInfoList(this);
         if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
             currentStoragePath = externalDeviceInfos.get(0).getStoragePath();
         }
@@ -142,60 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Sandra@20220215 add-->
 
-    /**
-     * 获取所有外置存储器的目录
-     *
-     * @return
-     */
-    List<ExternalDeviceInfo> getExternalDeviceInfoList() {
 
-        mStorageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
-        //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
-        volumes = mStorageManager.getStorageVolumes();
-        try {
-            Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
-            //通过反射调用系统hide的方法
-            Method getPath = storageVolumeClazz.getMethod("getPath");
-            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
-            for (int i = 0; i < volumes.size(); i++) {
-                StorageVolume storageVolume = volumes.get(i);//获取每个挂
-                // 载的StorageVolume
-                //通过反射调用getPath、isRemovable
-
-                String storagePath = (String) getPath.invoke(storageVolume); //获取路径
-                boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
-                String description = storageVolume.getDescription(this);
-                Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
-                        + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);
-                ExternalDeviceInfo externalDeviceInfo = new ExternalDeviceInfo();
-                //   if (isRemovableResult){//Sandra@20220210 剔除内部存储
-                externalDeviceInfo.setStoragePath(storagePath);
-                externalDeviceInfo.setRemovableResult(isRemovableResult);
-                externalDeviceInfo.setDescription(description);
-                externalDeviceInfo.
-                        setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
-                externalDeviceInfos.add(externalDeviceInfo);
-                //  }
-
-            }
-        } catch (Exception e) {
-            Log.d("jason", " e:" + e);
-        }
-
-        if (BtMusicManager.getInstance().isEnabled()) {
-            for(BluetoothDevice device:BtMusicManager.getInstance().getBondedDevices()){
-                ExternalDeviceInfo info = new ExternalDeviceInfo();
-                info.setDescription(device.getName()+(device.isConnected()?"(已连接)":""));
-                info.setBtDeviceAddress(BtMusicManager.getInstance().getBTDeviceAddress());
-                info.setType(BLUETOOTH_DEVICE);
-                externalDeviceInfos.add(info);
-            }
-
-            // info.setBtDeviceUUID(B);
-            //  info.setBluetoothDevice();
-        }
-        return externalDeviceInfos;
-    }
 
     //Sandra@20220215 add
     public void playMusic(int position) {
