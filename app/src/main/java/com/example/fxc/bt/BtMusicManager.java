@@ -98,6 +98,7 @@ public class BtMusicManager implements IBtMusicManager {
     }
 
     public boolean isEnabled() {
+        if (null == mBluetoothAdapter) return false;
         return mBluetoothAdapter.isEnabled();
     }
 //############################################regist 蓝牙相关广播   start############################################

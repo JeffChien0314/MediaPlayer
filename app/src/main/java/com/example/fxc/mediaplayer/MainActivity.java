@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initCondition();
+        initCondition();
         setContentView(R.layout.activity_main);
         initView();
     }
@@ -144,8 +144,6 @@ public class MainActivity extends AppCompatActivity {
     //Sandra@20220215 add
     public void playMusic(int position) {
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
-         List<GSYVideoModel> urls = new ArrayList<>();
-        urls=((ContentFragment) fragments.get(currentTab)).getUrls();
         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls() , true, currPosition);
         if (playMode == 1) {
             csdMediaPlayer.setLooping(true);

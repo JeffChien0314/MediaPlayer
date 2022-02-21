@@ -14,7 +14,8 @@
         android:layout_width="90px"
         android:layout_height="90px"
         android:layout_marginLeft="60px"
-        android:src="@drawable/background_music" />
+        
+android:src="@drawable/img_album" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

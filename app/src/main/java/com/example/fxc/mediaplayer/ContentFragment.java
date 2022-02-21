@@ -28,7 +28,6 @@ public class ContentFragment extends Fragment {
     private View view;
     //private ListView musicListView;
     private Context mContext;
-    private List<HashMap<String, String>> mList;
     //   private SimpleAdapter listAdapter;
     //   private TextView totaltimeView;
     //Sandra@20220215 add
@@ -48,7 +47,6 @@ public class ContentFragment extends Fragment {
     public ContentFragment(Context context, List<HashMap<String, String>> list) {
         super();
         mContext = context;
-        mList = list;
     }
 
     @Nullable
