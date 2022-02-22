@@ -35,16 +35,16 @@ public class ContentFragment extends Fragment {
     public List<MediaInfo> mediaInfos = null;
     private List<GSYVideoModel> urls = new ArrayList<>();
     //private ImageView playing_icon;
-    private TextView totaltime;
+    //private TextView totaltime;
     private AnimationDrawable ani_gif_playing;
     public MediaListAdapter listAdapter;
-
+    int lastPosition=-1;
     public ContentFragment() {
         super();
     }
 
     @SuppressLint("ValidFragment")
-    public ContentFragment(Context context, List<HashMap<String, String>> list) {
+    public ContentFragment(Context context) {
         super();
         mContext = context;
     }
@@ -78,31 +78,53 @@ public class ContentFragment extends Fragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.i("main", "Jennifertest35=: " + view);
-            view.findViewById(R.id.playing_icon).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.playing_icon).setBackgroundResource(R.drawable.ani_gif_playing);
-            ani_gif_playing = (AnimationDrawable)(view.findViewById(R.id.playing_icon)).getBackground();
-            ani_gif_playing.start();
-            view.findViewById(R.id.totalTime).setVisibility(View.INVISIBLE);
+            if(((MainActivity)getActivity()).csdMediaPlayer.getCurrentState()==-1) {
+                ImageView playing_icon = mediaFile_list.getChildAt(position).findViewById(R.id.playing_icon);
+                playing_icon.setVisibility(View.VISIBLE);
+                playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
+                ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
+                ani_gif_playing.start();
+                TextView totaltime = mediaFile_list.getChildAt(position).findViewById(R.id.totalTime);
+                totaltime.setVisibility(View.GONE);
+                lastPosition=position;
+            }else{
+                resetAnimation(lastPosition);
+                playingAnimation(position);
+            }
             ((MainActivity)getActivity()).playMusic(position);
         }
     };
 
     public void smoothScrollToPosition(int position) {
-        Log.i("main", "Jennifertest21=: " + position);
         mediaFile_list.smoothScrollToPosition(position);
-        mediaFile_list.performItemClick(
+      /*  mediaFile_list.performItemClick(
                 mediaFile_list.getAdapter().getView(position, null, null),
                 position,
-                mediaFile_list.getItemIdAtPosition(position));
+                mediaFile_list.getItemIdAtPosition(position));*/
     }
 
     public void playingAnimation(int position) {
-        ImageView playing_icon = (ImageView) listAdapter.getView(position, null, null).findViewById(R.id.playing_icon);
-        playing_icon.setVisibility(View.INVISIBLE);
-        listAdapter.getView(position, null, null).invalidate();
-        //totaltime=(TextView)mediaFile_list.getAdapter().getView(position,null,null).findViewById(R.id.totalTime);
-    }
+        try {
+            ImageView playing_icon = mediaFile_list.getChildAt(position).findViewById(R.id.playing_icon);
+            playing_icon.setVisibility(View.VISIBLE);
+            playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
+            ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
+            ani_gif_playing.start();
+            TextView totaltime = mediaFile_list.getChildAt(position).findViewById(R.id.totalTime);
+            totaltime.setVisibility(View.GONE);
+            lastPosition = position;
+        }catch (Exception e) {
+            Log.d("jason", " e:" + e);
+        }
+       }
+
+    public void resetAnimation(int lastPosition) {
+            ImageView playing_icon = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.playing_icon);
+            playing_icon.setVisibility(View.GONE);
+            playing_icon.setAnimation(null);
+            TextView totaltime = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.totalTime);
+            totaltime.setVisibility(View.VISIBLE);
+        }
 
     public void updateMediaList(int mediaType, String path) {
         if (mediaType == 0) {//音樂

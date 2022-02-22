@@ -24,8 +24,7 @@ import moe.codeest.enviews.ENDownloadView;
  */
 
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
-    int random;
-    static int  mPlayMode;
+    onAutoCompletionListener mListener;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -37,6 +36,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+    public void setOnAutoCompletionListener(onAutoCompletionListener listener) {
+        mListener = listener;
+    }
+
+    public interface onAutoCompletionListener {
+        public void completion();
+
     }
     /**
      * 设置播放URL
@@ -147,23 +154,10 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     public void onAutoCompletion() {
      Log.i("main", "Jennifertest10=: ");
-        if(MainActivity.randomOpen){
-            setLooping(false);
-            random = (int) (Math.random() * mUriList.size());
-            mPlayPosition =random;
-            Log.i("main", "Jennifertest6=: "+mPlayPosition);
-            GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
-            mSaveChangeViewTIme = 0;
-            setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-            if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
-                mTitleTextView.setText(gsyVideoModel.getTitle());
-            }
-            startPlayLogic();
-        }else if((mPlayMode==0) ||(mPlayMode==2)){
-            if (playNext()) {
+            if (MainActivity.playMode==0 ||MainActivity.playMode==1){
+                mListener.completion();
                 return;
             }
-        }
         super.onAutoCompletion();
     }
 
@@ -202,34 +196,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     }
 
-    /**
-     * 播放下一集
-     *
-     * @return true表示还有下一集
-     */
-    public boolean playNext() {
-        if (mPlayPosition < (mUriList.size() - 1)) {
-            mPlayPosition += 1;
-            GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
-            mSaveChangeViewTIme = 0;
-            setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-            if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
-                mTitleTextView.setText(gsyVideoModel.getTitle());
-            }
-            startPlayLogic();
-            return true;
-        }else if(mPlayPosition==(mUriList.size()-1)&&(mPlayMode==2)) {//循环播放
-            mPlayPosition = 0;
-            GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
-            mSaveChangeViewTIme = 0;
-            setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-            if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
-                mTitleTextView.setText(gsyVideoModel.getTitle());
-            }
-            startPlayLogic();
-            return true;
-        }
-        return false;
-    }
+
 
 }
