@@ -119,14 +119,14 @@ public class MediaUtil {
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel =new GSYVideoModel( String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)),title);
+            GSYVideoModel gsyVideoModel =new GSYVideoModel( String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)),title);
             Bitmap thumbBitmap = null;
             if (url != null) {
-                try {
+                /*try {
                     thumbBitmap =getBitmapFormUrl(url); //根据专辑路径获取到专辑封面图
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
             if (mime_type != null) {
                 videoinfo.setId(id);
