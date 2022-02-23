@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MusicWidget"
+        <receiver android:name="com.example.fxc.MusicWidget"
             android:label="Music">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
