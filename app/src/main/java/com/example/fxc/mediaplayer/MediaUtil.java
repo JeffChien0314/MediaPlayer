@@ -23,8 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -34,13 +32,17 @@ import static android.content.ContentValues.TAG;
  */
 
 public class MediaUtil {
-    public static List<MediaInfo> getMediaInfos(int mediaType,Context context, String path) {
-        if (mediaType==0){
-            return getMusicInfos(context,path);
-        }else {
-            return getVideoInfos(context,path);
+    private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+    private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
+
+    public static List<MediaInfo> getMediaInfos(int mediaType, Context context, DeviceInfo deviceInfo) {
+        if (mediaType == 0) {
+            return getMusicInfos(context, deviceInfo.getStoragePath());
+        } else {
+            return getVideoInfos(context, deviceInfo.getStoragePath());
         }
     }
+
     public static List<MediaInfo> getMusicInfos(Context context, String path) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
@@ -62,11 +64,11 @@ public class MediaUtil {
             String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
             String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
-            Log.i(TAG, "getMusicInfos:isMusicType "+isMusicType);
-            GSYVideoModel gsyVideoModel =new GSYVideoModel( String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)),title);
+            Log.i(TAG, "getMusicInfos:isMusicType " + isMusicType);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title);
             Bitmap thumbBitmap = null;
             if (url != null) {
-                  thumbBitmap = getArtwork(context,id,albumId,true); //根据专辑路径获取到专辑封面图
+                thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
@@ -87,11 +89,9 @@ public class MediaUtil {
         return musicInfos;
     }
 
-
-
     public static List<MediaInfo> getVideoInfos(Context context, String path) {
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        Log.i(TAG, "getVideoInfos: "+uri);
+        Log.i(TAG, "getVideoInfos: " + uri);
         String selection = MediaStore.Video.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
@@ -119,14 +119,14 @@ public class MediaUtil {
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel =new GSYVideoModel( String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)),title);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title);
             Bitmap thumbBitmap = null;
             if (url != null) {
-                /*try {
-                    thumbBitmap =getBitmapFormUrl(url); //根据专辑路径获取到专辑封面图
+                try {
+                    thumbBitmap = getBitmapFormUrl(url); //根据专辑路径获取到专辑封面图
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                }*/
+                }
             }
             if (mime_type != null) {
                 videoinfo.setId(id);
@@ -153,7 +153,6 @@ public class MediaUtil {
         try {
             if (Build.VERSION.SDK_INT >= 14) {
                 retriever.setDataSource(inputStream.getFD());
-
             } else {
                 retriever.setDataSource(url);
 
@@ -179,7 +178,7 @@ public class MediaUtil {
     }
 
     public static Bitmap getArtwork(Context context, long song_id, long album_id,
-                                   boolean allowdefault) {
+                                    boolean allowdefault) {
         if (album_id < 0) {
             // This is something that is not in the database, so get the album art directly
             // from the file.
@@ -268,9 +267,7 @@ public class MediaUtil {
         return BitmapFactory.decodeStream(
                 context.getResources().openRawResource(R.drawable.img_album), null, opts);
     }
-    private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-    private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
-   // private static Bitmap mCachedBit = null;
+    // private static Bitmap mCachedBit = null;
 
     /**
      * 格式化時間，將毫秒轉換為分:秒格式

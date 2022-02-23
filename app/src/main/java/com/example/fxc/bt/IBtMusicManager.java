@@ -35,6 +35,7 @@ public interface IBtMusicManager {
     void initConnectDevice();
 
     void unregisterBtReceiver(Context context);
+
     void initBtData(Context context);
 
 }

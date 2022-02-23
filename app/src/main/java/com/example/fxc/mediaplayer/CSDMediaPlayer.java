@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.fxc.MainActivity;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
@@ -37,14 +38,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
     public void setOnAutoCompletionListener(onAutoCompletionListener listener) {
         mListener = listener;
     }
 
-    public interface onAutoCompletionListener {
-        public void completion();
-
-    }
     /**
      * 设置播放URL
      *
@@ -53,7 +51,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
      * @param cacheWithPlay 是否边播边缓存
      * @return
      */
-    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position,int playmode) {
+    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, int playmode) {
         return setUp(url, cacheWithPlay, position, null, new HashMap<String, String>());
     }
 
@@ -107,7 +105,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         return set;
     }
 
-
     @Override
     protected void cloneParams(GSYBaseVideoPlayer from, GSYBaseVideoPlayer to) {
         super.cloneParams(from, to);
@@ -153,14 +150,13 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     @Override
     public void onAutoCompletion() {
-     Log.i("main", "Jennifertest10=: ");
-            if (MainActivity.playMode==0 ||MainActivity.playMode==1){
-                mListener.completion();
-                return;
-            }
+        Log.i("main", "Jennifertest10=: ");
+        if (MainActivity.playMode == 0 || MainActivity.playMode == 1) {
+            mListener.completion();
+            return;
+        }
         super.onAutoCompletion();
     }
-
 
     /**
      * 开始状态视频播放，prepare时不执行  addTextureView();
@@ -175,7 +171,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             }
         }
     }
-
 
     @Override
     public void onPrepared() {
@@ -192,10 +187,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             findViewById(R.id.previous).setVisibility(VISIBLE);
             findViewById(R.id.next).setVisibility(VISIBLE);
         }*/
-    //    setViewShowState(mPreviousButton, GONE);
+        //    setViewShowState(mPreviousButton, GONE);
 
     }
 
+    public interface onAutoCompletionListener {
+        public void completion();
+
+    }
 
 
 }

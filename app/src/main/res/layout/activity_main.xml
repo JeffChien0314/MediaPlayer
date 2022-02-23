@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_music"
-    tools:context="com.example.fxc.mediaplayer.MainActivity">
+    tools:context="com.example.fxc.MainActivity">
 
     <com.example.fxc.mediaplayer.CSDMediaPlayer
         android:id="@+id/mediaPlayer_csd"

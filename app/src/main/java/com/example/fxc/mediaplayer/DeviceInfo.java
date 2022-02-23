@@ -6,7 +6,7 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
  * Created by Sandra on 2022/2/10.
  */
 
-public class ExternalDeviceInfo {
+public class DeviceInfo {
 
     private String storagePath;//设备路径
     private String description;//设备名字

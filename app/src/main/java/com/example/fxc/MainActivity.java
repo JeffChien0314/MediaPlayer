@@ -1,15 +1,9 @@
-package com.example.fxc.mediaplayer;
+package com.example.fxc;
 
 import android.Manifest;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
-import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -18,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -26,23 +19,22 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.fxc.bt.BtMusicManager;
+import com.example.fxc.mediaplayer.CSDMediaPlayer;
+import com.example.fxc.mediaplayer.DeviceInfo;
+import com.example.fxc.mediaplayer.DeviceListAdapter;
+import com.example.fxc.mediaplayer.MediaDeviceManager;
+import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
-import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 
-import org.lsposed.hiddenapibypass.HiddenApiBypass;
-
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-
 public class MainActivity extends AppCompatActivity {
 
+    public static int playMode = 0;// 循环播放,1单曲循环
     private final int CURRENT_STATE_NORMAL = 0; //正常
     private final int CURRENT_STATE_PREPAREING = 1; //准备中
     private final int CURRENT_STATE_PLAYING = 2; //播放中
@@ -50,25 +42,22 @@ public class MainActivity extends AppCompatActivity {
     private final int CURRENT_STATE_PAUSE = 5;//暂停
     private final int CURRENT_STATE_AUTO_COMPLETE = 6;//自动播放结束
     private final int CURRENT_STATE_ERROR = 7; //错误状态
-
-    private SimpleAdapter listAdapter;
-    private ListView musicListView;
-    private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
-    private String TAG = "MainActivity";
     //private TextView nameView;// 页面中用来显示当前选中音乐名的TextViewl
     protected CSDMediaPlayer csdMediaPlayer;
-    private String nameChecked;//当前选中的音乐名
-    private Uri uriChecked;//当前选中的音乐对应的Uri
-    private int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
-    private int currState = -1;//当前播放器的状态
-
-   public static int playMode = 0;// 循环播放,1单曲循环
-    private boolean randomOpen = false;
-    private GSYVideoModel url= new GSYVideoModel("","");
     protected ImageView mPreviousButton;
     protected ImageView mNextButton;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
+    private SimpleAdapter listAdapter;
+    private ListView musicListView;
+    private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
+    private String TAG = "MainActivity";
+    private String nameChecked;//当前选中的音乐名
+    private Uri uriChecked;//当前选中的音乐对应的Uri
+    private int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
+    private int currState = -1;//当前播放器的状态
+    private boolean randomOpen = false;
+    private GSYVideoModel url = new GSYVideoModel("", "");
     private OrientationUtils orientationUtils;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
@@ -78,21 +67,19 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab = 0;
     //Sandra@20220215
     private ListView devicelistview;
-    private List<ExternalDeviceInfo> externalDeviceInfos = new ArrayList<ExternalDeviceInfo>();
+    private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
     private DeviceListAdapter deviceListAdapter;
+    private int lastPosition = -1;
+    private int random;
+    private MediaDeviceManager mMediaDeviceManager;
 
-    private String currentStoragePath = "";
-    private int lastPosition=-1;
-    int random;
-    public String getCurrentStoragePath() {
-        return currentStoragePath;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initCondition();
+        initCondition();
         setContentView(R.layout.activity_main);
+        mMediaDeviceManager = MediaDeviceManager.getInstance();
         initView();
     }
 
@@ -105,25 +92,23 @@ public class MainActivity extends AppCompatActivity {
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
         csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
-        csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener(){
+        csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener() {
             @Override
             public void completion() {
-                if(randomOpen==false){
-                if(playMode==0){
-                    Log.i("main", "Jennifertest14=: ");
-                    next();
-                }else if(playMode==1){
-                    playMusic(lastPosition);
-                }
-             }else {
-                    if(playMode==0){
+                if (randomOpen == false) {
+                    if (playMode == 0) {
+                        next();
+                    } else if (playMode == 1) {
+                        playMusic(lastPosition);
+                    }
+                } else {
+                    if (playMode == 0) {
                         ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
-                        random = (int) (Math.random() *((ContentFragment) fragments.get(currentTab)).mediaInfos.size());
-                        Log.i("main", "Jennifertest14=: "+random);
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);;
+                        random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaInfos.size());
+                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);
                         playMusic(random);
-                        lastPosition=random;
-                    }else if(playMode==1){
+                        lastPosition = random;
+                    } else if (playMode == 1) {
                         playMusic(lastPosition);
                     }
                 }
@@ -133,30 +118,22 @@ public class MainActivity extends AppCompatActivity {
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
-        externalDeviceInfos = ExternalStorageDeviceUtil.getInstance().getExternalDeviceInfoList(this);
-        if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
-            currentStoragePath = externalDeviceInfos.get(0).getStoragePath();
-        }
+        externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
+
         deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos);
         devicelistview.setAdapter(deviceListAdapter);
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                currentStoragePath = externalDeviceInfos.get(position).getStoragePath();
                 currentTab = mTabLayout.getSelectedTabPosition();
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,currentStoragePath);
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceInfos.get(position));
             }
         });
         //Sandra@20220215 add<--
     }
 
     private void initCondition() {
-        BtMusicManager.getInstance().initBtData(this);
-        //if (!BtMusicManager.getInstance().isEnabled()) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            HiddenApiBypass.addHiddenApiExemptions("L");
-        }
         requestAllPower();
     }
 
@@ -165,9 +142,9 @@ public class MainActivity extends AppCompatActivity {
     //Sandra@20220215 add
     public void playMusic(int position) {
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
-        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls() , true, currPosition);
+        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
         csdMediaPlayer.startPlayLogic();
-        lastPosition=position;
+        lastPosition = position;
     }
 
     private void initTabData() {
@@ -217,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 currPosition = -1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,currentStoragePath);
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mMediaDeviceManager.getCurrentDevice());
                 Log.i("main", "Jennifertest20=: " + currentTab);
             }
         });
@@ -243,10 +220,10 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp( ((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
+                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                         ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition=currPosition;
+                        lastPosition = currPosition;
                         break;
                 }
             } else {
@@ -263,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                         ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
-                        lastPosition=currPosition;
+                        lastPosition = currPosition;
                         break;
                 }
             }
@@ -289,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition=currPosition;
+                        lastPosition = currPosition;
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
@@ -305,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition=currPosition;
+                        lastPosition = currPosition;
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
@@ -314,30 +291,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onPlayModeClick(View v) {
-            switch (playMode) {
-                case 0:
-                    playMode = 1;
-                    mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
-                    Log.i("main", "Jennifertest7=: " + playMode);
-                    break;
-                case 1:
-                    playMode = 0;
-                    mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
-                    Log.i("main", "Jennifertest8=: " + playMode);
-                    break;
+        switch (playMode) {
+            case 0:
+                playMode = 1;
+                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                Log.i("main", "Jennifertest7=: " + playMode);
+                break;
+            case 1:
+                playMode = 0;
+                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                Log.i("main", "Jennifertest8=: " + playMode);
+                break;
 
-            }
         }
+    }
 
 
     public void onRandomOpenClick(View v) {
-            if (randomOpen == false) {
-                randomOpen = true;
-                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
-            } else if (randomOpen == false) {
-                randomOpen = false;
-                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
-            }
+        if (randomOpen == false) {
+            randomOpen = true;
+            mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+        } else if (randomOpen == false) {
+            randomOpen = false;
+            mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+        }
     }
 
     @Override
@@ -349,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        csdMediaPlayer.onVideoResume();
+        // csdMediaPlayer.onVideoResume();
     }
 
     @Override
@@ -358,26 +335,6 @@ public class MainActivity extends AppCompatActivity {
         GSYVideoManager.releaseAllVideos();
         if (orientationUtils != null)
             orientationUtils.releaseListener();
-    }
-
-    List mylist = new ArrayList();
-
-    public void getRandom(List<HashMap<String, String>> list) {
-        int random;
-        if (listRandom.size() != 0) {
-            listRandom.clear();
-        }
-        if (mylist.size() > 0) {
-            mylist.clear();
-        }
-        while (mylist.size() < list.size()) {
-            random = (int) (Math.random() * list.size());//生成1到list.size()-1之间的随机数
-            if (!mylist.contains(random + "")) {
-                mylist.add(random + "");  //往集合里面添加数据。
-                listRandom.add(list.get(random));
-                Log.i(TAG, "getRandom: name: " + listRandom.size() + ":" + list.get(random).get("name") + "\nID:" + list.get(random).get("id") + "\nartist:" + list.get(random).get("artist"));
-            }
-        }
     }
 
     public void requestAllPower() {

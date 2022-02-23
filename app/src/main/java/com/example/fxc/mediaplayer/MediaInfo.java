@@ -1,4 +1,5 @@
 package com.example.fxc.mediaplayer;
+
 import android.graphics.Bitmap;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
@@ -19,28 +20,13 @@ public class MediaInfo {
     private String url; // 歌曲路徑
     private String lrcTitle; // 歌詞名稱
     private String lrcSize; // 歌詞大小
-   private Bitmap thumbBitmap;
+    private Bitmap thumbBitmap;
     private GSYVideoModel gsyVideoModel;
-
-    public GSYVideoModel getGsyVideoModel() {
-        return gsyVideoModel;
-    }
-
-    public void setGsyVideoModel(GSYVideoModel gsyVideoModel) {
-        this.gsyVideoModel = gsyVideoModel;
-    }
-    public Bitmap getThumbBitmap() {
-        return thumbBitmap;
-    }
-
-    public void setThumbBitmap(Bitmap thumbBitmap) {
-        this.thumbBitmap = thumbBitmap;
-    }
-
 
     public MediaInfo() {
         super();
     }
+
     public MediaInfo(long id, String title, String album, long albumId,
                      String displayName, String artist, long duration, long size,
                      String url, String lrcTitle, String lrcSize) {
@@ -56,6 +42,22 @@ public class MediaInfo {
         this.url = url;
         this.lrcTitle = lrcTitle;
         this.lrcSize = lrcSize;
+    }
+
+    public GSYVideoModel getGsyVideoModel() {
+        return gsyVideoModel;
+    }
+
+    public void setGsyVideoModel(GSYVideoModel gsyVideoModel) {
+        this.gsyVideoModel = gsyVideoModel;
+    }
+
+    public Bitmap getThumbBitmap() {
+        return thumbBitmap;
+    }
+
+    public void setThumbBitmap(Bitmap thumbBitmap) {
+        this.thumbBitmap = thumbBitmap;
     }
 
     public long getId() {
