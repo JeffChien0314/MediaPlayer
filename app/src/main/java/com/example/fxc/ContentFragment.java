@@ -123,11 +123,13 @@ public class ContentFragment extends Fragment {
     }
 
     public void resetAnimation(int lastPosition) {
-        ImageView playing_icon = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.playing_icon);
-        playing_icon.setVisibility(View.GONE);
-        playing_icon.setAnimation(null);
-        TextView totaltime = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.totalTime);
-        totaltime.setVisibility(View.VISIBLE);
+        if (lastPosition >= mediaFile_list.getFirstVisiblePosition() && lastPosition <= mediaFile_list.getLastVisiblePosition()) {
+            ImageView playing_icon = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
+            playing_icon.setVisibility(View.GONE);
+            playing_icon.setAnimation(null);
+            TextView totaltime = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.totalTime);
+            totaltime.setVisibility(View.VISIBLE);
+        }
     }
 
     public void updateMediaList(int mediaType, DeviceInfo deviceInfo) {
