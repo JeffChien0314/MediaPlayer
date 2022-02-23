@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.fxc.MainActivity;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import moe.codeest.enviews.ENDownloadView;
+import moe.codeest.enviews.ENPlayView;
 
 /**
  * Created by Jennifer on 2022/1/17.
@@ -196,5 +198,32 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     }
 
+    @Override
+    public int getLayoutId() {
+        return R.layout.layout_media_play_control;
+    }
 
+    @Override
+    protected void updateStartImage() {
+        if (mStartButton instanceof ENPlayView) {
+            ENPlayView enPlayView = (ENPlayView) mStartButton;
+            enPlayView.setDuration(500);
+            if (mCurrentState == CURRENT_STATE_PLAYING) {
+                enPlayView.play();
+            } else if (mCurrentState == CURRENT_STATE_ERROR) {
+                enPlayView.pause();
+            } else {
+                enPlayView.pause();
+            }
+        } else if (mStartButton instanceof ImageView) {
+            ImageView imageView = (ImageView) mStartButton;
+            if (mCurrentState == CURRENT_STATE_PLAYING) {
+                imageView.setImageResource(R.drawable.icon_pause_normal);
+            } else if (mCurrentState == CURRENT_STATE_ERROR) {
+                imageView.setImageResource(R.drawable.video_click_error_selector);
+            } else {
+                imageView.setImageResource(R.drawable.icon_play_normal);
+            }
+        }
+    }
 }

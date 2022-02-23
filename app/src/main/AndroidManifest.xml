@@ -24,6 +24,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".MusicWidget"
+            android:label="Music">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@layout/music_widget_setting" />
+        </receiver>
+
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 </manifest>
