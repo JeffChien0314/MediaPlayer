@@ -29,8 +29,8 @@ import java.util.Set;
 public class BtMusicManager implements IBtMusicManager {
     private static final String TAG = "BtMusicManager";
     private static volatile BtMusicManager sInstance;
-    private int AVRCP_CONTROLLER = 12;
-    private int A2DP_SINK = 11;
+    private final int AVRCP_CONTROLLER = 12;
+    private final int A2DP_SINK = 11;
     //蓝牙开关状态，搜索蓝牙，配对蓝牙等
     private BluetoothAdapter mBluetoothAdapter;
     //这个类里主要是确定蓝牙音乐是否连接上
@@ -129,7 +129,7 @@ public class BtMusicManager implements IBtMusicManager {
             Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
             Log.i(TAG, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy);
             switch (profile) {
-                case /*BluetoothProfile.A2DP_SINK*/11:
+                case /*BluetoothProfile.A2DP_SINK*/A2DP_SINK:
                     mBluetoothA2dpSink = (BluetoothA2dpSink) proxy;
                     Log.e(TAG, "onServiceConnected: mBluetoothA2dpSink=" + mBluetoothA2dpSink);
 
@@ -157,7 +157,7 @@ public class BtMusicManager implements IBtMusicManager {
                     }
 
                     break;*/
-                case /*BluetoothProfile.AVRCP_CONTROLLER*/12:
+                case /*BluetoothProfile.AVRCP_CONTROLLER*/AVRCP_CONTROLLER:
                     mAvrcpController = (BluetoothAvrcpController) proxy;
                     Log.e(TAG, "onServiceConnected: mAvrcpController=" + mAvrcpController);
 
@@ -248,6 +248,10 @@ public class BtMusicManager implements IBtMusicManager {
         return mBondedDevices;
     }
 
+    public BluetoothDevice getConnectedDevice() {
+
+        return mConnectedDevice;
+    }
     public boolean isEnabled() {
         if (null == mBluetoothAdapter) return false;
         return mBluetoothAdapter.isEnabled();

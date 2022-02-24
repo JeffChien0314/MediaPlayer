@@ -78,7 +78,7 @@ public class MediaDeviceManager {
             for (BluetoothDevice device : BtMusicManager.getInstance().getBondedDevices()) {
                 DeviceInfo info = new DeviceInfo();
                 info.setDescription(device.getName() + (device.isConnected() ? "(已连接)" : ""));
-                info.setBtDeviceAddress(BtMusicManager.getInstance().getBTDeviceAddress());
+                info.setBluetoothDevice(device);
                 info.setType(Constants.BLUETOOTH_DEVICE);
                 externalDeviceInfos.add(info);
             }

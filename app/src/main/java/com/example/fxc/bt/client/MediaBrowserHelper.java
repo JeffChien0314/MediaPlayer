@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.fxc.client;
+package com.example.fxc.bt.client;
 
 import android.content.ComponentName;
 import android.content.Context;

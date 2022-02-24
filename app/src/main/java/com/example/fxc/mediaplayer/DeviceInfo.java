@@ -1,5 +1,7 @@
 package com.example.fxc.mediaplayer;
 
+import android.bluetooth.BluetoothDevice;
+
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
 /**
@@ -13,15 +15,16 @@ public class DeviceInfo {
     private int resImage;//设备图片
     private int type = USB_DEVICE;//设备类型 0:USB usb; 1:bluetooth
     private boolean isRemovableResult;
-    private String btDeviceAddress;
+    private BluetoothDevice bluetoothDevice;
 
-    public String getBtDeviceAddress() {
-        return btDeviceAddress;
+    public BluetoothDevice getBluetoothDevice() {
+        return bluetoothDevice;
     }
 
-    public void setBtDeviceAddress(String btDeviceUUID) {
-        this.btDeviceAddress = btDeviceUUID;
+    public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        this.bluetoothDevice = bluetoothDevice;
     }
+
 
     public int getType() {
         return type;

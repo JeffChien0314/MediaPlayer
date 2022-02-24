@@ -1,19 +1,26 @@
 package com.example.fxc;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.fxc.bt.BtMusicManager;
+import com.example.fxc.bt.ConnectBlueCallBack;
 import com.example.fxc.mediaplayer.DeviceInfo;
 import com.example.fxc.mediaplayer.MediaDeviceManager;
 import com.example.fxc.mediaplayer.MediaInfo;
@@ -31,6 +38,8 @@ import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
  * Created by Jennifer on 2022/2/08.
  */
 public class ContentFragment extends Fragment {
+    String TAG = ContentFragment.class.getSimpleName();
+
     public List<MediaInfo> mediaInfos = null;
     public MediaListAdapter listAdapter;
     int lastPosition = -1;
@@ -87,6 +96,22 @@ public class ContentFragment extends Fragment {
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
+        mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.i(TAG, "onScrollChange: ");
+                Log.i(TAG, "onScrollChange: currentposition=" + MainActivity.currPosition);
+                for (int i = 0; i < mediaInfos.size(); i++) {
+                    if (isVisiable(i) && MainActivity.currPosition == i) {
+                        playingAnimation(MainActivity.currPosition);
+                    } else {
+                        resetAnimation(i);
+                    }
+                }
+
+
+            }
+        });
         return view;
     }
 
@@ -102,15 +127,25 @@ public class ContentFragment extends Fragment {
     }
 
     public void smoothScrollToPosition(int position) {
+
         mediaFile_list.smoothScrollToPosition(position);
-      /*  mediaFile_list.performItemClick(
-                mediaFile_list.getAdapter().getView(position, null, null),
-                position,
-                mediaFile_list.getItemIdAtPosition(position));*/
+        mediaFile_list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                Log.i(TAG, "onScrollStateChanged: ");
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                Log.i(TAG, "onScroll: ");
+    }
+        });
+
     }
 
+
     public void playingAnimation(int position) {
-        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
+        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {//范围内可见
             ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
             playing_icon.setVisibility(View.VISIBLE);
             playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
@@ -118,27 +153,63 @@ public class ContentFragment extends Fragment {
             ani_gif_playing.start();
             TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
             totaltime.setVisibility(View.GONE);
-            lastPosition = position;
         }
+        //  lastPosition = position;
     }
 
     public void resetAnimation(int lastPosition) {
+        try {
         if (lastPosition >= mediaFile_list.getFirstVisiblePosition() && lastPosition <= mediaFile_list.getLastVisiblePosition()) {
             ImageView playing_icon = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
             playing_icon.setVisibility(View.GONE);
             playing_icon.setAnimation(null);
-            TextView totaltime = mediaFile_list.getChildAt(lastPosition).findViewById(R.id.totalTime);
+                TextView totaltime = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
             totaltime.setVisibility(View.VISIBLE);
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
+    }
+
+    }
+
+    public boolean isVisiable(int position) {
+        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void deviceItemOnClick(int mediaType, DeviceInfo deviceInfo) {
+            if (deviceInfo.getType() == BLUETOOTH_DEVICE) {
+            if (deviceInfo.getBluetoothDevice().isConnected()) {
+                //展示音乐列表，获取播放状态
+            } else {
+                BtMusicManager.getInstance().connect(deviceInfo.getBluetoothDevice(), new ConnectBlueCallBack() {
+                    @Override
+                    public void onStartConnect() {
+                        Toast.makeText(getContext(), "bluetooth device is connecting...", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onConnectSuccess(BluetoothDevice device, BluetoothSocket bluetoothSocket) {
+                        Toast.makeText(getContext(), "bluetooth device connected successfully...", Toast.LENGTH_SHORT).show();
+                        //展示音乐列表，获取播放状态
+                    }
+
+                    @Override
+                    public void onConnectFail(BluetoothDevice device, String string) {
+                        Toast.makeText(getContext(), "bluetooth device connected failed...", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            } else {
+            updateMediaList(mediaType, deviceInfo);
         }
     }
 
     public void updateMediaList(int mediaType, DeviceInfo deviceInfo) {
         if (mediaType == 0) {//音樂
-            if (deviceInfo.getType() == BLUETOOTH_DEVICE) {
-
-            } else {
                 mediaInfos = MediaUtil.getMusicInfos(mContext, deviceInfo.getStoragePath());
-            }
         } else {//視頻
             mediaInfos = MediaUtil.getVideoInfos(mContext, deviceInfo.getStoragePath());
         }
@@ -154,5 +225,6 @@ public class ContentFragment extends Fragment {
         }
         MediaDeviceManager.getInstance().setCurrentDevice(deviceInfo);
     }
+
 
 }

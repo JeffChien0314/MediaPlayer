@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
     private String nameChecked;//当前选中的音乐名
     private Uri uriChecked;//当前选中的音乐对应的Uri
-    private int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
+    public static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private int currState = -1;//当前播放器的状态
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
@@ -105,9 +105,9 @@ public class MainActivity extends AppCompatActivity {
                     if (playMode == 0) {
                         ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
                         random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaInfos.size());
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);
+                     //   ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);
                         playMusic(random);
-                        lastPosition = random;
+                     //   lastPosition = random;
                     } else if (playMode == 1) {
                         playMusic(lastPosition);
                     }
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 currentTab = mTabLayout.getSelectedTabPosition();
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceInfos.get(position));
+                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceInfos.get(position));             
             }
         });
         //Sandra@20220215 add<--
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
         csdMediaPlayer.startPlayLogic();
-        lastPosition = position;
+      //  lastPosition = position;
     }
 
     private void initTabData() {
@@ -222,8 +222,8 @@ public class MainActivity extends AppCompatActivity {
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;
+                     /*   ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                        lastPosition = currPosition;*/
                         break;
                 }
             } else {
@@ -237,10 +237,10 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                       // ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
-                        lastPosition = currPosition;
+                      //  lastPosition = currPosition;
                         break;
                 }
             }
@@ -265,8 +265,8 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;
+                       /* ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                        lastPosition = currPosition;*/
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
@@ -281,8 +281,8 @@ public class MainActivity extends AppCompatActivity {
                     case CURRENT_STATE_PLAYING:
                     case CURRENT_STATE_PAUSE:
                         ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;
+                       /* ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                        lastPosition = currPosition;*/
                         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
                         csdMediaPlayer.startPlayLogic();
                 }
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
         }
     }
+
 
     @Override
     protected void onPause() {
