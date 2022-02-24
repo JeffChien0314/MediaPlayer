@@ -54,7 +54,13 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
     private String nameChecked;//当前选中的音乐名
     private Uri uriChecked;//当前选中的音乐对应的Uri
-    public static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
+    private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
+    private int Currentprogress;
+
+    public int getCurrPosition() {
+        return currPosition;
+    }
+
     private int currState = -1;//当前播放器的状态
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
@@ -64,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private List<String> listTitles;
     private List<Fragment> fragments;
     private List<TextView> listTextViews;
-    private int currentTab = 0;
+    public static int currentTab = 0;
+
     //Sandra@20220215
     private ListView devicelistview;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
@@ -127,7 +134,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 currentTab = mTabLayout.getSelectedTabPosition();
-                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceInfos.get(position));             
+                Log.i(TAG, "onItemClick: currentTab"+currentTab);
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceInfos.get(position));
+                MediaDeviceManager.getInstance().setCurrentDevice(externalDeviceInfos.get(position));
+                Log.i(TAG, "defaultDeviceindex"+position);
             }
         });
         //Sandra@20220215 add<--
@@ -191,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 GSYVideoManager.releaseAllVideos();
                 if (orientationUtils != null)
                     orientationUtils.releaseListener();
-                currPosition = -1;
+              //  currPosition = -1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mMediaDeviceManager.getCurrentDevice());
@@ -306,6 +316,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+            csdMediaPlayer.onVideoPause();
+
+        Currentprogress =csdMediaPlayer.getDuration();
+        Currentprogress= csdMediaPlayer.getCurrentPositionWhenPlaying();
+    }
 
     public void onRandomOpenClick(View v) {
         if (randomOpen == false) {

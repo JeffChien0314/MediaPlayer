@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
+
 /**
  * Created by Sandra on 2022/2/18.
  */
@@ -20,7 +22,7 @@ public class MediaDeviceManager {
     private static volatile MediaDeviceManager sInstance;
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
-    private DeviceInfo currentDevice;
+    public  static DeviceInfo currentDevice;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
 
     public MediaDeviceManager() {
@@ -96,5 +98,21 @@ public class MediaDeviceManager {
 
     public void setCurrentDevice(DeviceInfo deviceInfo) {
         currentDevice = deviceInfo;
+    }
+    public boolean ifExsitThisDevice(DeviceInfo deviceInfo){
+        if (externalDeviceInfos!=null && externalDeviceInfos.size()>0){
+            for (int i=0; i<externalDeviceInfos.size();i++){
+                if (deviceInfo.getType() == USB_DEVICE){
+                    if (deviceInfo.getDescription().equals(externalDeviceInfos.get(i).getDescription())
+                            && deviceInfo.getStoragePath().equals(externalDeviceInfos.get(i).getStoragePath()) ){
+                        return true;
+                    }
+                }else {//蓝牙设备是否存在的判断
+
+                }
+                }
+
+        }
+       return false;
     }
 }

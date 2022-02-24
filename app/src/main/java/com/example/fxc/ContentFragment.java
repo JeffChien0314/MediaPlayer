@@ -89,30 +89,6 @@ public class ContentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.contentfragment, container, false);
-        //音視頻列表
-        mediaFile_list = (ListView) view.findViewById(R.id.list);
-        //  String pathDefault = ((MainActivity) getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
-        mediaInfos = MediaUtil.getMediaInfos(0, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
-        listAdapter = new MediaListAdapter(mContext, mediaInfos);
-        mediaFile_list.setAdapter(listAdapter);
-        ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, 0);
-        mediaFile_list.setOnItemClickListener(onItemClickListener);
-        mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                Log.i(TAG, "onScrollChange: ");
-                Log.i(TAG, "onScrollChange: currentposition=" + MainActivity.currPosition);
-                for (int i = 0; i < mediaInfos.size(); i++) {
-                    if (isVisiable(i) && MainActivity.currPosition == i) {
-                        playingAnimation(MainActivity.currPosition);
-                    } else {
-                        resetAnimation(i);
-                    }
-                }
-
-
-            }
-        });
         return view;
     }
 
@@ -227,5 +203,63 @@ public class ContentFragment extends Fragment {
         MediaDeviceManager.getInstance().setCurrentDevice(deviceInfo);
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //音視頻列表
+        mediaFile_list = (ListView) view.findViewById(R.id.list);
+        //  String pathDefault = ((MainActivity) getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
+        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())){
+        }else {
+            MediaDeviceManager.getInstance().setCurrentDevice(MediaDeviceManager.getInstance().getExternalDeviceInfoList(mContext).get(0));
+        }
+        mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).currentTab, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
+        listAdapter = new MediaListAdapter(mContext, mediaInfos);
+        mediaFile_list.setAdapter(listAdapter);
+        mediaFile_list.setOnItemClickListener(onItemClickListener);
+        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())){
+            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() "+((MainActivity) getActivity()).getCurrPosition());
+            mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
+        }
+        ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
+        if (lastPosition>=0){
+
+        }else {
+            lastPosition=0;
+        }
+        ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, lastPosition);
+                ((MainActivity) getActivity()).csdMediaPlayer.setSeekOnStart(Currentprogress);
+                //  csdMediaPlayer.startPlayLogic();
+            }
+        },500);
+    }
+    public int Currentprogress=0;
+    @Override
+    public void onPause() {
+        super.onPause();
+        Currentprogress=  ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }
