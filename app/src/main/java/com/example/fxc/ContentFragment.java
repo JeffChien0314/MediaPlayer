@@ -231,20 +231,20 @@ public class ContentFragment extends Fragment {
             Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() "+((MainActivity) getActivity()).getCurrPosition());
             mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
         }
-        ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
+       // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
         if (lastPosition>=0){
 
         }else {
             lastPosition=0;
         }
-        ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
+       /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
             @Override
             public void run() {
                 ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, lastPosition);
                 ((MainActivity) getActivity()).csdMediaPlayer.setSeekOnStart(Currentprogress);
                 //  csdMediaPlayer.startPlayLogic();
             }
-        },500);
+        },500);*/
     }
     public int Currentprogress=0;
     @Override

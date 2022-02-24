@@ -198,9 +198,9 @@ public class MainActivity extends AppCompatActivity {
         mTabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                GSYVideoManager.releaseAllVideos();
+                /*GSYVideoManager.releaseAllVideos();
                 if (orientationUtils != null)
-                    orientationUtils.releaseListener();
+                    orientationUtils.releaseListener();*/
               //  currPosition = -1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
@@ -325,10 +325,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void finish() {
         super.finish();
-            csdMediaPlayer.onVideoPause();
+           /* csdMediaPlayer.onVideoPause();
 
         Currentprogress =csdMediaPlayer.getDuration();
-        Currentprogress= csdMediaPlayer.getCurrentPositionWhenPlaying();
+        Currentprogress= csdMediaPlayer.getCurrentPositionWhenPlaying();*/
     }
 
     public void onRandomOpenClick(View v) {
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        csdMediaPlayer.onVideoPause();
+    //    csdMediaPlayer.onVideoPause();
     }
 
     @Override
@@ -357,9 +357,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GSYVideoManager.releaseAllVideos();
+      /*  GSYVideoManager.releaseAllVideos();
         if (orientationUtils != null)
-            orientationUtils.releaseListener();
+            orientationUtils.releaseListener();*/
     }
 
     public void requestAllPower() {
