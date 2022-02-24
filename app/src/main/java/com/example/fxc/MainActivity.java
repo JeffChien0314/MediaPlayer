@@ -99,15 +99,15 @@ public class MainActivity extends AppCompatActivity {
                     if (playMode == 0) {
                         next();
                     } else if (playMode == 1) {
-                        playMusic(lastPosition);
+                        playMusic(currPosition);
                     }
                 } else {
                     if (playMode == 0) {
-                        ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
+                        ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                         random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaInfos.size());
                      //   ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);
                         playMusic(random);
-                     //   lastPosition = random;
+                       currPosition = random;
                     } else if (playMode == 1) {
                         playMusic(lastPosition);
                     }
@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         currState = csdMediaPlayer.getCurrentState();
         if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
             if (currPosition > 0) {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
+                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 currPosition--;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             } else {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
+                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 currPosition = ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         currState = csdMediaPlayer.getCurrentState();
         if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
             if (currPosition < ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1) {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
+                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 currPosition++;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                         csdMediaPlayer.startPlayLogic();
                 }
             } else {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(lastPosition);
+                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 currPosition = 0;
                 switch (currState) {
                     case CURRENT_STATE_NORMAL:

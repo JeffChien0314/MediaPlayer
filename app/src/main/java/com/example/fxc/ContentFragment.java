@@ -95,6 +95,7 @@ public class ContentFragment extends Fragment {
         mediaInfos = MediaUtil.getMediaInfos(0, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
+        ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, 0);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
