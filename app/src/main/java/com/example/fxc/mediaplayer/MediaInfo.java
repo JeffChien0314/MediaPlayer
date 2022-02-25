@@ -11,38 +11,32 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 public class MediaInfo {
     private long id; // 歌曲ID
     private String title; // 歌曲名稱
-    private String album; // 專輯
-    private long albumId;//專輯ID
-    private String displayName; //顯示名稱
+   // private String album; // 專輯
     private String artist; // 歌手名稱
     private long duration; // 歌曲時長
-    private long size; // 歌曲大小
-    private String url; // 歌曲路徑
-    private String lrcTitle; // 歌詞名稱
-    private String lrcSize; // 歌詞大小
     private Bitmap thumbBitmap;
     private GSYVideoModel gsyVideoModel;
+    private boolean ifVideo;
+   /* private long albumId;//專輯ID*/
+ //   private String displayName; //顯示名稱
+  //  private long size; // 歌曲大小
+  //  private String url; // 歌曲路徑
+   /* private String lrcTitle; // 歌詞名稱
+    private String lrcSize; // 歌詞大小*/
+
+
+    public boolean isIfVideo() {
+        return ifVideo;
+    }
+
+    public void setIfVideo(boolean ifVideo) {
+        this.ifVideo = ifVideo;
+    }
 
     public MediaInfo() {
         super();
     }
 
-    public MediaInfo(long id, String title, String album, long albumId,
-                     String displayName, String artist, long duration, long size,
-                     String url, String lrcTitle, String lrcSize) {
-        super();
-        this.id = id;
-        this.title = title;
-        this.album = album;
-        this.albumId = albumId;
-        this.displayName = displayName;
-        this.artist = artist;
-        this.duration = duration;
-        this.size = size;
-        this.url = url;
-        this.lrcTitle = lrcTitle;
-        this.lrcSize = lrcSize;
-    }
 
     public GSYVideoModel getGsyVideoModel() {
         return gsyVideoModel;
@@ -76,30 +70,13 @@ public class MediaInfo {
         this.title = title;
     }
 
-    public String getAlbum() {
+   /* public String getAlbum() {
         return album;
-    }
+    }*/
 
-    public void setAlbum(String album) {
+   /* public void setAlbum(String album) {
         this.album = album;
-    }
-
-    public long getAlbumId() {
-        return albumId;
-    }
-
-    public void setAlbumId(long albumId) {
-        this.albumId = albumId;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
+    }*/
     public String getArtist() {
         return artist;
     }
@@ -115,24 +92,39 @@ public class MediaInfo {
     public void setDuration(long duration) {
         this.duration = duration;
     }
+   /* public long getAlbumId() {
+        return albumId;
+    }
 
-    public long getSize() {
+    public void setAlbumId(long albumId) {
+        this.albumId = albumId;
+    }*/
+
+   /* public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }*/
+
+  /*  public long getSize() {
         return size;
     }
 
     public void setSize(long size) {
         this.size = size;
-    }
+    }*/
 
-    public String getUrl() {
+    /*public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
-    }
+    }*/
 
-    public String getLrcTitle() {
+  /*  public String getLrcTitle() {
         return lrcTitle;
     }
 
@@ -146,5 +138,5 @@ public class MediaInfo {
 
     public void setLrcSize(String lrcSize) {
         this.lrcSize = lrcSize;
-    }
+    }*/
 }

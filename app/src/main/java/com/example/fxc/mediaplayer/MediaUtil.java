@@ -57,10 +57,10 @@ public class MediaUtil {
             String title = cursor.getString((cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))); // 音樂標題
             String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)); // 藝術家
             String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));    //專輯
-            String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+            //String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
             Long albumId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
             long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)); // 時長
-            long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)); // 檔案大小
+            //long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)); // 檔案大小
             String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
             String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
@@ -72,15 +72,16 @@ public class MediaUtil {
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
+                musicInfo.setIfVideo(false);
                 musicInfo.setId(id);
                 musicInfo.setTitle(title);
                 musicInfo.setArtist(artist);
-                musicInfo.setAlbum(album);
-                musicInfo.setDisplayName(displayName);
-                musicInfo.setAlbumId(albumId);
+              //  musicInfo.setAlbum(album);
+             //   musicInfo.setDisplayName(displayName);
+            //    musicInfo.setAlbumId(albumId);
                 musicInfo.setDuration(duration);
-                musicInfo.setSize(size);
-                musicInfo.setUrl(url);
+               // musicInfo.setSize(size);
+               // musicInfo.setUrl(url);
                 musicInfo.setThumbBitmap(thumbBitmap);
                 musicInfo.setGsyVideoModel(gsyVideoModel);
                 musicInfos.add(musicInfo);
@@ -108,13 +109,13 @@ public class MediaUtil {
                     .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
             String album = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
-            String displayName = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));
+            /*String displayName = cursor.getString(cursor
+                    .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));*/
             //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
             long duration = cursor.getLong(cursor
                     .getColumnIndex(MediaStore.Video.Media.DURATION)); // 時長
-            long size = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Video.Media.SIZE)); // 檔案大小
+            /*long size = cursor.getLong(cursor
+                    .getColumnIndex(MediaStore.Video.Media.SIZE)); // 檔案大小*/
             String url = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
@@ -129,15 +130,16 @@ public class MediaUtil {
                 }
             }
             if (mime_type != null) {
+                videoinfo.setIfVideo(true);
                 videoinfo.setId(id);
                 videoinfo.setTitle(title);
                 videoinfo.setArtist(artist);
-                videoinfo.setAlbum(album);
-                videoinfo.setDisplayName(displayName);
+               // videoinfo.setAlbum(album);
+               // videoinfo.setDisplayName(displayName);
                 //   musicInfo.setAlbumId(albumId);
                 videoinfo.setDuration(duration);
-                videoinfo.setSize(size);
-                videoinfo.setUrl(url);
+               // videoinfo.setSize(size);
+               // videoinfo.setUrl(url);
                 videoinfo.setThumbBitmap(thumbBitmap);
                 videoinfo.setGsyVideoModel(gsyVideoModel);
                 VideoInfos.add(videoinfo);

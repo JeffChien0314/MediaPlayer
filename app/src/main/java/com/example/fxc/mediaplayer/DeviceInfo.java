@@ -1,6 +1,8 @@
 package com.example.fxc.mediaplayer;
 
 import android.bluetooth.BluetoothDevice;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
@@ -8,7 +10,7 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
  * Created by Sandra on 2022/2/10.
  */
 
-public class DeviceInfo {
+public class DeviceInfo implements Parcelable {
 
     private String storagePath;//设备路径
     private String description;//设备名字
@@ -66,5 +68,15 @@ public class DeviceInfo {
 
     public void setRemovableResult(boolean removableResult) {
         isRemovableResult = removableResult;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+
     }
 }

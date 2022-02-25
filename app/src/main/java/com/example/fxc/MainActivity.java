@@ -48,15 +48,15 @@ public class MainActivity extends AppCompatActivity {
     protected ImageView mNextButton;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
-    private SimpleAdapter listAdapter;
-    private ListView musicListView;
+
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
     private String TAG = "MainActivity";
     private String nameChecked;//当前选中的音乐名
     private Uri uriChecked;//当前选中的音乐对应的Uri
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private int Currentprogress;
-
+    private android.os.Bundle outState;
+    private  boolean ifVideo=false;
     public int getCurrPosition() {
         return currPosition;
     }
@@ -84,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate: ");
+        if(savedInstanceState != null){
+           currentTab = savedInstanceState.getInt("currentTab");
+            //可以用Log/Toast输出
+            Log.i(TAG, "onCreate: currentTab:"+currentTab);
+            MediaDeviceManager.getInstance().setCurrentDevice(savedInstanceState.getParcelable("currentDevice"));
+            String description=MediaDeviceManager.getInstance().getCurrentDevice().getDescription();
+            Log.i(TAG, "onCreate: description"+description);
+        }
         initCondition();
         setContentView(R.layout.activity_main);
         mMediaDeviceManager = MediaDeviceManager.getInstance();
@@ -155,6 +164,11 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
         csdMediaPlayer.startPlayLogic();
       //  lastPosition = position;
+        if(((ContentFragment) fragments.get(currentTab)).mediaInfos.get(currPosition).isIfVideo()){
+            ifVideo=true;
+        }else {
+            ifVideo=false;
+        }
     }
 
     private void initTabData() {
@@ -316,20 +330,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-           /* csdMediaPlayer.onVideoPause();
-
-        Currentprogress =csdMediaPlayer.getDuration();
-        Currentprogress= csdMediaPlayer.getCurrentPositionWhenPlaying();*/
-    }
 
     public void onRandomOpenClick(View v) {
         if (randomOpen == false) {
@@ -345,23 +345,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-    //    csdMediaPlayer.onVideoPause();
+            if(ifVideo){//這個判斷條件需要優化，以防越界--儅播放音樂又點擊了另一個Tab
+                csdMediaPlayer.onVideoPause();
+            }
+        Log.i(TAG, "onPause: ");
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // csdMediaPlayer.onVideoResume();
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop: ");
+        outState=new Bundle();
+        outState.putInt("currentTab",currentTab);
+        outState.putParcelable("currentDevice",MediaDeviceManager.getInstance().getCurrentDevice());
+        onSaveInstanceState(outState);
     }
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "onDestroy: ");
         super.onDestroy();
-      /*  GSYVideoManager.releaseAllVideos();
+      /*  csdMediaPlayer.onVideoPause();
+        GSYVideoManager.releaseAllVideos();
         if (orientationUtils != null)
             orientationUtils.releaseListener();*/
     }
+    //调用（a）
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //定义变量的tempData可以设置为文本框
 
+        Log.i(TAG, "onSaveInstanceState: ");
+    }
+    @Override
+    public  void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        currentTab = savedInstanceState.getInt("currentTab");
+        MediaDeviceManager.getInstance().setCurrentDevice(savedInstanceState.getParcelable("currentDevice"));
+        Log.i(TAG, "onRestoreInstanceState: ");
+    }
     public void requestAllPower() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
