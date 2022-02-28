@@ -52,7 +52,7 @@ public class ConnectBlueTask extends AsyncTask<BluetoothDevice, Integer, Bluetoo
     protected void onPostExecute(BluetoothSocket bluetoothSocket) {
         if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
             Log.d(TAG, "连接成功");
-            if (callBack != null) callBack.onConnectSuccess(bluetoothDevice, bluetoothSocket);
+            if (callBack != null) callBack.onConnectSuccess(bluetoothDevice/*, bluetoothSocket*/);
         } else {
             Log.d(TAG, "连接失败");
             if (callBack != null) callBack.onConnectFail(bluetoothDevice, "连接失败");

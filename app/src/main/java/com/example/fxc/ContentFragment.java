@@ -29,6 +29,9 @@ import com.example.fxc.mediaplayer.MediaUtil;
 import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,23 +164,38 @@ public class ContentFragment extends Fragment {
             if (deviceInfo.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
             } else {
-                BtMusicManager.getInstance().connect(deviceInfo.getBluetoothDevice(), new ConnectBlueCallBack() {
+                try {
+                    if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
+                        Method m = BluetoothDevice.class.getMethod("createBond");
+                        m.invoke(deviceInfo.getBluetoothDevice());
+                    } else if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
+                        BtMusicManager.getInstance().a2dpSinkConnect(deviceInfo.getBluetoothDevice(), new ConnectBlueCallBack() {
                     @Override
                     public void onStartConnect() {
-                        Toast.makeText(getContext(), "bluetooth device is connecting...", Toast.LENGTH_LONG).show();
+                                Toast.makeText(mContext, "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onConnectSuccess(BluetoothDevice device, BluetoothSocket bluetoothSocket) {
-                        Toast.makeText(getContext(), "bluetooth device connected successfully...", Toast.LENGTH_SHORT).show();
-                        //展示音乐列表，获取播放状态
+                            public void onConnectSuccess(BluetoothDevice device) {
+                                Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onConnectFail(BluetoothDevice device, String string) {
-                        Toast.makeText(getContext(), "bluetooth device connected failed...", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mContext, "The bluetooth device  is ubable to connect", Toast.LENGTH_SHORT).show();
                     }
                 });
+            }
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                }
             }
             } else {
             updateMediaList(mediaType, deviceInfo);
@@ -227,6 +245,21 @@ public class ContentFragment extends Fragment {
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
+        mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.i(TAG, "onScrollChange: ");
+                Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
+                for (int i = 0; i < mediaInfos.size(); i++) {
+                    if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
+                        playingAnimation((((MainActivity) getActivity()).getCurrPosition()));
+                    } else {
+                        resetAnimation(i);
+                    }
+                }
+
+            }
+        });
         if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())){
             Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() "+((MainActivity) getActivity()).getCurrPosition());
             mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));

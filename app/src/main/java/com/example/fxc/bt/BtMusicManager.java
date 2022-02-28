@@ -126,12 +126,13 @@ public class BtMusicManager implements IBtMusicManager {
     private BluetoothProfile.ServiceListener profileServiceListener = new BluetoothProfile.ServiceListener() {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
+         //   Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
             Log.i(TAG, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy);
             switch (profile) {
                 case /*BluetoothProfile.A2DP_SINK*/A2DP_SINK:
                     mBluetoothA2dpSink = (BluetoothA2dpSink) proxy;
                     Log.e(TAG, "onServiceConnected: mBluetoothA2dpSink=" + mBluetoothA2dpSink);
+/*
 
 
                     if (mConnectedDevice == null || mBluetoothA2dpSink == null) {
@@ -139,14 +140,9 @@ public class BtMusicManager implements IBtMusicManager {
                                 " , mBluetoothA2dpSink=" + mBluetoothA2dpSink);
                         return;
                     }
+*/
 
-                    Log.e(TAG, "A2DP_SINK 设置蓝牙为可用状态");
-                    setUsedBt(true);
 
-                    // TODO: 2020/11/25 这里就代表蓝牙音乐的通道已经连接上了，这里可以更新ui上的蓝牙设备名字
-
-                    //如果应用没有打开，这个时候后连上蓝牙音乐播放，BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED广播不走
-                    setAudioStreamMode(true);
                     break;
 
                /* case BluetoothProfile.A2DP:
@@ -181,12 +177,12 @@ public class BtMusicManager implements IBtMusicManager {
         public void onServiceDisconnected(int profile) {
             Log.i(TAG, "onServiceDisconnected: profile=" + profile);
             switch (profile) {
-                case 11://LocalBluetoothProfile.A2DP_SINK:
+                case A2DP_SINK://LocalBluetoothProfile.A2DP_SINK:
                     mBluetoothA2dpSink = null;
                     Log.e(TAG, "onServiceDisconnected: mBluetoothA2dpSink为null");
                     break;
 
-                case 12://LocalBluetoothProfile.AVRCP_CONTROLLER:
+                case AVRCP_CONTROLLER://LocalBluetoothProfile.AVRCP_CONTROLLER:
                     mAvrcpController = null;
                     Log.e(TAG, "onServiceDisconnected: mAvrcpController为null");
                     break;
@@ -344,93 +340,11 @@ public class BtMusicManager implements IBtMusicManager {
         mBluetoothAdapter.closeProfileProxy(AVRCP_CONTROLLER, mAvrcpController);
     }
 
-    private void connectA2DPdevice() {
-        //获取配对的蓝牙设备
-        Set<BluetoothDevice> bondDevice = mBluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice device : bondDevice) {
-            //获取指定名称的设备
-            if (device.getName().contains("Honor")) {
-                // mConnectDevice = device;
-                //connectA2dp(device);
-            }
-        }
-    }
-
-    private void connectA2dp(BluetoothDevice device) {
-        //  setPriority(device, 100); //设置priority
-        try {
-            //通过反射获取BluetoothA2dp中connect方法（hide的），进行连接。
-            Method connectMethod = BluetoothA2dp.class.getMethod("connect",
-                    BluetoothDevice.class);
-            connectMethod.invoke(mA2dp, device);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setPriority(BluetoothDevice device, int priority) {
-        if (mA2dp == null) return;
-        try {//通过反射获取BluetoothA2dp中setPriority方法（hide的），设置优先级
-            Method connectMethod = BluetoothA2dp.class.getMethod("setPriority",
-                    BluetoothDevice.class, int.class);
-            connectMethod.invoke(mA2dp, device, priority);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 //############################################蓝牙广播回调   end############################################
 
 
     //############################################处理蓝牙广播方法  start############################################
 
-    /**
-     * 媒体信息，包括需要显示的MediaMetadata基本信息，和实时更新的PlaybackState信息
-     *
-     * @param intent
-     */
-    private void mediaInfo(Intent intent) {
-/*
-        MediaMetadata mediaMetadata = intent.getParcelableExtra(BluetoothAvrcpController.EXTRA_METADATA);
-//        Log.i(TAG, "mediaInfo,mediaMetadata=" + mediaMetadata);
-        PlaybackState playbackState = intent.getParcelableExtra(BluetoothAvrcpController.EXTRA_PLAYBACK);
-//        Log.i(TAG, "mediaInfo,parcelableExtra=" + playbackState);
-
-        mBluetoothAdapter.setAudioStreamMode(false);
-        mIsAudioStreamModeOn = false;
-        mBtPlayState = false;
-        //拦截时候如果媒体信息 存在，需要保存起来
-        if (mediaMetadata != null) {
-            mHaveMediaMetadatacache = true;
-        }
-
-
-        updateMediaMetadata(mediaMetadata);
-        updatePlaybackState(playbackState);*/
-    }
-
-    //蓝牙列表暂时没用
-    //    private void btList(int eventId) {
-//        switch (eventId) {
-//            case BluetoothAvrcpController.EVENT_NOW_PLAYING_CONTENT_CHANGED:
-//                Log.d(TAG, "BROWSING_EVENT PLAYING_CONTENT_CHANGED");
-//                //suggest delay 300ms to call getNowPlayingList
-//                // 与 ACTION_CURRENT_MEDIA_ITEM_CHANGED 的区别是什么？
-//                // 改为在 ACTION_CURRENT_MEDIA_ITEM_CHANGED 中 getNowPlayingList
-//                break;
-//            case BluetoothAvrcpController.EVENT_AVAILABLE_PLAYERS_CHANGED:
-//                Log.d(TAG, "BROWSING_EVENT AVAILABLE_PLAYERS_CHANGED");
-//            case BluetoothAvrcpController.EVENT_ADDRESSED_PLAYER_CHANGED:
-//                Log.d(TAG, "BROWSING_EVENT ADDRESSED_PLAYER_CHANGED");
-//                //suggest delay 300ms to call processPlayerChanged
-////                        processPlayerChanged();
-////                delayUpdate(); // 手机端断开并重新连接上需要更新，但因为BROWSING_EVENT先于BROWSE_CONNECTION_STATE_CHANGED而无效
-//                break;
-//            case BluetoothAvrcpController.EVENT_UIDS_CHANGED:
-//                // 暂不做处理
-//                Log.d(TAG, "BROWSING_EVENT UIDS_CHANGED");
-//                break;
-//        }
-//    }
 
     /**
      * 蓝牙开关状态
@@ -658,7 +572,19 @@ public class BtMusicManager implements IBtMusicManager {
         }
         new ConnectBlueTask(callBack).execute(device);
     }
-
+    public void a2dpSinkConnect(BluetoothDevice device,ConnectBlueCallBack callBack) {
+        //  setPriority(device, 100); //设置priority
+        try {
+            //通过反射获取BluetoothA2dp中connect方法（hide的），进行连接。
+            Method connectMethod = BluetoothA2dpSink.class.getMethod("connect",
+                    BluetoothDevice.class);
+            connectMethod.invoke(mBluetoothA2dpSink, device);
+            callBack.onConnectSuccess(device);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callBack.onConnectFail(device,"bluetooth device connected fail");
+        }
+    }
 
     public void stopSource() {
         Intent intent = new Intent();
