@@ -30,19 +30,12 @@ import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static int playMode = 0;// 循环播放,1单曲循环
-    private final int CURRENT_STATE_NORMAL = 0; //正常
-    private final int CURRENT_STATE_PREPAREING = 1; //准备中
-    private final int CURRENT_STATE_PLAYING = 2; //播放中
-    private final int CURRENT_STATE_PLAYING_BUFFERING_START = 3; //开始缓冲
-    private final int CURRENT_STATE_PAUSE = 5;//暂停
-    private final int CURRENT_STATE_AUTO_COMPLETE = 6;//自动播放结束
-    private final int CURRENT_STATE_ERROR = 7; //错误状态
-    //private TextView nameView;// 页面中用来显示当前选中音乐名的TextViewl
     protected CSDMediaPlayer csdMediaPlayer;
     protected ImageView mPreviousButton;
     protected ImageView mNextButton;
@@ -51,17 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
     private String TAG = "MainActivity";
-    private String nameChecked;//当前选中的音乐名
-    private Uri uriChecked;//当前选中的音乐对应的Uri
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
-    private int Currentprogress;
     private android.os.Bundle outState;
     private  boolean ifVideo=false;
     public int getCurrPosition() {
         return currPosition;
     }
-
-    private int currState = -1;//当前播放器的状态
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
     private OrientationUtils orientationUtils;
@@ -71,8 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Fragment> fragments;
     private List<TextView> listTextViews;
     public static int currentTab = 0;
-
-    //Sandra@20220215
+    private LinkedList<Integer> randomIndexList=new LinkedList<>();
     private ListView devicelistview;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
     private DeviceListAdapter deviceListAdapter;
@@ -111,23 +98,11 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener() {
             @Override
             public void completion() {
-                if (randomOpen == false) {
                     if (playMode == 0) {
                         next();
                     } else if (playMode == 1) {
                         playMusic(currPosition);
                     }
-                } else {
-                    if (playMode == 0) {
-                        ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-                        random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaInfos.size());
-                     //   ((ContentFragment) fragments.get(currentTab)).playingAnimation(random);
-                        playMusic(random);
-                       currPosition = random;
-                    } else if (playMode == 1) {
-                        playMusic(lastPosition);
-                    }
-                }
             }
         }));
         initTabData();
@@ -151,6 +126,17 @@ public class MainActivity extends AppCompatActivity {
         });
         //Sandra@20220215 add<--
     }
+    public LinkedList<Integer> getRandom() {
+        int random;
+        while (randomIndexList.size() < ((ContentFragment) fragments.get(currentTab)).mediaInfos.size()) {
+            random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaInfos.size());//生成1到list.size()-1之间的随机数
+            if (!randomIndexList.contains(random)) {
+                randomIndexList.add(random);
+            }
+        }
+        Log.i("main", "Jennifertest90=: " +randomIndexList);
+        return randomIndexList;
+    }
 
     private void initCondition() {
         requestAllPower();
@@ -163,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
         csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
         csdMediaPlayer.startPlayLogic();
-      //  lastPosition = position;
         if(((ContentFragment) fragments.get(currentTab)).mediaInfos.get(currPosition).isIfVideo()){
             ifVideo=true;
         }else {
@@ -212,10 +197,6 @@ public class MainActivity extends AppCompatActivity {
         mTabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                /*GSYVideoManager.releaseAllVideos();
-                if (orientationUtils != null)
-                    orientationUtils.releaseListener();*/
-              //  currPosition = -1;
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mMediaDeviceManager.getCurrentDevice());
@@ -231,89 +212,66 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void previous() {
-        currState = csdMediaPlayer.getCurrentState();
-        if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
-            if (currPosition > 0) {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-                currPosition--;
-                switch (currState) {
-                    case CURRENT_STATE_NORMAL:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        break;
-                    case CURRENT_STATE_AUTO_COMPLETE:
-                    case CURRENT_STATE_PLAYING:
-                    case CURRENT_STATE_PAUSE:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
-                        csdMediaPlayer.startPlayLogic();
-                     /*   ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;*/
-                        break;
+        if(randomOpen==false){
+            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+            if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
+                if (currPosition > 0) {
+                    currPosition--;
+                } else {
+                    currPosition = ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1;
                 }
-            } else {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-                currPosition = ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1;
-                switch (currState) {
-                    case CURRENT_STATE_NORMAL:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        break;
-                    case CURRENT_STATE_AUTO_COMPLETE:
-                    case CURRENT_STATE_PLAYING:
-                    case CURRENT_STATE_PAUSE:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                       // ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
-                        csdMediaPlayer.startPlayLogic();
-                      //  lastPosition = currPosition;
-                        break;
+            }
+        }else{
+            int i;
+            for (i=randomIndexList.size()-1; i>0; i--) {
+                if (currPosition == randomIndexList.get(i)) {
+                    currPosition = randomIndexList.get(i-1);
+                    break;
+                } else if (currPosition == randomIndexList.get(0)) {
+                    currPosition = randomIndexList.get(randomIndexList.size()-1);
+                    i =randomIndexList.size()-1;
+                    break;
                 }
             }
         }
+        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+        playMusic(currPosition);
+        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
     }
+
 
     public void onNextClick(View v) {
         next();
     }
 
     public void next() {
-        currState = csdMediaPlayer.getCurrentState();
-        if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
-            if (currPosition < ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1) {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-                currPosition++;
-                switch (currState) {
-                    case CURRENT_STATE_NORMAL:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        break;
-                    case CURRENT_STATE_AUTO_COMPLETE:
-                    case CURRENT_STATE_PLAYING:
-                    case CURRENT_STATE_PAUSE:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                       /* ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;*/
-                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
-                        csdMediaPlayer.startPlayLogic();
+        if (randomOpen == false) {
+            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+            if (((ContentFragment) fragments.get(currentTab)).mediaInfos.size() > 0) {
+                if (currPosition < ((ContentFragment) fragments.get(currentTab)).mediaInfos.size() - 1) {
+                    currPosition++;
+                } else {
+                    currPosition = 0;
                 }
-            } else {
-                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-                currPosition = 0;
-                switch (currState) {
-                    case CURRENT_STATE_NORMAL:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                        break;
-                    case CURRENT_STATE_AUTO_COMPLETE:
-                    case CURRENT_STATE_PLAYING:
-                    case CURRENT_STATE_PAUSE:
-                        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                       /* ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-                        lastPosition = currPosition;*/
-                        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
-                        csdMediaPlayer.startPlayLogic();
+            }
+        } else {
+            int i;
+            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+            for (i = 0; i < randomIndexList.size() - 1; i++) {
+                if (currPosition == randomIndexList.get(i)) {
+                    currPosition = randomIndexList.get(i + 1);
+                    break;
+                } else if (currPosition == randomIndexList.get(randomIndexList.size() - 1)) {
+                    currPosition = randomIndexList.get(0);
+                    i = 0;
+                    break;
                 }
             }
         }
+        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+        playMusic(currPosition);
+        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
     }
-
     public void onPlayModeClick(View v) {
         switch (playMode) {
             case 0:
@@ -334,9 +292,13 @@ public class MainActivity extends AppCompatActivity {
     public void onRandomOpenClick(View v) {
         if (randomOpen == false) {
             randomOpen = true;
+            getRandom();
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
-        } else if (randomOpen == false) {
+        } else if (randomOpen == true) {
             randomOpen = false;
+            if (randomIndexList.size() > 0) {
+                randomIndexList.clear();
+            }
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
         }
     }

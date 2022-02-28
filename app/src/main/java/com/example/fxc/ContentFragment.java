@@ -42,20 +42,14 @@ import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
  */
 public class ContentFragment extends Fragment {
     String TAG = ContentFragment.class.getSimpleName();
-
     public List<MediaInfo> mediaInfos = null;
     public MediaListAdapter listAdapter;
     int lastPosition = -1;
     private View view;
     //private ListView musicListView;
     private Context mContext;
-    //   private SimpleAdapter listAdapter;
-    //   private TextView totaltimeView;
-    //Sandra@20220215 add
     private ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
-    //private ImageView playing_icon;
-    //private TextView totaltime;
     private AnimationDrawable ani_gif_playing;
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
@@ -122,8 +116,6 @@ public class ContentFragment extends Fragment {
         });
 
     }
-
-
     public void playingAnimation(int position) {
         if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {//范围内可见
             ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
@@ -134,7 +126,6 @@ public class ContentFragment extends Fragment {
             TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
             totaltime.setVisibility(View.GONE);
         }
-        //  lastPosition = position;
     }
 
     public void resetAnimation(int lastPosition) {
@@ -149,7 +140,6 @@ public class ContentFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
     }
-
     }
 
     public boolean isVisiable(int position) {
