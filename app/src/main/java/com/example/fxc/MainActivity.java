@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 currentTab = mTabLayout.getSelectedTabPosition();
                 Log.i(TAG, "onItemClick: currentTab"+currentTab);
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceInfos.get(position));
+                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceInfos.get(position));
                 MediaDeviceManager.getInstance().setCurrentDevice(externalDeviceInfos.get(position));
                 Log.i(TAG, "defaultDeviceindex"+position);
             }
