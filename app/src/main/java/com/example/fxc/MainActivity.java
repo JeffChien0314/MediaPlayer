@@ -1,9 +1,15 @@
 package com.example.fxc;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mMediaDeviceManager = MediaDeviceManager.getInstance();
         initView();
+        startListen();
     }
 
     private void initView() {
@@ -109,10 +116,7 @@ public class MainActivity extends AppCompatActivity {
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
-        externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
-
-        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos);
-        devicelistview.setAdapter(deviceListAdapter);
+        updateDeviceListView();
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -294,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
             randomOpen = true;
             getRandom();
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
-        } else if (randomOpen == true) {
+        } else{
             randomOpen = false;
             if (randomIndexList.size() > 0) {
                 randomIndexList.clear();
@@ -327,10 +331,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
-      /*  csdMediaPlayer.onVideoPause();
-        GSYVideoManager.releaseAllVideos();
-        if (orientationUtils != null)
-            orientationUtils.releaseListener();*/
+        unregisterReceiver();
     }
     //调用（a）
     @Override
@@ -355,6 +356,75 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
+    }
+    public void startListen() {
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);// sd卡被插入，且已经挂载
+        intentFilter.setPriority(1000);// 设置最高优先级
+        intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);// sd卡存在，但还没有挂载
+        intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);// sd卡被移除
+        intentFilter.addAction(Intent.ACTION_MEDIA_SHARED);// sd卡作为 USB大容量存储被共享，挂载被解除
+        intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);// sd卡已经从sd卡插槽拔出，但是挂载点还没解除
+        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);// 开始扫描
+        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);// 扫描完成
+        intentFilter.addAction(Intent.ACTION_MEDIA_CHECKING);
+        intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
+        intentFilter.addAction(Intent.ACTION_MEDIA_NOFS);
+        intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        intentFilter.addDataScheme("file");
+        registerReceiver(broadcastRec, intentFilter);
+    }
+    public void unregisterReceiver() {
+        unregisterReceiver(broadcastRec);
+    }
+private final BroadcastReceiver broadcastRec = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            switch (action){
+                case Intent.ACTION_MEDIA_EJECT:
+                case Intent.ACTION_MEDIA_UNMOUNTED:
+                case Intent.ACTION_MEDIA_BAD_REMOVAL:
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
+                    //如果列表是当前移除的设备的，需要刷新音视频列表
+                    break;
+                case Intent.ACTION_MEDIA_CHECKING:
+                case Intent.ACTION_MEDIA_MOUNTED:// sd卡被插入，且已经挂载
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
+                    break;
+                case Intent.ACTION_MEDIA_SCANNER_STARTED:
+                    break;
+                case Intent.ACTION_MEDIA_SCANNER_FINISHED:
+                    //这个地方可以判断可已抓取U盘内部的文件
+                    break;
+               default:
+                    break;
+            }
+        }
+    };
+    private final int UPDATE_DEVICE_LIST =0 ;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                //Sandra@20220107 add 更新播放列表
+                case UPDATE_DEVICE_LIST:
+                    updateDeviceListView();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    public void updateDeviceListView(){
+        if (externalDeviceInfos !=null && externalDeviceInfos.size()>0){
+            externalDeviceInfos.clear();
+        }
+        externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos);
+        devicelistview.setAdapter(deviceListAdapter);
+        devicelistview.invalidateViews();
     }
 
 }

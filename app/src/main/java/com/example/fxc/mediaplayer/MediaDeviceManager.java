@@ -60,16 +60,14 @@ public class MediaDeviceManager {
                 String storagePath = (String) getPath.invoke(storageVolume); //获取路径
                 boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
                 String description = storageVolume.getDescription(context);
-                Log.d("jason", " i=" + i + " ,storagePath=" + storagePath
-                        + " ,isRemovableResult=" + isRemovableResult + " ,description=" + description);
                 DeviceInfo externalDeviceInfo = new DeviceInfo();
-                //   if (isRemovableResult){//Sandra@20220210 剔除内部存储
+                if (isRemovableResult){//Sandra@20220210 剔除内部存储
                 externalDeviceInfo.setStoragePath(storagePath);
                 externalDeviceInfo.setRemovableResult(isRemovableResult);
                 externalDeviceInfo.setDescription(description);
                 externalDeviceInfo.setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
                 externalDeviceInfos.add(externalDeviceInfo);
-                //  }
+                }
 
             }
         } catch (Exception e) {
