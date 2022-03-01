@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     protected ImageView mNextButton;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
-
+    protected ImageView mInputSourceButton;
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
     private String TAG = "MainActivity";
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer = (CSDMediaPlayer) findViewById(R.id.mediaPlayer_csd);
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
+        mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
         csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
         csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener() {
             @Override
@@ -306,7 +307,15 @@ public class MainActivity extends AppCompatActivity {
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
         }
     }
-
+    public void onInputSourceClick(View v) {
+        if (devicelistview.getVisibility()==View.GONE) {
+            devicelistview.setVisibility(View.VISIBLE);
+            mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
+        }else if (devicelistview.getVisibility()==View.VISIBLE) {
+            devicelistview.setVisibility(View.GONE);
+            mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
+        }
+    }
 
     @Override
     protected void onPause() {
@@ -422,7 +431,7 @@ private final BroadcastReceiver broadcastRec = new BroadcastReceiver() {
             externalDeviceInfos.clear();
         }
         externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
-        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos);
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos,mMediaDeviceManager.getCurrentDevice());
         devicelistview.setAdapter(deviceListAdapter);
         devicelistview.invalidateViews();
     }

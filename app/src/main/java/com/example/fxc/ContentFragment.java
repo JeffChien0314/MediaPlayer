@@ -56,14 +56,16 @@ public class ContentFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (((MainActivity) getActivity()).csdMediaPlayer.getCurrentState() == -1) {
-                ImageView playing_icon = mediaFile_list.getChildAt(position).findViewById(R.id.playing_icon);
-                playing_icon.setVisibility(View.VISIBLE);
-                playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
-                ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
-                ani_gif_playing.start();
-                TextView totaltime = mediaFile_list.getChildAt(position).findViewById(R.id.totalTime);
-                totaltime.setVisibility(View.GONE);
-                lastPosition = position;
+                if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
+                    ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
+                    playing_icon.setVisibility(View.VISIBLE);
+                    playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
+                    ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
+                    ani_gif_playing.start();
+                    TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
+                    totaltime.setVisibility(View.GONE);
+                    lastPosition = position;
+                }
             } else {
                 resetAnimation(lastPosition);
                 playingAnimation(position);
