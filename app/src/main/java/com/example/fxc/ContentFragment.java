@@ -44,10 +44,9 @@ public class ContentFragment extends Fragment {
     String TAG = ContentFragment.class.getSimpleName();
     public List<MediaInfo> mediaInfos = null;
     public MediaListAdapter listAdapter;
-    int lastPosition = -1;
     private View view;
     private Context mContext;
-    private ListView mediaFile_list;
+    public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private int Currentprogress = 0;
@@ -77,21 +76,7 @@ public class ContentFragment extends Fragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (((MainActivity) getActivity()).csdMediaPlayer.getCurrentState() == -1) {
-                if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
-                    ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
-                    playing_icon.setVisibility(View.VISIBLE);
-                    playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
-                    ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
-                    ani_gif_playing.start();
-                    TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
-                    totaltime.setVisibility(View.GONE);
-                    lastPosition = position;
-                }
-            } else {
-                resetAnimation(lastPosition);
-                playingAnimation(position);
-            }
+             playingAnimation(position);
             ((MainActivity) getActivity()).playMusic(position);
         }
     };
@@ -244,6 +229,7 @@ public class ContentFragment extends Fragment {
         mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).currentTab, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
+        ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, 0);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -264,11 +250,6 @@ public class ContentFragment extends Fragment {
             mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
         }
        // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
-        if (lastPosition >= 0) {
-
-        } else {
-            lastPosition = 0;
-        }
        /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
             @Override
             public void run() {
