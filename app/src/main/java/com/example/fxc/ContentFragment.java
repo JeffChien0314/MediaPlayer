@@ -2,7 +2,6 @@ package com.example.fxc;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -29,13 +28,14 @@ import com.example.fxc.mediaplayer.MediaUtil;
 import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+import static com.example.fxc.mediaplayer.MediaUtil.TYPE_MUSIC;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -46,11 +46,33 @@ public class ContentFragment extends Fragment {
     public MediaListAdapter listAdapter;
     int lastPosition = -1;
     private View view;
-    //private ListView musicListView;
     private Context mContext;
     private ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
+    private int Currentprogress = 0;
+
+    private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
+        @Override
+        public void onStartConnect() {
+            Log.i(TAG, "onStartConnect: ");
+            Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onConnectSuccess(BluetoothDevice device) {
+            Log.i(TAG, "onConnectSuccess: ");
+            Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onConnectFail(BluetoothDevice device, String string) {
+            Log.i(TAG, "onConnectFail: ");
+            Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
@@ -118,6 +140,7 @@ public class ContentFragment extends Fragment {
         });
 
     }
+
     public void playingAnimation(int position) {
         if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {//范围内可见
             ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
@@ -161,32 +184,17 @@ public class ContentFragment extends Fragment {
                         Method m = BluetoothDevice.class.getMethod("createBond");
                         m.invoke(deviceInfo.getBluetoothDevice());
                     } else if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceInfo.getBluetoothDevice(), new ConnectBlueCallBack() {
-                    @Override
-                    public void onStartConnect() {
-                                Toast.makeText(mContext, "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                            public void onConnectSuccess(BluetoothDevice device) {
-                                Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onConnectFail(BluetoothDevice device, String string) {
-                                Toast.makeText(mContext, "The bluetooth device  is ubable to connect", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        BtMusicManager.getInstance().a2dpSinkConnect(deviceInfo.getBluetoothDevice(), mConnectBlueCallBack);
             }
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is ubable to connect...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
                 }
             }
             } else {
@@ -195,7 +203,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(int mediaType, DeviceInfo deviceInfo) {
-        if (mediaType == 0) {//音樂
+        if (mediaType == TYPE_MUSIC) {//音樂
                 mediaInfos = MediaUtil.getMusicInfos(mContext, deviceInfo.getStoragePath());
         } else {//視頻
             mediaInfos = MediaUtil.getVideoInfos(mContext, deviceInfo.getStoragePath());
@@ -229,8 +237,8 @@ public class ContentFragment extends Fragment {
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
         //  String pathDefault = ((MainActivity) getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())){
-        }else {
+        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
+        } else {
             MediaDeviceManager.getInstance().setCurrentDevice(MediaDeviceManager.getInstance().getExternalDeviceInfoList(mContext).get(0));
         }
         mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).currentTab, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
@@ -240,7 +248,6 @@ public class ContentFragment extends Fragment {
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                Log.i(TAG, "onScrollChange: ");
                 Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
                 for (int i = 0; i < mediaInfos.size(); i++) {
                     if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
@@ -252,15 +259,15 @@ public class ContentFragment extends Fragment {
 
             }
         });
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())){
-            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() "+((MainActivity) getActivity()).getCurrPosition());
+        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
+            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() " + ((MainActivity) getActivity()).getCurrPosition());
             mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
         }
        // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
-        if (lastPosition>=0){
+        if (lastPosition >= 0) {
 
-        }else {
-            lastPosition=0;
+        } else {
+            lastPosition = 0;
         }
        /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
             @Override
@@ -271,11 +278,12 @@ public class ContentFragment extends Fragment {
             }
         },500);*/
     }
-    public int Currentprogress=0;
+
+
     @Override
     public void onPause() {
         super.onPause();
-        Currentprogress=  ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
+        Currentprogress = ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
     }
 
     @Override

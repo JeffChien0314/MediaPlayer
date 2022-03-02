@@ -32,11 +32,12 @@ import static android.content.ContentValues.TAG;
  */
 
 public class MediaUtil {
+    public static final int TYPE_MUSIC = 0;
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
 
     public static List<MediaInfo> getMediaInfos(int mediaType, Context context, DeviceInfo deviceInfo) {
-        if (mediaType == 0) {
+        if (mediaType == TYPE_MUSIC) {//TYPE_MUSIC = 0
             return getMusicInfos(context, deviceInfo.getStoragePath());
         } else {
             return getVideoInfos(context, deviceInfo.getStoragePath());

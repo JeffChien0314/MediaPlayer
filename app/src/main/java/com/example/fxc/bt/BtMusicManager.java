@@ -58,7 +58,7 @@ public class BtMusicManager implements IBtMusicManager {
             switch (action) {
                 case BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED:
                     Log.e(TAG, "mBtReceiver，BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED");
-                    btA2dpContentStatus(intent);
+                    //  btA2dpContentStatus(intent);
                     break;
                 case BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED:
                     Log.e(TAG, "mBtReceiver，BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED");
@@ -126,7 +126,7 @@ public class BtMusicManager implements IBtMusicManager {
     private BluetoothProfile.ServiceListener profileServiceListener = new BluetoothProfile.ServiceListener() {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-         //   Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
+            //   Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
             Log.i(TAG, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy);
             switch (profile) {
                 case /*BluetoothProfile.A2DP_SINK*/A2DP_SINK:
@@ -153,18 +153,18 @@ public class BtMusicManager implements IBtMusicManager {
                     }
 
                     break;*/
-                case /*BluetoothProfile.AVRCP_CONTROLLER*/AVRCP_CONTROLLER:
+                case AVRCP_CONTROLLER:
                     mAvrcpController = (BluetoothAvrcpController) proxy;
-                    Log.e(TAG, "onServiceConnected: mAvrcpController=" + mAvrcpController);
+                   /* Log.e(TAG, "onServiceConnected: mAvrcpController=" + mAvrcpController);
 
                     if (mConnectedDevice == null || mAvrcpController == null) {
                         Log.e(TAG, "onServiceConnected: mConnectedDevice=" + mConnectedDevice +
                                 " , mAvrcpController=" + mAvrcpController);
                         return;
-                    }
+                    }*/
 
                     //第一次注册，这种情况播放状态也需要改变
-                    updataPlayState(true);
+                    //  updataPlayState(true);
                     //  updateMediaMetadata(mAvrcpController.getMetadata(mConnectedDevice));
                     //  updatePlaybackState(mAvrcpController.getPlaybackState(mConnectedDevice));
                     break;
@@ -214,7 +214,7 @@ public class BtMusicManager implements IBtMusicManager {
     public void initBtData(Context context) {
         mContext = context;
         initConnectDevice();
-        registerBtReceiver(context);
+        //  registerBtReceiver(context);
         registerProfile(context);
     }
 
@@ -244,10 +244,6 @@ public class BtMusicManager implements IBtMusicManager {
         return mBondedDevices;
     }
 
-    public BluetoothDevice getConnectedDevice() {
-
-        return mConnectedDevice;
-    }
     public boolean isEnabled() {
         if (null == mBluetoothAdapter) return false;
         return mBluetoothAdapter.isEnabled();
@@ -274,69 +270,32 @@ public class BtMusicManager implements IBtMusicManager {
     }
 
     public void registerProfile(Context context) {
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, 11/*BluetoothProfile.A2DP_SINK*/)) {
+        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, A2DP_SINK/*BluetoothProfile.A2DP_SINK*/)) {
             Log.i(TAG, "registerProfile: A2DP_SINK success");
         } else {
             Log.e(TAG, "registerProfile: A2DP_SINK failed");
         }
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, 12/*BluetoothProfile.A2DP_SINK*/)) {
+        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, AVRCP_CONTROLLER/*BluetoothProfile.AVRCP_CONTROLLER*/)) {
             Log.i(TAG, "registerProfile: A2DP_SINK success");
         } else {
             Log.e(TAG, "registerProfile: A2DP_SINK failed");
         }
-        /* if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.A2DP)) {
-            Log.i(TAG, "registerProfile: A2DP success");
-        } else {
-            Log.e(TAG, "registerProfile: A2DP failed");
-        }*/
-        /*if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.AVRCP_CONTROLLER)) {
-            Log.i(TAG, "registerProfile: AVRCP_CONTROLLER success");
-        } else {
-            Log.e(TAG, "registerProfile: AVRCP_CONTROLLER failed");
-        }
 
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.AVRCP)) {
-            Log.i(TAG, "registerProfile: AVRCP success");
-        } else {
-            Log.e(TAG, "registerProfile: AVRCP failed");
-        }
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.HEADSET)) {
-            Log.i(TAG, "registerProfile: HEADSET success");
-        } else {
-            Log.e(TAG, "registerProfile: HEADSET failed");
-        }
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.HEADSET_CLIENT)) {
-            Log.i(TAG, "registerProfile: HEADSET success");
-        } else {
-            Log.e(TAG, "registerProfile: HEADSET failed");
-        }*/
-
-       /* if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.PBAP_CLIENT)) {
-            Log.i(TAG, "registerProfile: PBAP_CLIENT success");
-        } else {
-            Log.e(TAG, "registerProfile: PBAP_CLIENT failed");
-        }
-
-        if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, BluetoothProfile.PBAP)) {
-            Log.i(TAG, "registerProfile: PBAP success");
-        } else {
-            Log.e(TAG, "registerProfile: PBAP failed");
-        }*/
     }
 //############################################unregist 蓝牙相关广播   end############################################
 
     //############################################unregist 蓝牙相关广播   start############################################
     @Override
     public void unregisterBtReceiver(Context context) {
-        if (mBtReceiver != null) {
+       /* if (mBtReceiver != null) {
             context.unregisterReceiver(mBtReceiver);
             mBtReceiver = null;
-        }
+        }*/
     }
 
     @Override
     public void unRegisterProfile() {
-        mBluetoothAdapter.closeProfileProxy(/*BluetoothProfile.A2DP_SINK*/11, mBluetoothA2dpSink);
+        mBluetoothAdapter.closeProfileProxy(/*BluetoothProfile.A2DP_SINK*/A2DP_SINK, mBluetoothA2dpSink);
         mBluetoothAdapter.closeProfileProxy(AVRCP_CONTROLLER, mAvrcpController);
     }
 
@@ -572,8 +531,10 @@ public class BtMusicManager implements IBtMusicManager {
         }
         new ConnectBlueTask(callBack).execute(device);
     }
-    public void a2dpSinkConnect(BluetoothDevice device,ConnectBlueCallBack callBack) {
+
+    public void a2dpSinkConnect(BluetoothDevice device, ConnectBlueCallBack callBack) {
         //  setPriority(device, 100); //设置priority
+        callBack.onStartConnect();
         try {
             //通过反射获取BluetoothA2dp中connect方法（hide的），进行连接。
             Method connectMethod = BluetoothA2dpSink.class.getMethod("connect",
@@ -582,7 +543,7 @@ public class BtMusicManager implements IBtMusicManager {
             callBack.onConnectSuccess(device);
         } catch (Exception e) {
             e.printStackTrace();
-            callBack.onConnectFail(device,"bluetooth device connected fail");
+            callBack.onConnectFail(device, "bluetooth device connected fail");
         }
     }
 

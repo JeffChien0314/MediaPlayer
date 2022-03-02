@@ -1,6 +1,5 @@
 package com.example.fxc.bt.client;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
@@ -14,16 +13,37 @@ import android.util.Log;
 import java.util.List;
 
 public class MediaBroswerConnector {
-    final String TAG = MediaBroswerConnector.class.getSimpleName();
-    MediaBrowserCompat mMediaBrowser;
-    MediaBrowserConnectionCallback mConnectionCallback;
-    MediaControllerCompat mMediaController;
-    Context mContext;
-    String packageName = "com.android.bluetooth";
-    String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
+    private final String TAG = MediaBroswerConnector.class.getSimpleName();
+    public static final int STATE_PLAY = 0;
+    public static final int STATE_PAUSE = 1;
+    public static final int STATE_REPEAT_MODE_ONE = 2;
+    public static final int STATE_REPEAT_MODE_ALL = 3;
+    public static final int STATE_SHUFFLE_MODE_NONE = 4;
+    public static final int STATE_SHUFFLE_MODE_ALL = 5;
+    public static final int STATE_SKIP2NEXT = 6;
+    public static final int STATE_SKIP2PREVIOUS = 7;
+    public static final int STATE_SKIP2ITEM = 8;
+    public static final int STATE_SEEKTO = 9;
 
-    private void initBroswer(Context context) {
+    private MediaBrowserCompat mMediaBrowser;
+    private MediaBrowserConnectionCallback mConnectionCallback;
+    private MediaControllerCompat mMediaController;
+    private MediaControllerCallback mControllerCallback;
+    private Context mContext;
+    private String packageName = "com.android.bluetooth";
+    private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
+    private static MediaBroswerConnector mInstance;
+
+    public static MediaBroswerConnector getInstance() {
+        if (mInstance == null) {
+            mInstance = new MediaBroswerConnector();
+        }
+        return mInstance;
+    }
+
+    public void initBroswer(Context context, MediaControllerCallback controllerCallback) {
         mContext = context;
+        mControllerCallback = controllerCallback;
         mConnectionCallback = new MediaBrowserConnectionCallback();
         mMediaBrowser = new MediaBrowserCompat(context,
                 new ComponentName(packageName, className),
@@ -46,11 +66,11 @@ public class MediaBroswerConnector {
 
                 try {
                     mMediaController = new MediaControllerCompat(mContext, mMediaBrowser.getSessionToken());
-                    if (mContext instanceof Activity) {
+                   /* if (mContext instanceof Activity) {
                         MediaControllerCompat.setMediaController((Activity) mContext, mMediaController);
                     }
-
-                    mMediaController.registerCallback(controllerCallback);
+*/
+                    mMediaController.registerCallback(mControllerCallback);
                     Log.i(TAG, "onConnected: ok");
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -75,6 +95,48 @@ public class MediaBroswerConnector {
             super.onConnectionFailed();
             Log.i(TAG, "onConnectionFailed: ");
         }
+    }
+
+    public class MediaControllerCallback extends MediaControllerCompat.Callback {
+        @Override
+        public void onSessionDestroyed() {
+            super.onSessionDestroyed();
+            mMediaBrowser.disconnect();
+        }
+    }
+
+    public void setBTDeviceState(int state, long value) {
+        switch (state) {
+            case STATE_PLAY:
+                mMediaController.getTransportControls().play();
+                break;
+            case STATE_PAUSE:
+                mMediaController.getTransportControls().pause();
+                break;
+            case STATE_REPEAT_MODE_ONE:
+            case STATE_REPEAT_MODE_ALL:
+                mMediaController.getTransportControls().setRepeatMode(state - 1);//因为使用sdk定义会有case的重复，所以自定义相关case内容
+                break;
+            case STATE_SHUFFLE_MODE_ALL:
+            case STATE_SHUFFLE_MODE_NONE:
+                mMediaController.getTransportControls().setShuffleMode(state - 4);
+                break;
+            case STATE_SKIP2NEXT:
+                mMediaController.getTransportControls().skipToNext();
+                break;
+            case STATE_SKIP2PREVIOUS:
+                mMediaController.getTransportControls().skipToPrevious();
+                break;
+            case STATE_SKIP2ITEM://还要确认点击事件怎么播放
+                mMediaController.getTransportControls().skipToQueueItem(value);
+                break;
+            case STATE_SEEKTO://快进快退的位置
+                mMediaController.getTransportControls().seekTo(value);
+                break;
+            //  mMediaController.getTransportControls().setShuffleMode();
+
+        }
+
     }
 
     MediaControllerCompat.Callback controllerCallback =
@@ -127,4 +189,6 @@ public class MediaBroswerConnector {
             }
         }
     };
+
+
 }

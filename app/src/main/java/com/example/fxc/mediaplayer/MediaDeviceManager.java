@@ -63,12 +63,11 @@ public class MediaDeviceManager {
                 DeviceInfo externalDeviceInfo = new DeviceInfo();
                 if (isRemovableResult){//Sandra@20220210 剔除内部存储
                 externalDeviceInfo.setStoragePath(storagePath);
-                externalDeviceInfo.setRemovableResult(isRemovableResult);
+                externalDeviceInfo.setRemovableResult(true);
                 externalDeviceInfo.setDescription(description);
                 externalDeviceInfo.setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
                 externalDeviceInfos.add(externalDeviceInfo);
                 }
-
             }
         } catch (Exception e) {
             Log.d("jason", " e:" + e);
