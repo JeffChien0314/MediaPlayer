@@ -26,6 +26,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -196,6 +197,11 @@ public class MainActivity extends AppCompatActivity {
                 ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceInfos.get(position));
                 MediaDeviceManager.getInstance().setCurrentDevice(externalDeviceInfos.get(position));
                 Log.i(TAG, "defaultDeviceindex" + position);
+                devicelistview.setVisibility(View.GONE);
+                ViewGroup.LayoutParams params=((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+                params.height = 1000;
+                ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+                mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
             }
         });
         //Sandra@20220215 add<--
@@ -359,7 +365,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public void onRandomOpenClick(View v) {
         if (randomOpen == false) {
             randomOpen = true;
@@ -375,11 +380,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onInputSourceClick(View v) {
-        if (devicelistview.getVisibility() == View.GONE) {
+        if (devicelistview.getVisibility()==View.GONE) {
+            ViewGroup.LayoutParams params=((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+            if(mMediaDeviceManager.getExternalDeviceInfoList(this).size()*90 < 990) {
+                params.height = 1000 - (mMediaDeviceManager.getExternalDeviceInfoList(this).size() * 90);
+                ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+            }else{
+                params.height = 0;
+            }
             devicelistview.setVisibility(View.VISIBLE);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
-        } else if (devicelistview.getVisibility() == View.VISIBLE) {
+        }else if (devicelistview.getVisibility()==View.VISIBLE) {
             devicelistview.setVisibility(View.GONE);
+            ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+            params.height = 1000;
+            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
         }
     }
