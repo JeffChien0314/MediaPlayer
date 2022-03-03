@@ -98,7 +98,8 @@ public class MediaDeviceManager {
     public void setCurrentDevice(DeviceInfo deviceInfo) {
         currentDevice = deviceInfo;
     }
-    public boolean ifExsitThisDevice(Context context,DeviceInfo deviceInfo){
+    public boolean ifExsitThisDevice(/*Context context,*/DeviceInfo deviceInfo){
+        if (deviceInfo==null)return false;
         boolean exist=false;
         if (externalDeviceInfos!=null && externalDeviceInfos.size()>0){
             for (int i=0; i<externalDeviceInfos.size();i++){
