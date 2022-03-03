@@ -218,7 +218,7 @@ public class ContentFragment extends Fragment {
                 urls.add(mediaInfos.get(i).getGsyVideoModel());
             }
         }
-        MediaDeviceManager.getInstance().setCurrentDevice(deviceInfo);
+    //    MediaDeviceManager.getInstance().setCurrentDevice(deviceInfo);
     }
 
     @Override
@@ -236,12 +236,16 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        //  String pathDefault = ((MainActivity) getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
-        } else {
+        if (MediaDeviceManager.getInstance().getCurrentDevice()!=null && MediaDeviceManager.getInstance().ifExsitThisDevice(mContext,MediaDeviceManager.getInstance().getCurrentDevice())){
+        }else {
+            if (MediaDeviceManager.getInstance().getExternalDeviceInfoList(mContext).size()>0){
             MediaDeviceManager.getInstance().setCurrentDevice(MediaDeviceManager.getInstance().getExternalDeviceInfoList(mContext).get(0));
         }
+        }
+        if ((MediaDeviceManager.getInstance().getCurrentDevice())!=null){
         mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).currentTab, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
+        }
+        if (mediaInfos!=null && mediaInfos.size()!=0){
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
@@ -259,27 +263,14 @@ public class ContentFragment extends Fragment {
 
             }
         });
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
-            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() " + ((MainActivity) getActivity()).getCurrPosition());
+        }
+
+
+        if (MediaDeviceManager.getInstance().ifExsitThisDevice(mContext,MediaDeviceManager.getInstance().getCurrentDevice())){
+            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() "+((MainActivity) getActivity()).getCurrPosition());
             mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
-        }
-       // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
-        if (lastPosition >= 0) {
-
-        } else {
-            lastPosition = 0;
-        }
-       /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, lastPosition);
-                ((MainActivity) getActivity()).csdMediaPlayer.setSeekOnStart(Currentprogress);
-                //  csdMediaPlayer.startPlayLogic();
             }
-        },500);*/
     }
-
-
     @Override
     public void onPause() {
         super.onPause();

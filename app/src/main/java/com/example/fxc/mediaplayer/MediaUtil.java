@@ -46,6 +46,9 @@ public class MediaUtil {
 
     public static List<MediaInfo> getMusicInfos(Context context, String path) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            uri=  MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
+        }
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
@@ -165,7 +168,6 @@ public class MediaUtil {
                并将其作为位图返回。这对于生成输入数据源的缩略图很有用。**/
 
             bitmap = retriever.getFrameAtTime();
-
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (IOException e) {
