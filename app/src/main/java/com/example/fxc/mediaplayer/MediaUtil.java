@@ -72,7 +72,7 @@ public class MediaUtil {
             GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title);
             Bitmap thumbBitmap = null;
             if (url != null) {
-                thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
+            //    thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
@@ -127,11 +127,11 @@ public class MediaUtil {
             GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title);
             Bitmap thumbBitmap = null;
             if (url != null) {
-                try {
+              /*  try {
                     thumbBitmap = getBitmapFormUrl(url); //根据专辑路径获取到专辑封面图
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
             if (mime_type != null) {
                 videoinfo.setIfVideo(true);

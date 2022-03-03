@@ -245,10 +245,6 @@ public class ContentFragment extends Fragment {
 
             }
         });
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
-            Log.i(TAG, "onResume:((MainActivity) getActivity()).getCurrPosition() " + ((MainActivity) getActivity()).getCurrPosition());
-            mediaFile_list.smoothScrollToPosition((((MainActivity) getActivity()).getCurrPosition()));
-        }
        // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
        /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
             @Override

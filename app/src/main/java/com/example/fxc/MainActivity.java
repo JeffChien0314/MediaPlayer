@@ -121,6 +121,18 @@ public class MainActivity extends AppCompatActivity {
                 //Sandra@20220107 add 更新播放列表
                 case UPDATE_DEVICE_LIST:
                     updateDeviceListView();
+                    if (externalDeviceInfos.size()==0){
+                        ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, MediaDeviceManager.getInstance().getCurrentDevice());
+                        //实际currentDeviceInfo内容为空，所以刷新后文件列表为空
+                    }else {
+                        if (MediaDeviceManager.getInstance().getCurrentDevice()!=null && MediaDeviceManager.getInstance().ifExsitThisDevice( MediaDeviceManager.getInstance().getCurrentDevice())){//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
+                            Log.i(TAG, "handleMessage: 设备还在");
+                        }else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
+                            ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,externalDeviceInfos.get(0));
+                            MediaDeviceManager.getInstance().setCurrentDevice(externalDeviceInfos.get(0));
+
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -476,22 +488,19 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.i(TAG, "onReceive: action=" + action);
-            switch (action) {
+            Log.i(TAG, "onReceive: action22"+action);
+            switch (action){
                 case Intent.ACTION_MEDIA_EJECT:
                 case Intent.ACTION_MEDIA_UNMOUNTED:
-                case Intent.ACTION_MEDIA_BAD_REMOVAL:
-                   /* handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
-                    //如果列表是当前移除的设备的，需要刷新音视频列表
-                    break;*/
-                case Intent.ACTION_MEDIA_CHECKING:
+                case Intent.ACTION_MEDIA_REMOVED:
+                    // case Intent.ACTION_MEDIA_CHECKING:
                 case Intent.ACTION_MEDIA_MOUNTED:// sd卡被插入，且已经挂载
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
                     break;
                 case Intent.ACTION_MEDIA_SCANNER_STARTED:
-                    break;
                 case Intent.ACTION_MEDIA_SCANNER_FINISHED:
-                    //这个地方可以判断可已抓取U盘内部的文件
+                    //这个地方可以判断可以抓取U盘内部的文件
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
                     break;
                 default:
                     break;
