@@ -226,7 +226,7 @@ public class BtMusicManager implements IBtMusicManager {
     @Override
     public void initConnectDevice() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (isEnabled()) return;
+        if (!isEnabled()) return;
         mBondedDevices = mBluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : mBondedDevices) {
             if (device.isConnected()) {
