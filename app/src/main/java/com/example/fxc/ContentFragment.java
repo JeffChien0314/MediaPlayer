@@ -346,9 +346,8 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        if ( MediaDeviceManager.getInstance().getCurrentDevice()!=null){
-          //  mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).getCurrentTab(), mContext, MediaDeviceManager.getInstance().getCurrentDevice());
-            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), MediaDeviceManager.getInstance().getCurrentDevice());
+        if ( ((MainActivity) getActivity()).getmMediaDeviceManager().getCurrentDevice()!=null){
+            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), ((MainActivity) getActivity()).getmMediaDeviceManager().getCurrentDevice());
         }
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);

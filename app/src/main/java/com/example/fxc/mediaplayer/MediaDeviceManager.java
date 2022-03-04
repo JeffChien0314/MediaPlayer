@@ -20,7 +20,7 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
  */
 
 public class MediaDeviceManager {
-    private static volatile MediaDeviceManager sInstance;
+   // private static volatile MediaDeviceManager sInstance;
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
     public  DeviceInfo currentDevice;
@@ -29,7 +29,7 @@ public class MediaDeviceManager {
     public MediaDeviceManager() {
     }
 
-    public static MediaDeviceManager getInstance() {
+  /*  public static MediaDeviceManager getInstance() {
         if (sInstance == null) {
             synchronized (MediaDeviceManager.class) {
                 if (sInstance == null) {
@@ -38,7 +38,7 @@ public class MediaDeviceManager {
             }
         }
         return sInstance;
-    }
+    }*/
 
     /**
      * 获取所有外置存储器的目录
