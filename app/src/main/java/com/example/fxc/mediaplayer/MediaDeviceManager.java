@@ -23,7 +23,7 @@ public class MediaDeviceManager {
     private static volatile MediaDeviceManager sInstance;
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
-    public  static DeviceInfo currentDevice;
+    public  DeviceInfo currentDevice;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
 
     public MediaDeviceManager() {
@@ -98,18 +98,17 @@ public class MediaDeviceManager {
     public void setCurrentDevice(DeviceInfo deviceInfo) {
         currentDevice = deviceInfo;
     }
-    public boolean ifExsitThisDevice(/*Context context,*/DeviceInfo deviceInfo){
-        if (deviceInfo==null)return false;
-        boolean exist=false;
-        if (externalDeviceInfos!=null && externalDeviceInfos.size()>0){
-            for (int i=0; i<externalDeviceInfos.size();i++){
-                if (deviceInfo.getType() == USB_DEVICE){
-                    if (deviceInfo.getDescription().equals(externalDeviceInfos.get(i).getDescription())
-                            && deviceInfo.getStoragePath().equals(externalDeviceInfos.get(i).getStoragePath()) ){
-                        exist= true;
-                    }
-                }else {//蓝牙设备是否存在的判断
 
+    public boolean ifExsitThisDeviceByStoragePath(String StoragePath) {
+        if (StoragePath == null) return false;
+        boolean exist = false;
+        if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
+            for (int i = 0; i < externalDeviceInfos.size(); i++) {
+                if (externalDeviceInfos.get(i).getType() == USB_DEVICE) {
+                    if (StoragePath.equals(externalDeviceInfos.get(i).getStoragePath())) {
+                        exist = true;
+                    }
+                } else {//蓝牙设备
                 }
                 }
                 /*if (!exist){//不存在设备时，清除内存
@@ -126,5 +125,19 @@ public class MediaDeviceManager {
 
         }
        return exist;
+    }
+    public DeviceInfo getDeviceByStoragePath(String StoragePath){
+        if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
+            for (int i = 0; i < externalDeviceInfos.size(); i++) {
+                if (externalDeviceInfos.get(i).getType() == USB_DEVICE) {
+                    if (StoragePath.equals(externalDeviceInfos.get(i).getStoragePath())) {
+                       return externalDeviceInfos.get(i);
+                    }
+                } else {//蓝牙设备
+                }
+            }
+
+        }
+        return null;
     }
 }

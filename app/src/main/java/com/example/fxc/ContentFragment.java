@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -31,7 +32,10 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
@@ -42,7 +46,128 @@ import static com.example.fxc.mediaplayer.MediaUtil.TYPE_MUSIC;
  */
 public class ContentFragment extends Fragment {
     String TAG = ContentFragment.class.getSimpleName();
-    public List<MediaInfo> mediaInfos = null;
+    public List<MediaInfo> mediaInfos = new List<MediaInfo>() {
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return false;
+        }
+
+        @NonNull
+        @Override
+        public Iterator<MediaInfo> iterator() {
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public Object[] toArray() {
+            return new Object[0];
+        }
+
+        @NonNull
+        @Override
+        public <T> T[] toArray(@NonNull T[] ts) {
+            return null;
+        }
+
+        @Override
+        public boolean add(MediaInfo mediaInfo) {
+            return false;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(@NonNull Collection<?> collection) {
+            return false;
+        }
+
+        @Override
+        public boolean addAll(@NonNull Collection<? extends MediaInfo> collection) {
+            return false;
+        }
+
+        @Override
+        public boolean addAll(int i, @NonNull Collection<? extends MediaInfo> collection) {
+            return false;
+        }
+
+        @Override
+        public boolean removeAll(@NonNull Collection<?> collection) {
+            return false;
+        }
+
+        @Override
+        public boolean retainAll(@NonNull Collection<?> collection) {
+            return false;
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public MediaInfo get(int i) {
+            return null;
+        }
+
+        @Override
+        public MediaInfo set(int i, MediaInfo mediaInfo) {
+            return null;
+        }
+
+        @Override
+        public void add(int i, MediaInfo mediaInfo) {
+
+        }
+
+        @Override
+        public MediaInfo remove(int i) {
+            return null;
+        }
+
+        @Override
+        public int indexOf(Object o) {
+            return 0;
+        }
+
+        @Override
+        public int lastIndexOf(Object o) {
+            return 0;
+        }
+
+        @NonNull
+        @Override
+        public ListIterator<MediaInfo> listIterator() {
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public ListIterator<MediaInfo> listIterator(int i) {
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public List<MediaInfo> subList(int i, int i1) {
+            return null;
+        }
+    };
     public MediaListAdapter listAdapter;
     private View view;
     private Context mContext;
@@ -188,6 +313,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(int mediaType, DeviceInfo deviceInfo) {
+        if (deviceInfo==null)return;
         if (mediaType == TYPE_MUSIC) {//音樂
                 mediaInfos = MediaUtil.getMusicInfos(mContext, deviceInfo.getStoragePath());
         } else {//視頻
@@ -203,7 +329,6 @@ public class ContentFragment extends Fragment {
                 urls.add(mediaInfos.get(i).getGsyVideoModel());
             }
         }
-        MediaDeviceManager.getInstance().setCurrentDevice(deviceInfo);
     }
 
     @Override
@@ -221,16 +346,15 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        //  String pathDefault = ((MainActivity) getActivity()).getCurrentStoragePath();//默認顯示當前設備的多媒體文件
-        if (MediaDeviceManager.getInstance().ifExsitThisDevice(MediaDeviceManager.getInstance().getCurrentDevice())) {
-        } else {
-            MediaDeviceManager.getInstance().setCurrentDevice(MediaDeviceManager.getInstance().getExternalDeviceInfoList(mContext).get(0));
+        if ( MediaDeviceManager.getInstance().getCurrentDevice()!=null){
+          //  mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).getCurrentTab(), mContext, MediaDeviceManager.getInstance().getCurrentDevice());
+            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), MediaDeviceManager.getInstance().getCurrentDevice());
         }
-        mediaInfos = MediaUtil.getMediaInfos(((MainActivity) getActivity()).currentTab, mContext, MediaDeviceManager.getInstance().getCurrentDevice());
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
-        if (getUrls().size() > 0)
-            ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, 0);
+        if (getUrls() !=null && getUrls().size()>0){
+            ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, 0);
+        }
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -246,15 +370,6 @@ public class ContentFragment extends Fragment {
 
             }
         });
-       // ((MainActivity) getActivity()).csdMediaPlayer.onVideoResume(true);
-       /* ((MainActivity) getActivity()).csdMediaPlayer.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, lastPosition);
-                ((MainActivity) getActivity()).csdMediaPlayer.setSeekOnStart(Currentprogress);
-                //  csdMediaPlayer.startPlayLogic();
-            }
-        },500);*/
     }
 
 
