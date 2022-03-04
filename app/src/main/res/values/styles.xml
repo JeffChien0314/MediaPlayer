@@ -11,4 +11,8 @@ parent="Theme.AppCompat.Light.NoActionBar">
 <style name="Base.Widget.Design.TabLayout" parent="android:Widget">
     <item name="tabBackground">@drawable/tab_background</item>
 </style>
+<style name="text_artist_style">
+    <item name="android:textSize">22px</item>
+    <item name="android:textColor">@color/artist</item>
+</style>
 </resources>

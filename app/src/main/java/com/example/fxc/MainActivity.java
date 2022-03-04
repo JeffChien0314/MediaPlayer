@@ -158,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
         MediaBroswerConnector.getInstance().initBroswer(MainActivity.this, mediaControllerCallback);
         initView();
         registerReceiver();
+        TabLayout.Tab tab = mTabLayout.getTabAt(currentTab);
+        tab.select();
     }
 
     private void initView() {
@@ -169,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
-        csdMediaPlayer.getBackButton().setVisibility(View.INVISIBLE);
+        csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener() {
             @Override
             public void completion() {
@@ -563,7 +565,7 @@ public class MainActivity extends AppCompatActivity {
             externalDeviceInfos.clear();
         }
         externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
-        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos, mMediaDeviceManager.getCurrentDevice());
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos,MediaDeviceManager.getInstance().getCurrentDevice());
         devicelistview.setAdapter(deviceListAdapter);
         devicelistview.invalidateViews();
     }

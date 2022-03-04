@@ -10,12 +10,12 @@
     <com.example.fxc.mediaplayer.CSDMediaPlayer
         android:id="@+id/mediaPlayer_csd"
         android:layout_width="match_parent"
-        
-android:layout_height="486px"
+        android:layout_height="486px"
+        android:layout_marginBottom="30px"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
-        <ImageView
+        <!--ImageView
             android:id="@+id/previous"
             android:layout_width="100px"
             android:layout_height="100px"
@@ -34,7 +34,7 @@ android:layout_height="486px"
             android:onClick="onNextClick"
             android:scaleType="fitXY"
             android:src="@drawable/icon_skip_fwd_normal"
-            android:layout_marginTop="200px" />
+            android:layout_marginTop="200px" />-->
     </com.example.fxc.mediaplayer.CSDMediaPlayer>
 
 
