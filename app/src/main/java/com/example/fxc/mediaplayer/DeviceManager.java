@@ -2,7 +2,7 @@ package com.example.fxc.mediaplayer;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.util.Log;
@@ -19,26 +19,29 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
  * Created by Sandra on 2022/2/18.
  */
 
-public class MediaDeviceManager {
-   // private static volatile MediaDeviceManager sInstance;
+public class DeviceManager {
+    public static final String ACTION_DEVICE_CHANGED = "DeviceManager.deviceChanged";
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
-    public  DeviceInfo currentDevice;
+    public DeviceInfo currentDevice;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
+    private Context mContext;
+    private static DeviceManager mInstance;
 
-    public MediaDeviceManager() {
+    public DeviceManager(Context context) {
+        mContext = context;
     }
 
-  /*  public static MediaDeviceManager getInstance() {
-        if (sInstance == null) {
-            synchronized (MediaDeviceManager.class) {
-                if (sInstance == null) {
-                    sInstance = new MediaDeviceManager();
+  public static DeviceManager getInstance(Context context) {
+        if (mInstance == null) {
+            synchronized (DeviceManager.class) {
+                if (mInstance == null) {
+                    mInstance = new DeviceManager(context);
                 }
             }
         }
-        return sInstance;
-    }*/
+        return mInstance;
+    }
 
     /**
      * 获取所有外置存储器的目录
@@ -49,7 +52,9 @@ public class MediaDeviceManager {
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         volumes = mStorageManager.getStorageVolumes(); //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
         externalDeviceInfos = new ArrayList<>();//最好是可以监测设备连接状态进行刷新
-        if (volumes==null || volumes.size()==0){return externalDeviceInfos;}
+        if (volumes == null || volumes.size() == 0) {
+            return externalDeviceInfos;
+        }
 
         try {
             Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
@@ -57,14 +62,14 @@ public class MediaDeviceManager {
             Method getPath = storageVolumeClazz.getMethod("getPath");
             Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
             for (int i = 0; i < volumes.size(); i++) {
-                if (volumes!=null && volumes.get(i)!=null){
+                if (volumes != null && volumes.get(i) != null) {
                     StorageVolume storageVolume = volumes.get(i);//获取每个挂载的StorageVolume
                     //通过反射调用getPath、isRemovable
                     String storagePath = (String) getPath.invoke(storageVolume); //获取路径
                     boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
                     String description = storageVolume.getDescription(context);
                     DeviceInfo externalDeviceInfo = new DeviceInfo();
-                    if (isRemovableResult){//Sandra@20220210 剔除内部存储
+                    if (isRemovableResult) {//Sandra@20220210 剔除内部存储
                         externalDeviceInfo.setStoragePath(storagePath);
                         externalDeviceInfo.setRemovableResult(isRemovableResult);
                         externalDeviceInfo.setDescription(description);
@@ -87,6 +92,8 @@ public class MediaDeviceManager {
                 externalDeviceInfos.add(info);
             }
         }
+        broadCastDeviceChanged();
+
         return externalDeviceInfos;
     }
 
@@ -110,7 +117,7 @@ public class MediaDeviceManager {
                     }
                 } else {//蓝牙设备
                 }
-                }
+            }
                 /*if (!exist){//不存在设备时，清除内存
                     List<MediaInfo>  mediaInfos = MediaUtil.getMusicInfos(context, deviceInfo.getStoragePath());
                     for (int i=0;i<mediaInfos.size();i++){
@@ -124,14 +131,15 @@ public class MediaDeviceManager {
                 }}*/
 
         }
-       return exist;
+        return exist;
     }
-    public DeviceInfo getDeviceByStoragePath(String StoragePath){
+
+    public DeviceInfo getDeviceByStoragePath(String StoragePath) {
         if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
             for (int i = 0; i < externalDeviceInfos.size(); i++) {
                 if (externalDeviceInfos.get(i).getType() == USB_DEVICE) {
                     if (StoragePath.equals(externalDeviceInfos.get(i).getStoragePath())) {
-                       return externalDeviceInfos.get(i);
+                        return externalDeviceInfos.get(i);
                     }
                 } else {//蓝牙设备
                 }
@@ -139,5 +147,12 @@ public class MediaDeviceManager {
 
         }
         return null;
+    }
+
+    private void broadCastDeviceChanged() {//通知设备变更，client主动去取设备
+        Intent intent = new Intent(ACTION_DEVICE_CHANGED);
+        intent.setPackage("com.example.fxc.mediaplayer");
+        mContext.sendBroadcast(intent);
+
     }
 }

@@ -34,7 +34,7 @@ import com.example.fxc.bt.client.MediaBroswerConnector;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceInfo;
 import com.example.fxc.mediaplayer.DeviceListAdapter;
-import com.example.fxc.mediaplayer.MediaDeviceManager;
+import com.example.fxc.mediaplayer.DeviceManager;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.mediaplayer.SaveData;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private android.os.Bundle outState;
-    private SaveData saveData=new SaveData();
     private boolean ifVideo = false;
 
     public int getCurrPosition() {
@@ -68,13 +66,14 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
-
+    private OrientationUtils orientationUtils;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
-    private  int currentTab = 0;
-    private  String currentDevicestoragePath = "";
+    private int currentTab = 0;
+    private String currentDevicestoragePath = "";
+
     public int getCurrentTab() {
         return currentTab;
     }
@@ -87,10 +86,12 @@ public class MainActivity extends AppCompatActivity {
     private ListView devicelistview;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
     private DeviceListAdapter deviceListAdapter;
-    private MediaDeviceManager mMediaDeviceManager =new MediaDeviceManager();
-    public MediaDeviceManager getmMediaDeviceManager() {
-        return mMediaDeviceManager;
+    private DeviceManager mDeviceManager;
+
+    public DeviceManager getmDeviceManager() {
+        return mDeviceManager;
     }
+
     //蓝牙音乐UI控制，接收蓝牙音乐相关状态
     private MediaBroswerConnector.MediaControllerCallback mediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
         @Override
@@ -136,15 +137,15 @@ public class MainActivity extends AppCompatActivity {
                 //Sandra@20220107 add 更新播放列表
                 case UPDATE_DEVICE_LIST:
                     updateDeviceListView();
-                    if (externalDeviceInfos.size()==0){
-                        ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,mMediaDeviceManager.getCurrentDevice());
+                    if (externalDeviceInfos.size() == 0) {
+                        ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mDeviceManager.getCurrentDevice());
                         //实际currentDeviceInfo内容为空，所以刷新后文件列表为空
-                    }else {
-                        if (mMediaDeviceManager.getCurrentDevice()!=null &&mMediaDeviceManager.ifExsitThisDeviceByStoragePath(mMediaDeviceManager.getCurrentDevice().getStoragePath())){//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
-                        }else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
-                            ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab,externalDeviceInfos.get(0));
-                           mMediaDeviceManager.setCurrentDevice(externalDeviceInfos.get(0));
-                            currentTab=0;
+                    } else {
+                        if (mDeviceManager.getCurrentDevice() != null && mDeviceManager.ifExsitThisDeviceByStoragePath(mDeviceManager.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
+                        } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
+                            ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceInfos.get(0));
+                            mDeviceManager.setCurrentDevice(externalDeviceInfos.get(0));
+                            currentTab = 0;
 
                         }
                     }
@@ -161,29 +162,28 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate: ");
         initCondition();
         setContentView(R.layout.activity_main);
-        mMediaDeviceManager = MediaDeviceManager.getInstance();
+        mDeviceManager = DeviceManager.getInstance(this);
         MediaBroswerConnector.getInstance().initBroswer(MainActivity.this, mediaControllerCallback);
         recoverPreviousUIstatus();
         initView();
         registerReceiver();
 
     }
-    private void recoverPreviousUIstatus(){
-        currentDevicestoragePath= saveData. getCurrentDevicestoragePath(getApplicationContext());
-        if (mMediaDeviceManager.ifExsitThisDeviceByStoragePath(currentDevicestoragePath)) { //反推路径对应的Device
-            DeviceInfo deviceInfo=mMediaDeviceManager. getDeviceByStoragePath(currentDevicestoragePath);
-           mMediaDeviceManager.setCurrentDevice(deviceInfo);
-            currentTab= saveData. getCurrentTab(getApplicationContext());
-            currPosition=saveData.getCurrentPosition(getApplicationContext());
+
+    private void recoverPreviousUIstatus() {
+        currentDevicestoragePath = saveData.getCurrentDevicestoragePath(getApplicationContext());
+        currentTab = saveData.getCurrentTab(getApplicationContext());
+        if (mDeviceManager.ifExsitThisDeviceByStoragePath(currentDevicestoragePath)) { //反推路径对应的Device
+            DeviceInfo deviceInfo = mDeviceManager.getDeviceByStoragePath(currentDevicestoragePath);
+            mDeviceManager.setCurrentDevice(deviceInfo);
         } else {
-            DeviceInfo deviceInfo=new DeviceInfo();
-            if (mMediaDeviceManager.getExternalDeviceInfoList(getApplicationContext())!=null
-                    && mMediaDeviceManager.getExternalDeviceInfoList(getApplicationContext()).size()!=0) {
-                deviceInfo=mMediaDeviceManager.getExternalDeviceInfoList(getApplicationContext()).get(0);
-               mMediaDeviceManager.setCurrentDevice(deviceInfo);
+            DeviceInfo deviceInfo = new DeviceInfo();
+            if (mDeviceManager.getExternalDeviceInfoList(getApplicationContext()) != null
+                    && mDeviceManager.getExternalDeviceInfoList(getApplicationContext()).size() != 0) {
+                deviceInfo = mDeviceManager.getExternalDeviceInfoList(getApplicationContext()).get(0);
+                mDeviceManager.setCurrentDevice(deviceInfo);
             }
-            currentTab=0;
-            currPosition=0;
+            currentTab = 0;
         }
     }
 
@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
     }
+
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -225,10 +226,10 @@ public class MainActivity extends AppCompatActivity {
                 currentTab = mTabLayout.getSelectedTabPosition();
                 Log.i(TAG, "onItemClick: currentTab" + currentTab);
                 ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceInfos.get(position));
-               mMediaDeviceManager.setCurrentDevice(externalDeviceInfos.get(position));
+                mDeviceManager.setCurrentDevice(externalDeviceInfos.get(position));
                 Log.i(TAG, "defaultDeviceindex" + position);
                 devicelistview.setVisibility(View.GONE);
-                ViewGroup.LayoutParams params=((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+                ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
                 params.height = 1000;
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
@@ -258,18 +259,16 @@ public class MainActivity extends AppCompatActivity {
     //Sandra@20220215 add
     public void playMusic(int position) {
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
-      if (((ContentFragment) fragments.get(currentTab)).getUrls() !=null && ((ContentFragment) fragments.get(currentTab)).getUrls().size()>0){
-        csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).getUrls(), true, currPosition);
-        csdMediaPlayer.startPlayLogic();
-      }
-        if (((ContentFragment) fragments.get(currentTab)).mediaInfos!=null && ((ContentFragment) fragments.get(currentTab)).mediaInfos.get(currPosition)!=null){
+        if (((ContentFragment) fragments.get(currentTab)).getUrls() != null && ((ContentFragment) fragments.get(currentTab)).getUrls().size() > 0) {
+            csdMediaPlayer.setUp(((ContentFragment) fragments.get(currentTab)).mediaInfos, true, currPosition);
+            csdMediaPlayer.startPlayLogic();
+        }
+
         if (((ContentFragment) fragments.get(currentTab)).mediaInfos.get(currPosition).isIfVideo()) {
             ifVideo = true;
         } else {
             ifVideo = false;
         }
-    }
-
     }
 
     private void initTabData() {
@@ -313,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mMediaDeviceManager.getCurrentDevice());
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mDeviceManager.getCurrentDevice());
             }
         });
     }
@@ -415,17 +414,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onInputSourceClick(View v) {
-        if (devicelistview.getVisibility()==View.GONE) {
-            ViewGroup.LayoutParams params=((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
-            if(mMediaDeviceManager.getExternalDeviceInfoList(this).size()*90 < 990) {
-                params.height = 1000 - (mMediaDeviceManager.getExternalDeviceInfoList(this).size() * 90);
+        if (devicelistview.getVisibility() == View.GONE) {
+            ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+            if (mDeviceManager.getExternalDeviceInfoList(this).size() * 90 < 990) {
+                params.height = 1000 - (mDeviceManager.getExternalDeviceInfoList(this).size() * 90);
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
-            }else{
+            } else {
                 params.height = 0;
             }
             devicelistview.setVisibility(View.VISIBLE);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
-        }else if (devicelistview.getVisibility()==View.VISIBLE) {
+        } else if (devicelistview.getVisibility() == View.VISIBLE) {
             devicelistview.setVisibility(View.GONE);
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
             params.height = 1000;
@@ -446,15 +445,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.i(TAG, "onStop: ");
+        outState = new Bundle();
+        outState.putInt("currentTab", currentTab);
+        outState.putParcelable("currentDevice", mDeviceManager.getCurrentDevice());
+        onSaveInstanceState(outState);
     }
+
+    SaveData saveData = new SaveData();
 
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
         unregisterReceiver();
-        saveData.saveToFile(getApplicationContext(),currPosition,currentTab,MediaDeviceManager.getInstance().getCurrentDevice().getStoragePath(),MediaDeviceManager.getInstance().getCurrentDevice().getDescription());
+        saveData.saveToFile(getApplicationContext(), currentTab, mDeviceManager.getCurrentDevice().getStoragePath(), mDeviceManager.getCurrentDevice().getDescription());
     }
+
     public void requestAllPower() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -504,18 +511,19 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            switch (action){
+            Log.i(TAG, "onReceive: action22" + action);
+            switch (action) {
                 case Intent.ACTION_MEDIA_EJECT:
                 case Intent.ACTION_MEDIA_UNMOUNTED:
                 case Intent.ACTION_MEDIA_REMOVED:
                     // case Intent.ACTION_MEDIA_CHECKING:
                 case Intent.ACTION_MEDIA_MOUNTED:// sd卡被插入，且已经挂载
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
                     break;
                 case Intent.ACTION_MEDIA_SCANNER_STARTED:
                 case Intent.ACTION_MEDIA_SCANNER_FINISHED:
                     //这个地方可以判断可以抓取U盘内部的文件
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST,500);
+                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
                     break;
                 default:
                     break;
@@ -573,13 +581,14 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void updateDeviceListView() {//Sandra@20220307 add
+    public void updateDeviceListView() {
         if (externalDeviceInfos != null && externalDeviceInfos.size() > 0) {
             externalDeviceInfos.clear();
         }
-        externalDeviceInfos = mMediaDeviceManager.getExternalDeviceInfoList(this);
-        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos, mMediaDeviceManager.getCurrentDevice());
+        externalDeviceInfos = mDeviceManager.getExternalDeviceInfoList(this);
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceInfos, mDeviceManager.getCurrentDevice());
         devicelistview.setAdapter(deviceListAdapter);
         devicelistview.invalidateViews();
     }
+
 }

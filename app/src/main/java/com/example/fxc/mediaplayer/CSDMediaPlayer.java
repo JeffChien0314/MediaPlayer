@@ -1,6 +1,7 @@
 package com.example.fxc.mediaplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -10,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.fxc.MainActivity;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
@@ -32,7 +32,12 @@ import moe.codeest.enviews.ENPlayView;
  */
 
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
-    onAutoCompletionListener mListener;
+    private final String TAG = CSDMediaPlayer.class.getSimpleName();
+    public static final String ACTION_STATE_CHANGED = "CSDMediaPlayer.stateChanged";
+    public static final int PLAYSTATE_CHANGED = 1;
+    public static final int MEDIAITEM_CHANGED = 2;
+    private onAutoCompletionListener mListener;
+    private ArrayList<MediaInfo> mMediaInfos;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -53,41 +58,83 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     /**
      * 设置播放URL
      *
+     * @param mediaInfos    当前播放mediaInfo
+     * @param position      需要播放的位置
+     * @param cacheWithPlay 是否边播边缓存
+     * @return
+     */
+    public boolean setUp(ArrayList<MediaInfo> mediaInfos, boolean cacheWithPlay, int position) {
+        mMediaInfos = mediaInfos;
+        ArrayList<GSYVideoModel> models = new ArrayList<>();
+        for (int i = 0; i < mediaInfos.size(); i++) {
+            models.add(mediaInfos.get(i).getGsyVideoModel());
+        }
+
+        boolean result = setUp(models, cacheWithPlay, position, null, new HashMap<String, String>());
+        broadCastStateChanged(MEDIAITEM_CHANGED);
+        return result;
+    }
+
+    /**
+     * 设置播放URL
+     *
      * @param url           播放url
      * @param position      需要播放的位置
      * @param cacheWithPlay 是否边播边缓存
      * @return
      */
+    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position) {
+        return setUp(url, cacheWithPlay, position, null, new HashMap<String, String>());
+    }
+
+
+    /*
+
+     */
+/**
+ * 设置播放URL
+ *
+ * @param url           播放url
+ * @param position      需要播放的位置
+ * @param cacheWithPlay 是否边播边缓存
+ * @return
+ *//*
+
     public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, int playmode) {
         return setUp(url, cacheWithPlay, position, null, new HashMap<String, String>());
     }
 
-    /**
-     * 设置播放URL
-     *
-     * @param url           播放url
-     * @param cacheWithPlay 是否边播边缓存
-     * @param position      需要播放的位置
-     * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
-     * @return
-     */
+    */
+/**
+ * 设置播放URL
+ *
+ * @param url           播放url
+ * @param cacheWithPlay 是否边播边缓存
+ * @param position      需要播放的位置
+ * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
+ * @return
+ *//*
+
     public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath) {
         return setUp(url, cacheWithPlay, position, cachePath, new HashMap<String, String>());
     }
 
-    /**
-     * 设置播放URL
-     *
-     * @param url           播放url
-     * @param cacheWithPlay 是否边播边缓存
-     * @param position      需要播放的位置
-     * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
-     * @param mapHeadData   http header
-     * @return
-     */
+    */
+/**
+ * 设置播放URL
+ *
+ * @param url           播放url
+ * @param cacheWithPlay 是否边播边缓存
+ * @param position      需要播放的位置
+ * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
+ * @param mapHeadData   http header
+ * @return
+ *//*
+
     public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath, Map<String, String> mapHeadData) {
         return setUp(url, cacheWithPlay, position, cachePath, mapHeadData, true);
     }
+*/
 
     /**
      * 设置播放URL
@@ -234,5 +281,30 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 imageView.setImageResource(R.drawable.icon_play_normal);
             }
         }
+        broadCastStateChanged(PLAYSTATE_CHANGED);
+    }
+
+
+    public String getCurrentUri() {
+        if (mMediaInfos != null && mPlayPosition > 0 && mMediaInfos.size() - 1 < mPlayPosition) {
+            return mMediaInfos.get(mPlayPosition).getGsyVideoModel().getUrl();
+        }
+        return "";
+    }
+
+    private void broadCastStateChanged(int extraName) {
+        Intent intent = new Intent(ACTION_STATE_CHANGED);
+        intent.setPackage("com.example.fxc.mediaplayer");
+        switch (extraName) {
+            case PLAYSTATE_CHANGED:
+                intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
+                break;
+            case MEDIAITEM_CHANGED:
+                intent.putExtra(MEDIAITEM_CHANGED + "", mMediaInfos.get(mPlayPosition));
+                break;
+        }
+        Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
+        mContext.sendBroadcast(intent);
+
     }
 }

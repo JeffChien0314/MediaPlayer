@@ -1,6 +1,8 @@
 package com.example.fxc.mediaplayer;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
@@ -8,22 +10,43 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
  * Created by Sandra on 2022/2/10.
  */
 
-public class MediaInfo {
+public class MediaInfo implements Parcelable {
     private long id; // 歌曲ID
     private String title; // 歌曲名稱
-   // private String album; // 專輯
+    // private String album; // 專輯
     private String artist; // 歌手名稱
     private long duration; // 歌曲時長
     private Bitmap thumbBitmap;
     private GSYVideoModel gsyVideoModel;
     private boolean ifVideo;
-   /* private long albumId;//專輯ID*/
- //   private String displayName; //顯示名稱
-  //  private long size; // 歌曲大小
-  //  private String url; // 歌曲路徑
+    /* private long albumId;//專輯ID*/
+    //   private String displayName; //顯示名稱
+    //  private long size; // 歌曲大小
+    //  private String url; // 歌曲路徑
    /* private String lrcTitle; // 歌詞名稱
     private String lrcSize; // 歌詞大小*/
 
+
+    protected MediaInfo(Parcel in) {
+        id = in.readLong();
+        title = in.readString();
+        artist = in.readString();
+        duration = in.readLong();
+        thumbBitmap = in.readParcelable(Bitmap.class.getClassLoader());
+        ifVideo = in.readByte() != 0;
+    }
+
+    public static final Creator<MediaInfo> CREATOR = new Creator<MediaInfo>() {
+        @Override
+        public MediaInfo createFromParcel(Parcel in) {
+            return new MediaInfo(in);
+        }
+
+        @Override
+        public MediaInfo[] newArray(int size) {
+            return new MediaInfo[size];
+        }
+    };
 
     public boolean isIfVideo() {
         return ifVideo;
@@ -70,13 +93,6 @@ public class MediaInfo {
         this.title = title;
     }
 
-   /* public String getAlbum() {
-        return album;
-    }*/
-
-   /* public void setAlbum(String album) {
-        this.album = album;
-    }*/
     public String getArtist() {
         return artist;
     }
@@ -92,51 +108,20 @@ public class MediaInfo {
     public void setDuration(long duration) {
         this.duration = duration;
     }
-   /* public long getAlbumId() {
-        return albumId;
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setAlbumId(long albumId) {
-        this.albumId = albumId;
-    }*/
-
-   /* public String getDisplayName() {
-        return displayName;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(title);
+        dest.writeString(artist);
+        dest.writeLong(duration);
+        dest.writeParcelable(thumbBitmap, flags);
+        dest.writeByte((byte) (ifVideo ? 1 : 0));
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }*/
-
-  /*  public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }*/
-
-    /*public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }*/
-
-  /*  public String getLrcTitle() {
-        return lrcTitle;
-    }
-
-    public void setLrcTitle(String lrcTitle) {
-        this.lrcTitle = lrcTitle;
-    }
-
-    public String getLrcSize() {
-        return lrcSize;
-    }
-
-    public void setLrcSize(String lrcSize) {
-        this.lrcSize = lrcSize;
-    }*/
 }
