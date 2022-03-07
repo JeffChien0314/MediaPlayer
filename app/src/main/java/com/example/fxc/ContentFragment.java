@@ -346,13 +346,13 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        if ( ((MainActivity) getActivity()).getmMediaDeviceManager().getCurrentDevice()!=null){
+        if ( ((MainActivity) getActivity()).getmMediaDeviceManager().getCurrentDevice()!=null) {
             updateMediaList(((MainActivity) getActivity()).getCurrentTab(), ((MainActivity) getActivity()).getmMediaDeviceManager().getCurrentDevice());
         }
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);
-        if (getUrls() !=null && getUrls().size()>0){
-            ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, 0);
+        if (getUrls() !=null && getUrls().size()>0){//Sandra@20220307 modify
+            ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(),true, ((MainActivity) getActivity()).getCurrPosition());
         }
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
