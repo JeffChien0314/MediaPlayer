@@ -267,6 +267,67 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
         super.onAutoCompletion();
     }
+       @Override
+    protected void hideAllWidget() {
+        super.hideAllWidget();
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+    }
+
+
+
+    @Override
+    protected void changeUiToPreparingShow() {
+        super.changeUiToPreparingShow();
+        Debuger.printfLog("changeUiToPreparingShow");
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+
+    }
+
+    @Override
+    protected void changeUiToPlayingShow() {
+        super.changeUiToPlayingShow();
+        Debuger.printfLog("changeUiToPlayingShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToPauseShow() {
+        super.changeUiToPauseShow();
+        Debuger.printfLog("changeUiToPauseShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToPlayingBufferingShow() {
+        super.changeUiToPlayingBufferingShow();
+        Debuger.printfLog("changeUiToPlayingBufferingShow");
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+    }
+
+    @Override
+    protected void changeUiToCompleteShow() {
+        super.changeUiToCompleteShow();
+        Debuger.printfLog("changeUiToCompleteShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToError() {
+        super.changeUiToError();
+        Debuger.printfLog("changeUiToError");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
 
     /**
      * 开始状态视频播放，prepare时不执行  addTextureView();
@@ -309,15 +370,9 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     protected void changeUiToNormal() {
         super.changeUiToNormal();
-      /*  if (mHadPlay && mPlayPosition < (mUriList.size())) {
-            findViewById(R.id.previous).setVisibility(GONE);
-            findViewById(R.id.next).setVisibility(GONE);
-        }else{
-            findViewById(R.id.previous).setVisibility(VISIBLE);
-            findViewById(R.id.next).setVisibility(VISIBLE);
-        }*/
-        //    setViewShowState(mPreviousButton, GONE);
-
+         setViewShowState(findViewById(R.id.previous),VISIBLE);
+       setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
     }
 
     public interface onAutoCompletionListener {

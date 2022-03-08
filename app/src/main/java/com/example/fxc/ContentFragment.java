@@ -244,7 +244,7 @@ public class ContentFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Currentprogress = ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
+      //  Currentprogress = ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
     }
 
     @Override
