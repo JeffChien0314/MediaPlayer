@@ -6,6 +6,9 @@ public class MediaInfo {
     private ArrayList<MediaItem> mediaItems;
     private DeviceItem deviceItem;
 
+    public MediaInfo() {
+    }
+
     public MediaInfo(ArrayList<MediaItem> mediaItems, DeviceItem deviceItem) {
         this.mediaItems = mediaItems;
         this.deviceItem = deviceItem;

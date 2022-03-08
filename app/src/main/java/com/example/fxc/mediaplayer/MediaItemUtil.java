@@ -36,24 +36,29 @@ public class MediaItemUtil {
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
 
-    public static List<MediaItem> getMediaInfos(int mediaType, Context context, DeviceItem deviceItem) {
+    public static MediaInfo getMediaInfos(int mediaType, Context context, DeviceItem deviceItem) {
+
+        MediaInfo mediaInfo = new MediaInfo();
+        mediaInfo.setDeviceItem(deviceItem);
         if (mediaType == TYPE_MUSIC) {//TYPE_MUSIC = 0
-            return getMusicInfos(context, deviceItem.getStoragePath());
+            mediaInfo.setMediaItems(getMusicInfos(context, deviceItem.getStoragePath()));
         } else {
-            return getVideoInfos(context, deviceItem.getStoragePath());
+            mediaInfo.setMediaItems(getVideoInfos(context, deviceItem.getStoragePath()));
+            // return getVideoInfos(context, deviceItem.getStoragePath());
         }
+        return mediaInfo;
     }
 
-    public static List<MediaItem> getMusicInfos(Context context, String path) {
+    public static ArrayList<MediaItem> getMusicInfos(Context context, String path) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            uri=  MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
+            uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
         }
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
         Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
-        List<MediaItem> musicInfos = new ArrayList<MediaItem>();
+        ArrayList<MediaItem> musicInfos = new ArrayList<MediaItem>();
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
             MediaItem musicInfo = new MediaItem();
@@ -69,10 +74,10 @@ public class MediaItemUtil {
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
             String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
             Log.i(TAG, "getMusicInfos:isMusicType " + isMusicType);
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title+"\n"+artist);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
             Bitmap thumbBitmap = null;
             if (url != null) {
-            //    thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
+                //    thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
@@ -80,12 +85,12 @@ public class MediaItemUtil {
                 musicInfo.setId(id);
                 musicInfo.setTitle(title);
                 musicInfo.setArtist(artist);
-              //  musicInfo.setAlbum(album);
-             //   musicInfo.setDisplayName(displayName);
-            //    musicInfo.setAlbumId(albumId);
+                //  musicInfo.setAlbum(album);
+                //   musicInfo.setDisplayName(displayName);
+                //    musicInfo.setAlbumId(albumId);
                 musicInfo.setDuration(duration);
-               // musicInfo.setSize(size);
-               // musicInfo.setUrl(url);
+                // musicInfo.setSize(size);
+                // musicInfo.setUrl(url);
                 musicInfo.setThumbBitmap(thumbBitmap);
                 musicInfo.setGsyVideoModel(gsyVideoModel);
                 musicInfos.add(musicInfo);
@@ -94,14 +99,14 @@ public class MediaItemUtil {
         return musicInfos;
     }
 
-    public static List<MediaItem> getVideoInfos(Context context, String path) {
+    public static ArrayList<MediaItem> getVideoInfos(Context context, String path) {
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         Log.i(TAG, "getVideoInfos: " + uri);
         String selection = MediaStore.Video.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
         Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
-        List<MediaItem> VideoInfos = new ArrayList<MediaItem>();
+        ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
             MediaItem videoinfo = new MediaItem();
@@ -124,7 +129,7 @@ public class MediaItemUtil {
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title+"\n"+artist);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
             Bitmap thumbBitmap = null;
             if (url != null) {
               /*  try {
@@ -138,18 +143,18 @@ public class MediaItemUtil {
                 videoinfo.setId(id);
                 videoinfo.setTitle(title);
                 videoinfo.setArtist(artist);
-               // videoinfo.setAlbum(album);
-               // videoinfo.setDisplayName(displayName);
+                // videoinfo.setAlbum(album);
+                // videoinfo.setDisplayName(displayName);
                 //   musicInfo.setAlbumId(albumId);
                 videoinfo.setDuration(duration);
-               // videoinfo.setSize(size);
-               // videoinfo.setUrl(url);
+                // videoinfo.setSize(size);
+                // videoinfo.setUrl(url);
                 videoinfo.setThumbBitmap(thumbBitmap);
                 videoinfo.setGsyVideoModel(gsyVideoModel);
-                VideoInfos.add(videoinfo);
+                mediaItems.add(videoinfo);
             }
         }
-        return VideoInfos;
+        return mediaItems;
     }
 
     public static Bitmap getBitmapFormUrl(String url) throws FileNotFoundException {

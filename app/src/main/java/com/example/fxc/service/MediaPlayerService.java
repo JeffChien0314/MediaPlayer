@@ -20,10 +20,18 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import com.example.fxc.bt.client.MediaBroswerConnector;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
+import com.example.fxc.mediaplayer.MediaController;
+import com.example.fxc.util.applicationUtils;
+
+import java.util.List;
 
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
@@ -35,11 +43,8 @@ import static com.example.fxc.service.notifications.MediaNotificationManager.NOT
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
     //public static CSDMediaPlayer mediaPlayer= CSDMediaPlayer.getInstance(this.getApplicationContext());;//本地音乐播放器
-    public static CSDMediaPlayer mediaPlayer;
+    private CSDMediaPlayer mediaPlayer;
     private DeviceItemUtil mDeviceItemUtil;
-    private static int currentSourceType = USB_DEVICE;
-
-
     private final int UPDATE_DEVICE_LIST = 0;
     public static boolean isAlive = false;
 
@@ -55,6 +60,43 @@ public class MediaPlayerService extends Service {
             }
         }
     };
+    //蓝牙音乐UI控制，接收蓝牙音乐相关状态
+    private MediaBroswerConnector.MediaControllerCallback btMediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
+        @Override
+        public void onSessionDestroyed() {
+            super.onSessionDestroyed();
+        }
+
+        @Override
+        public void onSessionReady() {
+            super.onSessionReady();
+        }
+
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat state) {
+            super.onPlaybackStateChanged(state);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            super.onMetadataChanged(metadata);
+        }
+
+        @Override
+        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+            super.onQueueChanged(queue);
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+            super.onRepeatModeChanged(repeatMode);
+        }
+
+        @Override
+        public void onShuffleModeChanged(int shuffleMode) {
+            super.onShuffleModeChanged(shuffleMode);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -62,12 +104,10 @@ public class MediaPlayerService extends Service {
         Log.i(TAG, "onCreate: ");
         isAlive = true;
         registerReceiver();
+        MediaBroswerConnector.getInstance().initBroswer(this.getApplicationContext(), btMediaControllerCallback);
         mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
-        // mediaPlayer=CSDMediaPlayer.getInstance(this);
-        //  mediaPlayer = new CSDMediaPlayer(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition();
-
     }
 
 
@@ -97,7 +137,7 @@ public class MediaPlayerService extends Service {
         mediaPlayer = null;
         unregisterReceiver();
         isAlive = false;
-        startService(new Intent(this, MediaPlayerService.class));
+        applicationUtils.startService(this);
         super.onDestroy();
     }
 
@@ -235,8 +275,10 @@ public class MediaPlayerService extends Service {
                 case ACTION_CHANGE_STATE:
                     int state = intent.getIntExtra(STATE_EXTRA, STATE_PLAY);
                     int pos = intent.getIntExtra(POS_EXTRA, -1);
-                    if (USB_DEVICE == currentSourceType) {
+                    if (USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
                         mediaPlayer.mediaControl(state, pos);
+                    } else {//蓝牙设备控制
+                        MediaBroswerConnector.getInstance().setBTDeviceState(state, pos);
                     }
 
                     break;

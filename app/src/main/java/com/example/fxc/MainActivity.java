@@ -6,15 +6,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAvrcpController;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -39,10 +36,12 @@ import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.DeviceListAdapter;
+import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.mediaplayer.SaveData;
 import com.example.fxc.service.MediaPlayerService;
+import com.example.fxc.util.applicationUtils;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 
@@ -80,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab = 0;
     private String currentDevicestoragePath = "";
     private MediaInfo mMediaInfo;
+
     public int getCurrentTab() {
         return currentTab;
     }
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
     private MediaPlayerService mediaService;
+    private MediaController mediaController;
 
     //蓝牙音乐UI控制，接收蓝牙音乐相关状态
     private MediaBroswerConnector.MediaControllerCallback mediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
@@ -162,47 +163,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       /* if (bindService()) {
-        //    handler.sendEmptyMessageDelayed(VIEW_INIT, 200);
-        }*/
-
-        startService();
-        // bindService();
         Log.i(TAG, "onCreate: ");
+        applicationUtils.startService(this);
         initCondition();
         setContentView(R.layout.activity_main);
+        mediaController = MediaController.getInstance(this);
         mDeviceItemUtil = DeviceItemUtil.getInstance(this);
-        //  MediaBroswerConnector.getInstance().initBroswer(MainActivity.this, mediaControllerCallback);
         recoverPreviousUIstatus();
         initView();
         registerReceiver();
 
     }
-
-    private void startService() {
-        Intent intent = new Intent(this, MediaPlayerService.class);
-        startService(intent);
-    }
-
-    private boolean bindService() {
-        Intent intent = new Intent(this, MediaPlayerService.class);
-        // 标志位BIND_AUTO_CREATE是的服务中onCreate得到执行,onStartCommand不会执行
-        return bindService(intent, conn, Context.BIND_AUTO_CREATE);
-    }
-
-    ServiceConnection conn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mediaService = ((MediaPlayerService.MediaServiceBinder) service).getService();
-            csdMediaPlayer = mediaService.getMediaPlayer();
-            initView();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    };
 
     private void recoverPreviousUIstatus() {
         currentDevicestoragePath = saveData.getCurrentDevicestoragePath(getApplicationContext());
@@ -221,10 +192,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
@@ -295,13 +262,13 @@ public class MainActivity extends AppCompatActivity {
 
     //Sandra@20220215 add
     public void playMusic(int position) {
-        mMediaInfo =new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, mDeviceItemUtil.getCurrentDevice());//Sandra@20220308 add
+        mMediaInfo = new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, mDeviceItemUtil.getCurrentDevice());//Sandra@20220308 add
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
         if (((ContentFragment) fragments.get(currentTab)).getUrls() != null && ((ContentFragment) fragments.get(currentTab)).getUrls().size() > 0) {
             csdMediaPlayer.setUp(mMediaInfo, true, currPosition);
             csdMediaPlayer.startPlayLogic();
         }
-      //  csdMediaPlayer. setMediaInfoLists();
+        //  csdMediaPlayer. setMediaInfoLists();
         if (((ContentFragment) fragments.get(currentTab)).mediaItems.get(currPosition).isIfVideo()) {
             ifVideo = true;
         } else {

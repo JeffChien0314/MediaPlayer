@@ -22,9 +22,8 @@ import com.example.fxc.bt.BtMusicManager;
 import com.example.fxc.bt.ConnectBlueCallBack;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
+import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaItemUtil;
-import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
@@ -36,7 +35,6 @@ import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -50,8 +48,6 @@ public class ContentFragment extends Fragment {
     public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
-    private int Currentprogress = 0;
-
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
         public void onStartConnect() {
@@ -190,11 +186,8 @@ public class ContentFragment extends Fragment {
 
     public void updateMediaList(int mediaType, DeviceItem deviceItem) {
         if (deviceItem == null) return;
-        if (mediaType == TYPE_MUSIC) {//音樂
-            mediaItems = (ArrayList<MediaItem>) MediaItemUtil.getMusicInfos(mContext, deviceItem.getStoragePath());
-        } else {//視頻
-            mediaItems = (ArrayList<MediaItem>) MediaItemUtil.getVideoInfos(mContext, deviceItem.getStoragePath());
-        }
+        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false).getMediaItems();
+
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);

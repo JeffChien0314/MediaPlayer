@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.fxc.service.MediaPlayerService;
+import com.example.fxc.util.applicationUtils;
 
 public class MusicWidget extends AppWidgetProvider {
 
@@ -18,7 +19,7 @@ public class MusicWidget extends AppWidgetProvider {
                 <action android:name="DeviceItemUtil.deviceChanged" />=>设备改变，给UI重新抓取设备*/
         Log.i("MusicWidget", "onReceive: action=" + intent.getAction());
         if (!MediaPlayerService.isAlive) {
-            context.startForegroundService(new Intent(context, MediaPlayerService.class));
+            applicationUtils.startService(context);
         }
     }
 
