@@ -136,7 +136,7 @@
         android:id="@+id/previous"
         android:layout_width="120px"
         android:layout_height="120px"
-        android:layout_marginTop="190px"
+        android:layout_marginTop="200px"
         android:layout_marginRight="108px"
         android:layout_toLeftOf="@+id/start"
         android:scaleType="fitXY"
@@ -151,7 +151,7 @@
         android:onClick="onNextClick"
         android:scaleType="fitXY"
         android:src="@drawable/icon_skip_fwd_normal"
-        android:layout_marginTop="190px" />
+        android:layout_marginTop="200px" />
 
     <ImageView
         android:id="@+id/small_close"
