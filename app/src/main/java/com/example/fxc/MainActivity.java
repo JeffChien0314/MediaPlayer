@@ -6,12 +6,15 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAvrcpController;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -27,6 +30,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -37,6 +41,7 @@ import com.example.fxc.mediaplayer.DeviceListAdapter;
 import com.example.fxc.mediaplayer.DeviceManager;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.mediaplayer.SaveData;
+import com.example.fxc.service.MediaPlayerService;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 
@@ -78,19 +83,12 @@ public class MainActivity extends AppCompatActivity {
         return currentTab;
     }
 
-    public String getCurrentDevicestoragePath() {
-        return currentDevicestoragePath;
-    }
-
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
     private ListView devicelistview;
     private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceManager mDeviceManager;
-
-    public DeviceManager getmDeviceManager() {
-        return mDeviceManager;
-    }
+    private MediaPlayerService mediaService;
 
     //蓝牙音乐UI控制，接收蓝牙音乐相关状态
     private MediaBroswerConnector.MediaControllerCallback mediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
@@ -129,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
             super.onShuffleModeChanged(shuffleMode);
         }
     };
-    private final int UPDATE_DEVICE_LIST = 0;
+    private final int VIEW_INIT = 0;
+    private final int UPDATE_DEVICE_LIST = 1;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -150,6 +149,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     break;
+                case VIEW_INIT:
+                    //   initView();
+                    break;
                 default:
                     break;
             }
@@ -159,16 +161,47 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+       /* if (bindService()) {
+        //    handler.sendEmptyMessageDelayed(VIEW_INIT, 200);
+        }*/
+
+        startService();
+        // bindService();
         Log.i(TAG, "onCreate: ");
         initCondition();
         setContentView(R.layout.activity_main);
         mDeviceManager = DeviceManager.getInstance(this);
-        MediaBroswerConnector.getInstance().initBroswer(MainActivity.this, mediaControllerCallback);
+        //  MediaBroswerConnector.getInstance().initBroswer(MainActivity.this, mediaControllerCallback);
         recoverPreviousUIstatus();
         initView();
         registerReceiver();
 
     }
+
+    private void startService() {
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        startService(intent);
+    }
+
+    private boolean bindService() {
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        // 标志位BIND_AUTO_CREATE是的服务中onCreate得到执行,onStartCommand不会执行
+        return bindService(intent, conn, Context.BIND_AUTO_CREATE);
+    }
+
+    ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mediaService = ((MediaPlayerService.MediaServiceBinder) service).getService();
+            csdMediaPlayer = mediaService.getMediaPlayer();
+            initView();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private void recoverPreviousUIstatus() {
         currentDevicestoragePath = saveData.getCurrentDevicestoragePath(getApplicationContext());
@@ -197,7 +230,10 @@ public class MainActivity extends AppCompatActivity {
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mPreviousButton = (ImageView) findViewById(R.id.previous);
         mNextButton = (ImageView) findViewById(R.id.next);
-        csdMediaPlayer = (CSDMediaPlayer) findViewById(R.id.mediaPlayer_csd);
+        csdMediaPlayer = CSDMediaPlayer.getInstance(this);
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
+        frameLayout.addView(csdMediaPlayer);
+
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
@@ -459,6 +495,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
         unregisterReceiver();
+        //   unbindService(conn);
         saveData.saveToFile(getApplicationContext(), currentTab, mDeviceManager.getCurrentDevice().getStoragePath(), mDeviceManager.getCurrentDevice().getDescription());
     }
 

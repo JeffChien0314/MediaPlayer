@@ -22,7 +22,6 @@
             </intent-filter>
         </activity>
 
-
         <receiver
             android:name="com.example.fxc.MusicWidget"
             android:label="Music">
@@ -37,6 +36,10 @@
                 android:resource="@layout/music_widget_setting" />
         </receiver>
 
+        <service
+            android:name="com.example.fxc.service.MediaPlayerService"
+            android:launchMode="singleInstance" />
+
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -47,4 +50,5 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 </manifest>

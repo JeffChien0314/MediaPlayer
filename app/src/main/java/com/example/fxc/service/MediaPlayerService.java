@@ -14,24 +14,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceManager;
 
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PLAY;
+import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.service.notifications.MediaNotificationManager.NOTIFICATION_ID;
 
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
-    private CSDMediaPlayer mediaPlayer;//本地音乐播放器
+    //public static CSDMediaPlayer mediaPlayer= CSDMediaPlayer.getInstance(this.getApplicationContext());;//本地音乐播放器
+    public static CSDMediaPlayer mediaPlayer;
     private DeviceManager mDeviceManager;
+    private static int currentSourceType = USB_DEVICE;
+
 
     private final int UPDATE_DEVICE_LIST = 0;
-    public static boolean isAlive = true;
+    public static boolean isAlive = false;
 
     private Handler handler = new Handler() {
         @Override
@@ -49,9 +59,12 @@ public class MediaPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "onCreate: ");
         registerReceiver();
         mDeviceManager = DeviceManager.getInstance(this.getApplicationContext());
-        mediaPlayer = new CSDMediaPlayer(this.getApplicationContext());
+        // mediaPlayer=CSDMediaPlayer.getInstance(this);
+        //  mediaPlayer = new CSDMediaPlayer(this.getApplicationContext());
+        mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition();
 
     }
@@ -77,6 +90,7 @@ public class MediaPlayerService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "onDestroy: ");
         saveData();
         mediaPlayer.release();
         mediaPlayer = null;
@@ -84,6 +98,13 @@ public class MediaPlayerService extends Service {
         isAlive = false;
         startService(new Intent(this, MediaPlayerService.class));
         super.onDestroy();
+    }
+
+    public CSDMediaPlayer getMediaPlayer() {
+        if (null == mediaPlayer) {
+            mediaPlayer = CSDMediaPlayer.getInstance(this);
+        }
+        return mediaPlayer;
     }
 
     public void saveData() {
@@ -122,11 +143,15 @@ public class MediaPlayerService extends Service {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         registerReceiver(bluetoothReceiver, filter);
+
+        IntentFilter playerFilter = new IntentFilter(ACTION_CHANGE_STATE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(playerControlReceiver, playerFilter);
     }
 
     public void unregisterReceiver() {
         unregisterReceiver(USBDeviceReceiver);
         unregisterReceiver(bluetoothReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(playerControlReceiver);
     }
 
     private final BroadcastReceiver USBDeviceReceiver = new BroadcastReceiver() {
@@ -202,11 +227,35 @@ public class MediaPlayerService extends Service {
         }
     };
 
+    private final BroadcastReceiver playerControlReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_CHANGE_STATE:
+                    int state = intent.getIntExtra(STATE_EXTRA, STATE_PLAY);
+                    int pos = intent.getIntExtra(POS_EXTRA, -1);
+                    if (USB_DEVICE == currentSourceType) {
+                        mediaPlayer.mediaControl(state, pos);
+                    }
+
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + intent.getAction());
+            }
+        }
+    };
+
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new MediaServiceBinder();
+    }
+
+    public class MediaServiceBinder extends Binder {
+        public MediaPlayerService getService() {
+            return MediaPlayerService.this;
+        }
     }
 
     private static void startForeground(Service service) {

@@ -1,7 +1,9 @@
 package com.example.fxc.mediaplayer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -10,10 +12,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.example.fxc.MainActivity;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
+import com.shuyu.gsyvideoplayer.utils.CommonUtil;
+import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
@@ -34,10 +39,23 @@ import moe.codeest.enviews.ENPlayView;
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private final String TAG = CSDMediaPlayer.class.getSimpleName();
     public static final String ACTION_STATE_CHANGED = "CSDMediaPlayer.stateChanged";
+    public static final String ACTION_CHANGE_STATE = "CSDMediaPlayer.changestate";
+    public static final String STATE_EXTRA = "state";
+    public static final String POS_EXTRA = "pos";
     public static final int PLAYSTATE_CHANGED = 1;
     public static final int MEDIAITEM_CHANGED = 2;
+    public static final int STATE_PLAY = 0;
+    public static final int STATE_PAUSE = 1;
+    public static final int STATE_NEXT = 2;
+    public static final int STATE_PREVIOUS = 3;
+    public static final int STATE_SEEKTO = 4;
+    public static final int STATE_RANDOM_TRUE = 5;
+    public static final int STATE_RANDOM_FALSE = 6;
+    public static final int STATE_SHUFFLE = 7;
+
     private onAutoCompletionListener mListener;
     private ArrayList<MediaInfo> mMediaInfos;
+    private static CSDMediaPlayer mInstance;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -47,8 +65,42 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         super(context);
     }
 
+    protected Context getActivityContext() {
+        if (null == CommonUtil.getActivityContext(getContext()))
+            return mContext;
+        else
+            return CommonUtil.getActivityContext(getContext());
+    }
+
+    /*protected void init(Context context) {
+
+     *//*if (getActivityContext() != null) {
+            this.mContext = getActivityContext();
+        } else {
+            this.mContext = context;
+        }*//*
+        this.mContext = context;
+        initInflate(mContext);
+
+        mTextureViewContainer = (ViewGroup) findViewById(R.id.surface_container);
+        if (isInEditMode())
+            return;
+        mScreenWidth = getActivityContext().getResources().getDisplayMetrics().widthPixels;
+        mScreenHeight = getActivityContext().getResources().getDisplayMetrics().heightPixels;
+        mAudioManager = (AudioManager) getActivityContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+
+    }*/
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public static CSDMediaPlayer getInstance(Context context) {
+        Log.i("CSDMediaPlayer", "CSDMediaPlayer: context=" + context);
+        if (mInstance == null) {
+            Log.i("CSDMediaPlayer", "CSDMediaPlayer: context=" + context);
+            mInstance = new CSDMediaPlayer(context);
+        }
+        return mInstance;
     }
 
     public void setOnAutoCompletionListener(onAutoCompletionListener listener) {
@@ -230,6 +282,25 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
     }
 
+    protected void startPrepare() {
+        if (getGSYVideoManager().listener() != null) {
+            getGSYVideoManager().listener().onCompletion();
+        }
+        if (mVideoAllCallBack != null) {
+            Debuger.printfLog("onStartPrepared");
+            mVideoAllCallBack.onStartPrepared(mOriginUrl, mTitle, this);
+        }
+        getGSYVideoManager().setListener(this);
+        getGSYVideoManager().setPlayTag(mPlayTag);
+        getGSYVideoManager().setPlayPosition(mPlayPosition);
+        mAudioManager.requestAudioFocus(onAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+       if(getActivityContext() instanceof Activity)
+        ((Activity) getActivityContext()).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        mBackUpPlayingBufferState = -1;
+        getGSYVideoManager().prepare(mUrl, (mMapHeadData == null) ? new HashMap<String, String>() : mMapHeadData, mLooping, mSpeed, mCache, mCachePath, mOverrideExtension);
+        setStateAndUi(CURRENT_STATE_PREPAREING);
+    }
+
     @Override
     public void onPrepared() {
         super.onPrepared();
@@ -305,6 +376,21 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
         mContext.sendBroadcast(intent);
+
+    }
+
+    public void mediaControl(int state, long position) {
+        switch (state) {
+            case STATE_PLAY:
+                getGSYVideoManager().start();
+                break;
+            case STATE_PAUSE:
+                getGSYVideoManager().pause();
+                break;
+            case STATE_NEXT:
+
+                break;
+        }
 
     }
 }

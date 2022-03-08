@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.example.fxc.bt.BtMusicManager;
 import com.example.fxc.bt.ConnectBlueCallBack;
 import com.example.fxc.mediaplayer.DeviceInfo;
+import com.example.fxc.mediaplayer.DeviceManager;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.MediaUtil;
@@ -220,8 +221,8 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        if (((MainActivity) getActivity()).getmDeviceManager().getCurrentDevice() != null) {
-            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), ((MainActivity) getActivity()).getmDeviceManager().getCurrentDevice());
+        if (DeviceManager.getInstance(mContext).getCurrentDevice() != null) {
+            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), (DeviceManager.getInstance(mContext).getCurrentDevice()));
         }
         listAdapter = new MediaListAdapter(mContext, mediaInfos);
         mediaFile_list.setAdapter(listAdapter);

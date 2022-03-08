@@ -7,15 +7,23 @@
     android:background="@drawable/background_music"
     tools:context="com.example.fxc.MainActivity">
 
-    <com.example.fxc.mediaplayer.CSDMediaPlayer
-        android:id="@+id/mediaPlayer_csd"
+    <FrameLayout
+        android:id="@+id/mediaPlayer_csd_container"
         android:layout_width="match_parent"
         android:layout_height="486px"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+   <!-- <com.example.fxc.mediaplayer.CSDMediaPlayer
+        android:id="@+id/mediaPlayer_csd"
+        android:layout_width="match_parent"
+        android:layout_height="186px"
         android:layout_marginBottom="30px"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
-        <!--ImageView
+        &lt;!&ndash;ImageView
             android:id="@+id/previous"
             android:layout_width="100px"
             android:layout_height="100px"
@@ -34,17 +42,17 @@
             android:onClick="onNextClick"
             android:scaleType="fitXY"
             android:src="@drawable/icon_skip_fwd_normal"
-            android:layout_marginTop="200px" />-->
+            android:layout_marginTop="200px" />&ndash;&gt;
     </com.example.fxc.mediaplayer.CSDMediaPlayer>
 
-
+-->
     <LinearLayout
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd">
+        app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container">
 
         <View
             android:id="@+id/input_source_indicated"

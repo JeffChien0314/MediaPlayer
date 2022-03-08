@@ -24,7 +24,7 @@ public class DeviceManager {
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
     public DeviceInfo currentDevice;
-    private List<DeviceInfo> externalDeviceInfos = new ArrayList<DeviceInfo>();
+    private List<DeviceInfo> externalDeviceInfos;
     private Context mContext;
     private static DeviceManager mInstance;
 
@@ -32,7 +32,7 @@ public class DeviceManager {
         mContext = context;
     }
 
-  public static DeviceManager getInstance(Context context) {
+    public static DeviceManager getInstance(Context context) {
         if (mInstance == null) {
             synchronized (DeviceManager.class) {
                 if (mInstance == null) {
@@ -51,8 +51,9 @@ public class DeviceManager {
     public List<DeviceInfo> getExternalDeviceInfoList(Context context) {
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         volumes = mStorageManager.getStorageVolumes(); //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
-        externalDeviceInfos = new ArrayList<>();//最好是可以监测设备连接状态进行刷新
+        externalDeviceInfos = new ArrayList<>();
         if (volumes == null || volumes.size() == 0) {
+            broadCastDeviceChanged();
             return externalDeviceInfos;
         }
 
@@ -71,7 +72,7 @@ public class DeviceManager {
                     DeviceInfo externalDeviceInfo = new DeviceInfo();
                     if (isRemovableResult) {//Sandra@20220210 剔除内部存储
                         externalDeviceInfo.setStoragePath(storagePath);
-                        externalDeviceInfo.setRemovableResult(isRemovableResult);
+                        externalDeviceInfo.setRemovableResult(true);
                         externalDeviceInfo.setDescription(description);
                         externalDeviceInfo.setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
                         externalDeviceInfos.add(externalDeviceInfo);
@@ -97,6 +98,17 @@ public class DeviceManager {
         return externalDeviceInfos;
     }
 
+    /**
+     * 获取所有外置存储器的目录
+     *
+     * @return
+     */
+    public List<DeviceInfo> getExternalDeviceInfoList() {
+        if (null == externalDeviceInfos) {
+            getExternalDeviceInfoList(mContext);
+        }
+        return externalDeviceInfos;
+    }
 
     public DeviceInfo getCurrentDevice() {
         return currentDevice;
