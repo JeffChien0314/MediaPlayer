@@ -15,7 +15,7 @@ public class MusicWidget extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         /* <action android:name="CSDMediaPlayer.stateChanged" />=>播放状态改变，给UI修改播放器当前状态显示
-                <action android:name="DeviceManager.deviceChanged" />=>设备改变，给UI重新抓取设备*/
+                <action android:name="DeviceItemUtil.deviceChanged" />=>设备改变，给UI重新抓取设备*/
         Log.i("MusicWidget", "onReceive: action=" + intent.getAction());
         if (!MediaPlayerService.isAlive) {
             context.startForegroundService(new Intent(context, MediaPlayerService.class));

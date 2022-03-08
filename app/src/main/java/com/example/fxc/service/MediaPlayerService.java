@@ -23,7 +23,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
-import com.example.fxc.mediaplayer.DeviceManager;
+import com.example.fxc.mediaplayer.DeviceItemUtil;
 
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
@@ -36,7 +36,7 @@ public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
     //public static CSDMediaPlayer mediaPlayer= CSDMediaPlayer.getInstance(this.getApplicationContext());;//本地音乐播放器
     public static CSDMediaPlayer mediaPlayer;
-    private DeviceManager mDeviceManager;
+    private DeviceItemUtil mDeviceItemUtil;
     private static int currentSourceType = USB_DEVICE;
 
 
@@ -48,7 +48,7 @@ public class MediaPlayerService extends Service {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case UPDATE_DEVICE_LIST:
-                    mDeviceManager.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext());
+                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext());
                     break;
                 default:
                     break;
@@ -62,7 +62,7 @@ public class MediaPlayerService extends Service {
         Log.i(TAG, "onCreate: ");
         isAlive = true;
         registerReceiver();
-        mDeviceManager = DeviceManager.getInstance(this.getApplicationContext());
+        mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         // mediaPlayer=CSDMediaPlayer.getInstance(this);
         //  mediaPlayer = new CSDMediaPlayer(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);

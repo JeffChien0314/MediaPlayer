@@ -54,7 +54,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_SHUFFLE = 7;
 
     private onAutoCompletionListener mListener;
-    private ArrayList<MediaInfo> mMediaInfos;
+    private MediaInfo MediaInfo;
     private static CSDMediaPlayer mInstance;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
@@ -115,11 +115,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
      * @param cacheWithPlay 是否边播边缓存
      * @return
      */
-    public boolean setUp(ArrayList<MediaInfo> mediaInfos, boolean cacheWithPlay, int position) {
-        mMediaInfos = mediaInfos;
+    public boolean setUp(MediaInfo mediaInfos, boolean cacheWithPlay, int position) {
+        MediaInfo = mediaInfos;
         ArrayList<GSYVideoModel> models = new ArrayList<>();
-        for (int i = 0; i < mediaInfos.size(); i++) {
-            models.add(mediaInfos.get(i).getGsyVideoModel());
+        for (int i = 0; i < mediaInfos.getMediaItems().size(); i++) {
+            models.add(mediaInfos.getMediaItems().get(i).getGsyVideoModel());
         }
 
         boolean result = setUp(models, cacheWithPlay, position, null, new HashMap<String, String>());
@@ -357,8 +357,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
 
     public String getCurrentUri() {
-        if (mMediaInfos != null && mPlayPosition > 0 && mMediaInfos.size() - 1 < mPlayPosition) {
-            return mMediaInfos.get(mPlayPosition).getGsyVideoModel().getUrl();
+        if (MediaInfo !=null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
+            return MediaInfo.getMediaItems().get(mPlayPosition).getGsyVideoModel().getUrl();
         }
         return "";
     }
@@ -371,7 +371,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                intent.putExtra(MEDIAITEM_CHANGED + "", mMediaInfos.get(mPlayPosition));
+                intent.putExtra(MEDIAITEM_CHANGED + "",  MediaInfo.getMediaItems().get(mPlayPosition));
                 break;
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);

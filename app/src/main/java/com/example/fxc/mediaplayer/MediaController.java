@@ -47,8 +47,8 @@ public class MediaController {
      * 给UI使用抓取当前设备
      * @return
      */
-    public List<DeviceInfo> getDevices() {
-        return DeviceManager.getInstance(mContext).getExternalDeviceInfoList();
+    public List<DeviceItem> getDevices() {
+        return DeviceItemUtil.getInstance(mContext).getExternalDeviceInfoList();
     }
 
 }

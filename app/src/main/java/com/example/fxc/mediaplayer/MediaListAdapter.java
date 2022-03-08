@@ -16,8 +16,8 @@ import java.util.List;
 
 public class MediaListAdapter extends BaseAdapter {
     private Context context;
-    private List<MediaInfo> mediaInfos;
-    private MediaInfo mediaInfo;
+    private List<MediaItem> mediaItems;
+    private MediaItem mediaItem;
 
     /**
      * 建構函式
@@ -25,22 +25,22 @@ public class MediaListAdapter extends BaseAdapter {
      * @param context  上下文
      * @param mp3Infos 集合物件
      */
-    public MediaListAdapter(Context context, List<MediaInfo> mp3Infos) {
+    public MediaListAdapter(Context context, List<MediaItem> mp3Infos) {
         this.context = context;
-        this.mediaInfos = mp3Infos;
+        this.mediaItems = mp3Infos;
     }
 
-    public List<MediaInfo> getMediaInfos() {
-        return mediaInfos;
+    public List<MediaItem> getMediaItems() {
+        return mediaItems;
     }
 
-    public void setMediaInfos(List<MediaInfo> mediaInfos) {
-        this.mediaInfos = mediaInfos;
+    public void setMediaItems(List<MediaItem> mediaItems) {
+        this.mediaItems = mediaItems;
     }
 
     @Override
     public int getCount() {
-        return mediaInfos.size();
+        return mediaItems.size();
     }
 
     @Override
@@ -67,11 +67,11 @@ public class MediaListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();//通過getTag的方法將資料取出來
         }
-        mediaInfo = mediaInfos.get(position);
-        viewHolder.musicTitle.setText(mediaInfo.getTitle());//顯示標題
-        viewHolder.musicArtist.setText(mediaInfo.getArtist());//顯示藝術家
-        viewHolder.musicDuration.setText(MediaUtil.formatTime(mediaInfo.getDuration()));//顯示時長
-        viewHolder.albumImage.setImageBitmap(mediaInfo.getThumbBitmap());
+        mediaItem = mediaItems.get(position);
+        viewHolder.musicTitle.setText(mediaItem.getTitle());//顯示標題
+        viewHolder.musicArtist.setText(mediaItem.getArtist());//顯示藝術家
+        viewHolder.musicDuration.setText(MediaItemUtil.formatTime(mediaItem.getDuration()));//顯示時長
+        viewHolder.albumImage.setImageBitmap(mediaItem.getThumbBitmap());
 
         return convertView;
     }

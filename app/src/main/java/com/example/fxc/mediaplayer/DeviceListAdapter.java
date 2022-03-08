@@ -18,21 +18,21 @@ import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 
 public class DeviceListAdapter extends BaseAdapter {
     private Context context;
-    private List<DeviceInfo> externalDeviceInfos;
-    private DeviceInfo externalDeviceInfo, mCurrentDevice;
+    private List<DeviceItem> externalDeviceItems;
+    private DeviceItem externalDeviceItem, mCurrentDevice;
 
     public DeviceListAdapter() {
     }
 
-    public DeviceListAdapter(Context context, List<DeviceInfo> externalDeviceInfos, DeviceInfo currentDevice) {
+    public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems, DeviceItem currentDevice) {
         this.context = context;
-        this.externalDeviceInfos = externalDeviceInfos;
+        this.externalDeviceItems = externalDeviceItems;
         this.mCurrentDevice = currentDevice;
     }
 
     @Override
     public int getCount() {
-        return externalDeviceInfos.size();
+        return externalDeviceItems.size();
     }
 
     @Override
@@ -58,21 +58,21 @@ public class DeviceListAdapter extends BaseAdapter {
         } else {
             viewHolder = (DeviceListAdapter.ViewHolder) convertView.getTag();//通過getTag的方法將資料取出來
         }
-        externalDeviceInfo = externalDeviceInfos.get(position);
-        viewHolder.description.setText(externalDeviceInfo.getDescription());//設備名稱
-        if (externalDeviceInfo.getType() == BLUETOOTH_DEVICE) {
+        externalDeviceItem = externalDeviceItems.get(position);
+        viewHolder.description.setText(externalDeviceItem.getDescription());//設備名稱
+        if (externalDeviceItem.getType() == BLUETOOTH_DEVICE) {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
         }
-        if (mCurrentDevice != null && externalDeviceInfo.equals(mCurrentDevice)) {
+        if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
             viewHolder.connected_icon.setVisibility(View.VISIBLE);
             viewHolder.description.setTextColor(Color.parseColor("#BFFFFFFF"));
         } else {
             viewHolder.connected_icon.setVisibility(View.GONE);
             viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
         }
-        // viewHolder.deviceImage.setImageBitmap(externalDeviceInfo.getThumbBitmap());
+        // viewHolder.deviceImage.setImageBitmap(externalDeviceItem.getThumbBitmap());
         return convertView;
     }
 

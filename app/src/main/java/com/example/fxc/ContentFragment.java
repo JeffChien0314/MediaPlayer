@@ -20,11 +20,12 @@ import android.widget.Toast;
 
 import com.example.fxc.bt.BtMusicManager;
 import com.example.fxc.bt.ConnectBlueCallBack;
-import com.example.fxc.mediaplayer.DeviceInfo;
-import com.example.fxc.mediaplayer.DeviceManager;
+import com.example.fxc.mediaplayer.DeviceItem;
+import com.example.fxc.mediaplayer.DeviceItemUtil;
+import com.example.fxc.mediaplayer.MediaItem;
+import com.example.fxc.mediaplayer.MediaItemUtil;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaListAdapter;
-import com.example.fxc.mediaplayer.MediaUtil;
 import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
@@ -35,14 +36,14 @@ import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-import static com.example.fxc.mediaplayer.MediaUtil.TYPE_MUSIC;
+import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 
 /**
  * Created by Jennifer on 2022/2/08.
  */
 public class ContentFragment extends Fragment {
     String TAG = ContentFragment.class.getSimpleName();
-    public ArrayList<MediaInfo> mediaInfos = new ArrayList<>();
+    public ArrayList<MediaItem> mediaItems = new ArrayList<>();
     public MediaListAdapter listAdapter;
     private View view;
     private Context mContext;
@@ -99,8 +100,8 @@ public class ContentFragment extends Fragment {
     }
 
     public List<GSYVideoModel> getUrls() {
-        for (int i = 0; i < mediaInfos.size(); i++) {
-            urls.add(mediaInfos.get(i).getGsyVideoModel());
+        for (int i = 0; i < mediaItems.size(); i++) {
+            urls.add(mediaItems.get(i).getGsyVideoModel());
         }
         return urls;
     }
@@ -159,17 +160,17 @@ public class ContentFragment extends Fragment {
         return false;
     }
 
-    public void deviceItemOnClick(int mediaType, DeviceInfo deviceInfo) {
-        if (deviceInfo.getType() == BLUETOOTH_DEVICE) {
-            if (deviceInfo.getBluetoothDevice().isConnected()) {
+    public void deviceItemOnClick(int mediaType, DeviceItem deviceItem) {
+        if (deviceItem.getType() == BLUETOOTH_DEVICE) {
+            if (deviceItem.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
             } else {
                 try {
-                    if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
+                    if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                         Method m = BluetoothDevice.class.getMethod("createBond");
-                        m.invoke(deviceInfo.getBluetoothDevice());
-                    } else if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceInfo.getBluetoothDevice(), mConnectBlueCallBack);
+                        m.invoke(deviceItem.getBluetoothDevice());
+                    } else if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
+                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(), mConnectBlueCallBack);
                     }
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
@@ -183,25 +184,25 @@ public class ContentFragment extends Fragment {
                 }
             }
         } else {
-            updateMediaList(mediaType, deviceInfo);
+            updateMediaList(mediaType, deviceItem);
         }
     }
 
-    public void updateMediaList(int mediaType, DeviceInfo deviceInfo) {
-        if (deviceInfo == null) return;
+    public void updateMediaList(int mediaType, DeviceItem deviceItem) {
+        if (deviceItem == null) return;
         if (mediaType == TYPE_MUSIC) {//音樂
-            mediaInfos = (ArrayList<MediaInfo>) MediaUtil.getMusicInfos(mContext, deviceInfo.getStoragePath());
+            mediaItems = (ArrayList<MediaItem>) MediaItemUtil.getMusicInfos(mContext, deviceItem.getStoragePath());
         } else {//視頻
-            mediaInfos = (ArrayList<MediaInfo>) MediaUtil.getVideoInfos(mContext, deviceInfo.getStoragePath());
+            mediaItems = (ArrayList<MediaItem>) MediaItemUtil.getVideoInfos(mContext, deviceItem.getStoragePath());
         }
-        listAdapter = new MediaListAdapter(mContext, mediaInfos);
+        listAdapter = new MediaListAdapter(mContext, mediaItems);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);
         listAdapter.notifyDataSetChanged();
         if (urls != null && urls.size() != 0) {
             urls.clear();
-            for (int i = 0; i < mediaInfos.size(); i++) {
-                urls.add(mediaInfos.get(i).getGsyVideoModel());
+            for (int i = 0; i < mediaItems.size(); i++) {
+                urls.add(mediaItems.get(i).getGsyVideoModel());
             }
         }
     }
@@ -221,10 +222,10 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        if (DeviceManager.getInstance(mContext).getCurrentDevice() != null) {
-            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), (DeviceManager.getInstance(mContext).getCurrentDevice()));
+        if (DeviceItemUtil.getInstance(mContext).getCurrentDevice() != null) {
+            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), (DeviceItemUtil.getInstance(mContext).getCurrentDevice()));
         }
-        listAdapter = new MediaListAdapter(mContext, mediaInfos);
+        listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
         if (getUrls() != null && getUrls().size() > 0) {
             ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, 0);
@@ -234,7 +235,7 @@ public class ContentFragment extends Fragment {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
-                for (int i = 0; i < mediaInfos.size(); i++) {
+                for (int i = 0; i < mediaItems.size(); i++) {
                     if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
                         playingAnimation((((MainActivity) getActivity()).getCurrPosition()));
                     } else {
