@@ -54,8 +54,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_SHUFFLE = 7;
 
     private onAutoCompletionListener mListener;
-    private MediaInfo MediaInfo;
+    private ArrayList<MediaInfo> mMediaInfos;
     private static CSDMediaPlayer mInstance;
+    private ImageView mPreviousButton;
+    private ImageView mNextButton;
+
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -88,6 +91,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         mScreenWidth = getActivityContext().getResources().getDisplayMetrics().widthPixels;
         mScreenHeight = getActivityContext().getResources().getDisplayMetrics().heightPixels;
         mAudioManager = (AudioManager) getActivityContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        mPreviousButton = (ImageView) findViewById(R.id.previous);
+        mNextButton = (ImageView) findViewById(R.id.next);
 
     }*/
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
@@ -115,11 +120,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
      * @param cacheWithPlay 是否边播边缓存
      * @return
      */
-    public boolean setUp(MediaInfo mediaInfos, boolean cacheWithPlay, int position) {
-        MediaInfo = mediaInfos;
+    public boolean setUp(ArrayList<MediaInfo> mediaInfos, boolean cacheWithPlay, int position) {
+        mMediaInfos = mediaInfos;
         ArrayList<GSYVideoModel> models = new ArrayList<>();
-        for (int i = 0; i < mediaInfos.getMediaItems().size(); i++) {
-            models.add(mediaInfos.getMediaItems().get(i).getGsyVideoModel());
+        for (int i = 0; i < mediaInfos.size(); i++) {
+            models.add(mediaInfos.get(i).getGsyVideoModel());
         }
 
         boolean result = setUp(models, cacheWithPlay, position, null, new HashMap<String, String>());
@@ -309,14 +314,16 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     protected void changeUiToNormal() {
         super.changeUiToNormal();
-      /*  if (mHadPlay && mPlayPosition < (mUriList.size())) {
+       /* if (mHadPlay && mPlayPosition < (mUriList.size())) {
             findViewById(R.id.previous).setVisibility(GONE);
             findViewById(R.id.next).setVisibility(GONE);
         }else{
             findViewById(R.id.previous).setVisibility(VISIBLE);
             findViewById(R.id.next).setVisibility(VISIBLE);
         }*/
-        //    setViewShowState(mPreviousButton, GONE);
+       setViewShowState(findViewById(R.id.previous),VISIBLE);
+       setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
 
     }
 
@@ -324,7 +331,67 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         public void completion();
 
     }
+   @Override
+    protected void hideAllWidget() {
+        super.hideAllWidget();
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+    }
 
+
+
+    @Override
+    protected void changeUiToPreparingShow() {
+        super.changeUiToPreparingShow();
+        Debuger.printfLog("changeUiToPreparingShow");
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+
+    }
+
+    @Override
+    protected void changeUiToPlayingShow() {
+        super.changeUiToPlayingShow();
+        Debuger.printfLog("changeUiToPlayingShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToPauseShow() {
+        super.changeUiToPauseShow();
+        Debuger.printfLog("changeUiToPauseShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToPlayingBufferingShow() {
+        super.changeUiToPlayingBufferingShow();
+        Debuger.printfLog("changeUiToPlayingBufferingShow");
+        setViewShowState(findViewById(R.id.previous), INVISIBLE);
+        setViewShowState(findViewById(R.id.next), INVISIBLE);
+    }
+
+    @Override
+    protected void changeUiToCompleteShow() {
+        super.changeUiToCompleteShow();
+        Debuger.printfLog("changeUiToCompleteShow");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
+
+    @Override
+    protected void changeUiToError() {
+        super.changeUiToError();
+        Debuger.printfLog("changeUiToError");
+        setViewShowState(findViewById(R.id.previous), VISIBLE);
+        setViewShowState(findViewById(R.id.next), VISIBLE);
+        updateStartImage();
+    }
     @Override
     public int getLayoutId() {
         return R.layout.layout_media_play_control;
@@ -349,16 +416,19 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             } else if (mCurrentState == CURRENT_STATE_ERROR) {
                 imageView.setImageResource(R.drawable.video_click_error_selector);
             } else {
+
                 imageView.setImageResource(R.drawable.icon_play_normal);
             }
         }
         broadCastStateChanged(PLAYSTATE_CHANGED);
+        Log.i(TAG, "playing Status=" + mCurrentState);
     }
 
 
+
     public String getCurrentUri() {
-        if (MediaInfo !=null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
-            return MediaInfo.getMediaItems().get(mPlayPosition).getGsyVideoModel().getUrl();
+        if (mMediaInfos != null && mPlayPosition > 0 && mMediaInfos.size() - 1 < mPlayPosition) {
+            return mMediaInfos.get(mPlayPosition).getGsyVideoModel().getUrl();
         }
         return "";
     }
@@ -371,7 +441,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                intent.putExtra(MEDIAITEM_CHANGED + "",  MediaInfo.getMediaItems().get(mPlayPosition));
+                intent.putExtra(MEDIAITEM_CHANGED + "", mMediaInfos.get(mPlayPosition));
                 break;
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
@@ -393,4 +463,20 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
 
     }
+    public boolean playNext() {
+        if (mPlayPosition < (mUriList.size() - 1)) {
+            mPlayPosition += 1;
+            GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
+            mSaveChangeViewTIme = 0;
+            setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
+            if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
+                mTitleTextView.setText(gsyVideoModel.getTitle());
+            }
+            startPlayLogic();
+            return true;
+        }
+        return false;
+    }
+
+
 }
