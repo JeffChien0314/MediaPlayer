@@ -60,6 +60,7 @@ public class MediaPlayerService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
+        isAlive = true;
         registerReceiver();
         mDeviceManager = DeviceManager.getInstance(this.getApplicationContext());
         // mediaPlayer=CSDMediaPlayer.getInstance(this);

@@ -270,6 +270,7 @@ public class BtMusicManager implements IBtMusicManager {
     }
 
     public void registerProfile(Context context) {
+        if (!isEnabled()) return;
         if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, A2DP_SINK/*BluetoothProfile.A2DP_SINK*/)) {
             Log.i(TAG, "registerProfile: A2DP_SINK success");
         } else {
