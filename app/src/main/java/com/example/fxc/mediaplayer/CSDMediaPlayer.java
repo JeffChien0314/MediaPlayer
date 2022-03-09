@@ -476,6 +476,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 break;
             case MEDIAITEM_CHANGED:
                 intent.putExtra(MEDIAITEM_CHANGED + "", MediaInfo.getMediaItems().get(mPlayPosition));
+                intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
