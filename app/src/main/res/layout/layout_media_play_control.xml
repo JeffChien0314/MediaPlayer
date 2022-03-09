@@ -140,7 +140,6 @@
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/start"
         android:scaleType="fitXY"
-        android:onClick="onPreviousClick"
         android:src="@drawable/icon_skip_back_normal" />
     <ImageView
         android:id="@+id/bt_next"
@@ -149,7 +148,6 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/start"
         android:layout_marginLeft="108px"
-        android:onClick="onNextClick"
         android:scaleType="fitXY"
         android:src="@drawable/icon_skip_fwd_normal"
          />

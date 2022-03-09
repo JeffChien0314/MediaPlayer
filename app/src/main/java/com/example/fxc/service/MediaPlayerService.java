@@ -53,7 +53,7 @@ public class MediaPlayerService extends Service {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case UPDATE_DEVICE_LIST:
-                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext());
+                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(),true);
                     break;
                 default:
                     break;

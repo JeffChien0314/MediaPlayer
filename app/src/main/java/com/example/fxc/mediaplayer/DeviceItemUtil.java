@@ -48,12 +48,12 @@ public class DeviceItemUtil {
      *
      * @return
      */
-    public List<DeviceItem> getExternalDeviceInfoList(Context context) {
+    public List<DeviceItem> getExternalDeviceInfoList(Context context, boolean needNotify) {
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         volumes = mStorageManager.getStorageVolumes(); //获取所有挂载的设备（内部sd卡、外部sd卡、挂载的U盘）
         externalDeviceItems = new ArrayList<>();
         if (volumes == null || volumes.size() == 0) {
-            broadCastDeviceChanged();
+            if (needNotify) broadCastDeviceChanged();
             return externalDeviceItems;
         }
 
@@ -93,7 +93,7 @@ public class DeviceItemUtil {
                 externalDeviceItems.add(info);
             }
         }
-        broadCastDeviceChanged();
+        if (needNotify) broadCastDeviceChanged();
 
         return externalDeviceItems;
     }
@@ -104,9 +104,9 @@ public class DeviceItemUtil {
      * @return
      */
     public List<DeviceItem> getExternalDeviceInfoList() {
-        if (null == externalDeviceItems) {
-            getExternalDeviceInfoList(mContext);
-        }
+
+        getExternalDeviceInfoList(mContext, false);
+
         return externalDeviceItems;
     }
 

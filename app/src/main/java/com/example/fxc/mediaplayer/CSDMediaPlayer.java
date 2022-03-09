@@ -117,7 +117,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
 
         boolean result = setUp(models, cacheWithPlay, position, null, new HashMap<String, String>());
-        broadCastStateChanged(MEDIAITEM_CHANGED);
         return result;
     }
 
@@ -429,6 +428,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         return true;
     }
 
+    @Override
+    public void startPlayLogic() {
+        super.startPlayLogic();
+        broadCastStateChanged(MEDIAITEM_CHANGED);
+    }
 
     @Override
     protected void updateStartImage() {

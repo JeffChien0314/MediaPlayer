@@ -1,10 +1,6 @@
 package com.example.fxc;
 
 import android.Manifest;
-import android.bluetooth.BluetoothA2dpSink;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothAvrcpController;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +47,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,10 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private android.os.Bundle outState;
     private boolean ifVideo = false;
 
-    public int getCurrPosition() {
-        return currPosition;
-    }
-
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
     private OrientationUtils orientationUtils;
@@ -81,11 +74,6 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab = 0;
     private String currentDevicestoragePath = "";
     private MediaInfo mMediaInfo;
-
-    public int getCurrentTab() {
-        return currentTab;
-    }
-
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
     private ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
@@ -131,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
             super.onShuffleModeChanged(shuffleMode);
         }
     };
-    private final int VIEW_INIT = 0;
     private final int UPDATE_DEVICE_LIST = 1;
     private Handler handler = new Handler() {
         @Override
@@ -153,9 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     break;
-                case VIEW_INIT:
-                    //   initView();
-                    break;
+
                 default:
                     break;
             }
@@ -177,6 +162,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (ifVideo) {//這個判斷條件需要優化，以防越界--儅播放音樂又點擊了另一個Tab
+            csdMediaPlayer.onVideoPause();
+        }
+        Log.i(TAG, "onPause: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop: ");
+        outState = new Bundle();
+        outState.putInt("currentTab", currentTab);
+        outState.putParcelable("currentDevice", mDeviceItemUtil.getCurrentDevice());
+        onSaveInstanceState(outState);
+    }
+
+    SaveData saveData = new SaveData();
+
+    @Override
+    protected void onDestroy() {
+        Log.i(TAG, "onDestroy: ");
+        super.onDestroy();
+        unregisterReceiver();
+        saveData.saveToFile(getApplicationContext(), currentTab, mDeviceItemUtil.getCurrentDevice().getStoragePath(), mDeviceItemUtil.getCurrentDevice().getDescription());
+    }
+
     private void recoverPreviousUIstatus() {
         currentDevicestoragePath = saveData.getCurrentDevicestoragePath(getApplicationContext());
         currentTab = saveData.getCurrentTab(getApplicationContext());
@@ -184,11 +198,9 @@ public class MainActivity extends AppCompatActivity {
             DeviceItem deviceItem = mDeviceItemUtil.getDeviceByStoragePath(currentDevicestoragePath);
             mDeviceItemUtil.setCurrentDevice(deviceItem);
         } else {
-            DeviceItem deviceItem = new DeviceItem();
-            if (mDeviceItemUtil.getExternalDeviceInfoList(getApplicationContext()) != null
-                    && mDeviceItemUtil.getExternalDeviceInfoList(getApplicationContext()).size() != 0) {
-                deviceItem = mDeviceItemUtil.getExternalDeviceInfoList(getApplicationContext()).get(0);
-                mDeviceItemUtil.setCurrentDevice(deviceItem);
+            List<DeviceItem> deviceItems = MediaController.getInstance(this).getDevices();
+            if (deviceItems != null && deviceItems.size() != 0) {
+                mDeviceItemUtil.setCurrentDevice(deviceItems.get(0));
             }
             currentTab = 0;
         }
@@ -211,16 +223,7 @@ public class MainActivity extends AppCompatActivity {
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
-        csdMediaPlayer.setOnAutoCompletionListener((new CSDMediaPlayer.onAutoCompletionListener() {
-            @Override
-            public void completion() {
-                if (playMode == 0) {
-                    next();
-                } else if (playMode == 1) {
-                    playMusic(currPosition);
-                }
-            }
-        }));
+
         initTabData();
         TabLayout.Tab tab = mTabLayout.getTabAt(currentTab);
         tab.select();
@@ -263,9 +266,6 @@ public class MainActivity extends AppCompatActivity {
         requestAllPower();
     }
 
-    //Sandra@20220215 add-->
-
-    //Sandra@20220215 add
     public void playMusic(int position) {
         mMediaInfo = new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, mDeviceItemUtil.getCurrentDevice());//Sandra@20220308 add
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
@@ -273,13 +273,7 @@ public class MainActivity extends AppCompatActivity {
             csdMediaPlayer.setUp(mMediaInfo, true, currPosition);
             csdMediaPlayer.startPlayLogic();
         }
-        //  csdMediaPlayer. setMediaInfoLists();
-        if (((ContentFragment) fragments.get(currentTab)).mediaItems.get(currPosition).isIfVideo()) {
-            ifVideo = true;
-        } else {
-            ifVideo = false;
-        }
-
+        ifVideo = ((ContentFragment) fragments.get(currentTab)).mediaItems.get(currPosition).isIfVideo();
     }
 
     private void initTabData() {
@@ -328,72 +322,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onPreviousClick(View v) {
-        previous();
-    }
-
-    private void previous() {
-        if (randomOpen == false) {
-            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-            if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
-                if (currPosition > 0) {
-                    currPosition--;
-                } else {
-                    currPosition = ((ContentFragment) fragments.get(currentTab)).mediaItems.size() - 1;
-                }
-            }
-        } else {
-            int i;
-            for (i = randomIndexList.size() - 1; i > 0; i--) {
-                if (currPosition == randomIndexList.get(i)) {
-                    currPosition = randomIndexList.get(i - 1);
-                    break;
-                } else if (currPosition == randomIndexList.get(0)) {
-                    currPosition = randomIndexList.get(randomIndexList.size() - 1);
-                    i = randomIndexList.size() - 1;
-                    break;
-                }
-            }
-        }
-        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-        playMusic(currPosition);
-        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-    }
-
-
-    public void onNextClick(View v) {
-        next();
-    }
-
-    public void next() {
-        if (randomOpen == false) {
-            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-            if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
-                if (currPosition < ((ContentFragment) fragments.get(currentTab)).mediaItems.size() - 1) {
-                    currPosition++;
-                } else {
-                    currPosition = 0;
-                }
-            }
-        } else {
-            int i;
-            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-            for (i = 0; i < randomIndexList.size() - 1; i++) {
-                if (currPosition == randomIndexList.get(i)) {
-                    currPosition = randomIndexList.get(i + 1);
-                    break;
-                } else if (currPosition == randomIndexList.get(randomIndexList.size() - 1)) {
-                    currPosition = randomIndexList.get(0);
-                    i = 0;
-                    break;
-                }
-            }
-        }
-        ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-        playMusic(currPosition);
-        ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-    }
-
     public void onPlayModeClick(View v) {
         switch (playMode) {
             case 0://列表循环
@@ -427,8 +355,8 @@ public class MainActivity extends AppCompatActivity {
     public void onInputSourceClick(View v) {
         if (devicelistview.getVisibility() == View.GONE) {
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
-            if (mDeviceItemUtil.getExternalDeviceInfoList(this).size() * 90 < 990) {
-                params.height = 1000 - (mDeviceItemUtil.getExternalDeviceInfoList(this).size() * 90);
+            if (MediaController.getInstance(this).getDevices().size() * 90 < 990) {
+                params.height = 1000 - (MediaController.getInstance(this).getDevices().size() * 90);
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             } else {
                 params.height = 0;
@@ -444,34 +372,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (ifVideo) {//這個判斷條件需要優化，以防越界--儅播放音樂又點擊了另一個Tab
-            csdMediaPlayer.onVideoPause();
-        }
-        Log.i(TAG, "onPause: ");
+
+    public int getCurrPosition() {
+        return currPosition;
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.i(TAG, "onStop: ");
-        outState = new Bundle();
-        outState.putInt("currentTab", currentTab);
-        outState.putParcelable("currentDevice", mDeviceItemUtil.getCurrentDevice());
-        onSaveInstanceState(outState);
-    }
-
-    SaveData saveData = new SaveData();
-
-    @Override
-    protected void onDestroy() {
-        Log.i(TAG, "onDestroy: ");
-        super.onDestroy();
-        unregisterReceiver();
-        //   unbindService(conn);
-        saveData.saveToFile(getApplicationContext(), currentTab, mDeviceItemUtil.getCurrentDevice().getStoragePath(), mDeviceItemUtil.getCurrentDevice().getDescription());
+    public int getCurrentTab() {
+        return currentTab;
     }
 
     public void requestAllPower() {
@@ -485,108 +392,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void registerReceiver() {
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);// sd卡被插入，且已经挂载
-        intentFilter.setPriority(1000);// 设置最高优先级
-        intentFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);// sd卡存在，但还没有挂载
-        intentFilter.addAction(Intent.ACTION_MEDIA_REMOVED);// sd卡被移除
-        intentFilter.addAction(Intent.ACTION_MEDIA_SHARED);// sd卡作为 USB大容量存储被共享，挂载被解除
-        intentFilter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);// sd卡已经从sd卡插槽拔出，但是挂载点还没解除
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);// 开始扫描
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);// 扫描完成
-        intentFilter.addAction(Intent.ACTION_MEDIA_CHECKING);
-        intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
-        intentFilter.addAction(Intent.ACTION_MEDIA_NOFS);
-        intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-        intentFilter.addAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        intentFilter.addDataScheme("file");
-        registerReceiver(USBDeviceReceiver, intentFilter);
-
-        //蓝牙相关action
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        filter.addAction(BluetoothDevice.ACTION_NAME_CHANGED);
-        filter.addAction(BluetoothDevice.ACTION_UUID);
-        filter.addAction(BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED);//A2DP连接状态改变
-        filter.addAction(BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED);//A2DP播放状态改变
-        filter.addAction(BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED);//连接状态
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-        registerReceiver(bluetoothReceiver, filter);
+        IntentFilter intentFilter = new IntentFilter(ACTION_DEVICE_CHANGED);// sd卡被插入，且已经挂载
+        registerReceiver(DeviceChangedReceiver, intentFilter);
     }
 
     public void unregisterReceiver() {
-        unregisterReceiver(USBDeviceReceiver);
-        unregisterReceiver(bluetoothReceiver);
+        unregisterReceiver(DeviceChangedReceiver);
     }
 
-    private final BroadcastReceiver USBDeviceReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver DeviceChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Log.i(TAG, "onReceive: action22" + action);
             switch (action) {
-                case Intent.ACTION_MEDIA_EJECT:
-                case Intent.ACTION_MEDIA_UNMOUNTED:
-                case Intent.ACTION_MEDIA_REMOVED:
-                    // case Intent.ACTION_MEDIA_CHECKING:
-                case Intent.ACTION_MEDIA_MOUNTED:// sd卡被插入，且已经挂载
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
-                    break;
-                case Intent.ACTION_MEDIA_SCANNER_STARTED:
-                case Intent.ACTION_MEDIA_SCANNER_FINISHED:
-                    //这个地方可以判断可以抓取U盘内部的文件
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
-    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.i(TAG, "onReceive: action=" + action);
-            switch (action) {
-                case BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED:
-                case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
-                case BluetoothAdapter.ACTION_STATE_CHANGED:
-                case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
-                case BluetoothDevice.ACTION_NAME_CHANGED:
-                case BluetoothDevice.ACTION_UUID:
-                    Log.i(TAG, "onReceive: action=" + action);
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 100);
-                    //  btA2dpContentStatus(intent);
-                    break;
-                case BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED:
-                    Log.e(TAG, "mBtReceiver，BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED");
-                    //控制蓝牙的播放状态,启动这个作为播放状态更新，时序太慢
-                    //       playState(intent);
-                    break;
-
-                case BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED:
-                    Log.e(TAG, "mBtReceiver，BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED");
-                    break;
-               /* case BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED: //A2DP连接状态改变
-                    Toast.makeText(context, "A2DP连接状态改变", Toast.LENGTH_SHORT);
-                    break;
-                case BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED: //A2DP播放状态改变
-                    Toast.makeText(context, "A2DP播放状态改变", Toast.LENGTH_SHORT);
-                    break;*/
-                /*case BluetoothAdapter.ACTION_STATE_CHANGED:
+                case ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
-                    Log.e(TAG, "mBtReceiver，BluetoothAdapter.ACTION_STATE_CHANGED");
                     break;
-                case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 100);
-                    Log.e(TAG, "mBtReceiver，BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED");
-                    //用这个广播判断蓝牙连接状态
-                    break;
-                case BluetoothDevice.ACTION_NAME_CHANGED:
-                    handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
-                    Log.e(TAG, "mBtReceiver， BluetoothDevice.ACTION_NAME_CHANGED");
-                    break;*/
                 default:
                     break;
             }
@@ -597,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {
             externalDeviceItems.clear();
         }
-        externalDeviceItems = mDeviceItemUtil.getExternalDeviceInfoList(this);
+        externalDeviceItems = MediaController.getInstance(this).getDevices();
         deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems, mDeviceItemUtil.getCurrentDevice());
         devicelistview.setAdapter(deviceListAdapter);
         devicelistview.invalidateViews();
