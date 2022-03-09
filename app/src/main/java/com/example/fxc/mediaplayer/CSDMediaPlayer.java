@@ -56,6 +56,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private onAutoCompletionListener mListener;
     private MediaInfo MediaInfo;
     private static CSDMediaPlayer mInstance;
+    private ImageView mPrevious, mNext, mRandom;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -72,24 +73,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             return CommonUtil.getActivityContext(getContext());
     }
 
-    /*protected void init(Context context) {
 
-     *//*if (getActivityContext() != null) {
-            this.mContext = getActivityContext();
-        } else {
-            this.mContext = context;
-        }*//*
-        this.mContext = context;
-        initInflate(mContext);
-
-        mTextureViewContainer = (ViewGroup) findViewById(R.id.surface_container);
-        if (isInEditMode())
-            return;
-        mScreenWidth = getActivityContext().getResources().getDisplayMetrics().widthPixels;
-        mScreenHeight = getActivityContext().getResources().getDisplayMetrics().heightPixels;
-        mAudioManager = (AudioManager) getActivityContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-
-    }*/
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -105,6 +89,16 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     public void setOnAutoCompletionListener(onAutoCompletionListener listener) {
         mListener = listener;
+    }
+
+
+    @Override
+    protected void init(Context context) {
+        super.init(context);
+        mPrevious = findViewById(R.id.bt_previous);
+        mNext = findViewById(R.id.bt_next);
+        mPrevious.setOnClickListener(this);
+        mNext.setOnClickListener(this);
     }
 
     /**
@@ -267,21 +261,21 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
         super.onAutoCompletion();
     }
-       @Override
+
+    @Override
     protected void hideAllWidget() {
         super.hideAllWidget();
-        setViewShowState(findViewById(R.id.previous), INVISIBLE);
-        setViewShowState(findViewById(R.id.next), INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
     }
-
 
 
     @Override
     protected void changeUiToPreparingShow() {
         super.changeUiToPreparingShow();
         Debuger.printfLog("changeUiToPreparingShow");
-        setViewShowState(findViewById(R.id.previous), INVISIBLE);
-        setViewShowState(findViewById(R.id.next), INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
 
     }
 
@@ -289,8 +283,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     protected void changeUiToPlayingShow() {
         super.changeUiToPlayingShow();
         Debuger.printfLog("changeUiToPlayingShow");
-        setViewShowState(findViewById(R.id.previous), VISIBLE);
-        setViewShowState(findViewById(R.id.next), VISIBLE);
+        setViewShowState(mPrevious, VISIBLE);
+        setViewShowState(mNext, VISIBLE);
         updateStartImage();
     }
 
@@ -298,8 +292,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     protected void changeUiToPauseShow() {
         super.changeUiToPauseShow();
         Debuger.printfLog("changeUiToPauseShow");
-        setViewShowState(findViewById(R.id.previous), VISIBLE);
-        setViewShowState(findViewById(R.id.next), VISIBLE);
+        setViewShowState(mPrevious, VISIBLE);
+        setViewShowState(mNext, VISIBLE);
         updateStartImage();
     }
 
@@ -307,16 +301,16 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     protected void changeUiToPlayingBufferingShow() {
         super.changeUiToPlayingBufferingShow();
         Debuger.printfLog("changeUiToPlayingBufferingShow");
-        setViewShowState(findViewById(R.id.previous), INVISIBLE);
-        setViewShowState(findViewById(R.id.next), INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
     }
 
     @Override
     protected void changeUiToCompleteShow() {
         super.changeUiToCompleteShow();
         Debuger.printfLog("changeUiToCompleteShow");
-        setViewShowState(findViewById(R.id.previous), VISIBLE);
-        setViewShowState(findViewById(R.id.next), VISIBLE);
+        setViewShowState(mPrevious, VISIBLE);
+        setViewShowState(mNext, VISIBLE);
         updateStartImage();
     }
 
@@ -324,8 +318,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     protected void changeUiToError() {
         super.changeUiToError();
         Debuger.printfLog("changeUiToError");
-        setViewShowState(findViewById(R.id.previous), VISIBLE);
-        setViewShowState(findViewById(R.id.next), VISIBLE);
+        setViewShowState(mPrevious, VISIBLE);
+        setViewShowState(mNext, VISIBLE);
         updateStartImage();
     }
 
@@ -355,23 +349,19 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         getGSYVideoManager().setPlayTag(mPlayTag);
         getGSYVideoManager().setPlayPosition(mPlayPosition);
         mAudioManager.requestAudioFocus(onAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
-       if(getActivityContext() instanceof Activity)
+        if (getActivityContext() instanceof Activity)
             ((Activity) getActivityContext()).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mBackUpPlayingBufferState = -1;
         getGSYVideoManager().prepare(mUrl, (mMapHeadData == null) ? new HashMap<String, String>() : mMapHeadData, mLooping, mSpeed, mCache, mCachePath, mOverrideExtension);
         setStateAndUi(CURRENT_STATE_PREPAREING);
     }
 
-    @Override
-    public void onPrepared() {
-        super.onPrepared();
-    }
 
     @Override
     protected void changeUiToNormal() {
         super.changeUiToNormal();
-         setViewShowState(findViewById(R.id.previous),VISIBLE);
-       setViewShowState(findViewById(R.id.next), VISIBLE);
+        setViewShowState(mPrevious, VISIBLE);
+        setViewShowState(mNext, VISIBLE);
         updateStartImage();
     }
 
@@ -384,6 +374,61 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public int getLayoutId() {
         return R.layout.layout_media_play_control;
     }
+
+
+    @Override
+    public void onClick(View v) {
+        super.onClick(v);
+        int i = v.getId();
+        if (i == mPrevious.getId()) {
+            playPrevious();
+            return;
+        } else if (i == mNext.getId()) {
+            playNext();
+            return;
+        }
+    }
+
+    private boolean playPrevious() {
+        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+
+        if (mPlayPosition == 0) {
+            mPlayPosition = mUriList.size() - 1;
+        } else if (mPlayPosition <= (mUriList.size() - 1)) {
+            mPlayPosition--;
+        }
+        GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
+        mSaveChangeViewTIme = 0;
+        setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
+        if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
+            mTitleTextView.setText(gsyVideoModel.getTitle());
+        }
+        startPlayLogic();
+        return true;
+    }
+
+    /**
+     * 播放下一集
+     *
+     * @return true表示还有下一集
+     */
+    public boolean playNext() {
+        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+        if (mPlayPosition < (mUriList.size() - 1)) {
+            mPlayPosition += 1;
+        } else if (mPlayPosition >= (mUriList.size() - 1)) {
+            mPlayPosition = 0;
+        }
+        GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
+        mSaveChangeViewTIme = 0;
+        setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
+        if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
+            mTitleTextView.setText(gsyVideoModel.getTitle());
+        }
+        startPlayLogic();
+        return true;
+    }
+
 
     @Override
     protected void updateStartImage() {
@@ -412,10 +457,10 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
 
     public String getCurrentUri() {
-        if (MediaInfo !=null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
+        /*if (MediaInfo != null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
             return MediaInfo.getMediaItems().get(mPlayPosition).getGsyVideoModel().getUrl();
-        }
-        return "";
+        }*/
+        return mOriginUrl;
     }
 
     private void broadCastStateChanged(int extraName) {
@@ -426,7 +471,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                intent.putExtra(MEDIAITEM_CHANGED + "",  MediaInfo.getMediaItems().get(mPlayPosition));
+                intent.putExtra(MEDIAITEM_CHANGED + "", MediaInfo.getMediaItems().get(mPlayPosition));
                 break;
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
@@ -446,6 +491,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
                 break;
         }
-
+        updateStartImage();
     }
 }

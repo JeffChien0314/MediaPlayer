@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+
 public class MainActivity extends AppCompatActivity {
 
     public static int playMode = 0;// 0循环播放,1单曲循环
@@ -201,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         frameLayout.addView(csdMediaPlayer);
+        if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
+            csdMediaPlayer.setVisibility(View.GONE);
+        }
 
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);

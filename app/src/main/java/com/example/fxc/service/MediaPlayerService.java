@@ -141,13 +141,6 @@ public class MediaPlayerService extends Service {
         super.onDestroy();
     }
 
-    public CSDMediaPlayer getMediaPlayer() {
-        if (null == mediaPlayer) {
-            mediaPlayer = CSDMediaPlayer.getInstance(this);
-        }
-        return mediaPlayer;
-    }
-
     public void saveData() {
         SharedPreferences sharedPreferences = getSharedPreferences("currentStatus", Context.MODE_PRIVATE); //私有数据
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
