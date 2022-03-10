@@ -23,6 +23,7 @@ import com.example.fxc.bt.ConnectBlueCallBack;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.MediaController;
+import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
@@ -220,8 +221,9 @@ public class ContentFragment extends Fragment {
         }
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
-        if (getUrls() != null && getUrls().size() > 0) {
-            ((MainActivity) getActivity()).csdMediaPlayer.setUp(getUrls(), true, 0);
+        MediaInfo mMediaInfo =new MediaInfo(mediaItems, DeviceItemUtil.getInstance(mContext).getCurrentDevice());
+        if (mMediaInfo != null) {
+            ((MainActivity) getActivity()).csdMediaPlayer.setUp(mMediaInfo, true, 0);
         }
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
