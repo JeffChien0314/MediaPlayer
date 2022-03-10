@@ -27,18 +27,19 @@ import android.util.Log;
 
 import com.example.fxc.bt.client.MediaBroswerConnector;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
+import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.util.applicationUtils;
 
 import java.util.List;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
-import static com.example.fxc.service.notifications.MediaNotificationManager.NOTIFICATION_ID;
 
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
@@ -53,7 +54,21 @@ public class MediaPlayerService extends Service {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case UPDATE_DEVICE_LIST:
-                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(),true);
+                    List<DeviceItem> deviceItems =
+                            mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
+                    //同时需要更新文件列表
+                   /*  boolean isExist = false;
+                   if (null != mediaPlayer.getMediaInfo()) {
+                        for (DeviceItem item : deviceItems) {
+                            if (mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath().equals(item.getStoragePath())) {
+                                isExist = true;
+                            }
+                        }
+                        if (!isExist) {
+                       // mediaPlayer
+                        }
+                    }*/
+
                     break;
                 default:
                     break;

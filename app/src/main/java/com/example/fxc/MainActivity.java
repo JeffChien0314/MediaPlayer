@@ -50,7 +50,7 @@ import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
 public class MainActivity extends AppCompatActivity {
-
+    private String TAG = "MainActivity";
     public static int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer csdMediaPlayer;
     protected ImageView mPreviousButton;
@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
-    private String TAG = "MainActivity";
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private android.os.Bundle outState;
     private boolean ifVideo = false;

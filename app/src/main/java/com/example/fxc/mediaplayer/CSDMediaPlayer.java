@@ -49,12 +49,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_NEXT = 2;
     public static final int STATE_PREVIOUS = 3;
     public static final int STATE_SEEKTO = 4;
-    public static final int STATE_RANDOM_TRUE = 5;
-    public static final int STATE_RANDOM_FALSE = 6;
-    public static final int STATE_SHUFFLE = 7;
+    public static final int STATE_RANDOM = 5;
+    /* public static final int STATE_RANDOM_FALSE = 6;*/
+    public static final int STATE_SHUFFLE = 6;
 
     private onAutoCompletionListener mListener;
-    private MediaInfo MediaInfo;
+    private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRandom;
 
@@ -110,7 +110,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
      * @return
      */
     public boolean setUp(MediaInfo mediaInfos, boolean cacheWithPlay, int position) {
-        MediaInfo = mediaInfos;
+        mediaInfo = mediaInfos;
         ArrayList<GSYVideoModel> models = new ArrayList<>();
         for (int i = 0; i < mediaInfos.getMediaItems().size(); i++) {
             models.add(mediaInfos.getMediaItems().get(i).getGsyVideoModel());
@@ -460,6 +460,10 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
 
+    public MediaInfo getMediaInfo() {
+        return mediaInfo;
+    }
+
     public String getCurrentUri() {
         /*if (MediaInfo != null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
             return MediaInfo.getMediaItems().get(mPlayPosition).getGsyVideoModel().getUrl();
@@ -475,7 +479,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                intent.putExtra(MEDIAITEM_CHANGED + "", MediaInfo.getMediaItems().get(mPlayPosition));
+                intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
                 intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
         }
@@ -493,8 +497,15 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 getGSYVideoManager().pause();
                 break;
             case STATE_NEXT:
-
+                playNext();
                 break;
+            case STATE_PREVIOUS:
+                playPrevious();
+                break;
+            case STATE_RANDOM:
+            case STATE_SHUFFLE:
+                break;
+
         }
         updateStartImage();
     }
