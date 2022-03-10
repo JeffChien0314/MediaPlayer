@@ -13,7 +13,7 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 public class MediaItem implements Parcelable {
     private long id; // 歌曲ID
     private String title; // 歌曲名稱
-    // private String album; // 專輯
+    private String album; // 專輯
     private String artist; // 歌手名稱
     private long duration; // 歌曲時長
     private Bitmap thumbBitmap;
@@ -30,6 +30,7 @@ public class MediaItem implements Parcelable {
     protected MediaItem(Parcel in) {
         id = in.readLong();
         title = in.readString();
+        album = in.readString();
         artist = in.readString();
         duration = in.readLong();
         thumbBitmap = in.readParcelable(Bitmap.class.getClassLoader());
@@ -93,6 +94,14 @@ public class MediaItem implements Parcelable {
         this.title = title;
     }
 
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
     public String getArtist() {
         return artist;
     }
@@ -118,6 +127,7 @@ public class MediaItem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(title);
+        dest.writeString(album);
         dest.writeString(artist);
         dest.writeLong(duration);
         dest.writeParcelable(thumbBitmap, flags);

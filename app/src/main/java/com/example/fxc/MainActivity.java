@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
         mNextButton = (ImageView) findViewById(R.id.next);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
+        frameLayout.removeAllViews();
         frameLayout.addView(csdMediaPlayer);
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             csdMediaPlayer.setVisibility(View.GONE);
