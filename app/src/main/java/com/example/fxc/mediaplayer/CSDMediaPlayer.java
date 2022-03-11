@@ -65,6 +65,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private ImageView imageViewAudio;
     private int playMode = 0;
     private boolean randomOpen = false;
+    private LinkedList<Integer> randomIndexList = new LinkedList<>();
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -277,8 +278,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Log.i("main", "Jennifertest10=: ");
         if (playMode==0) {
             Log.i("main", "Jennifertest11=: ");
-          playNext();
-          return;
+            playNext();
+            return;
         } else if (playMode==1) {
             setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
             Log.i("main", "Jennifertest12=: ");
@@ -418,8 +419,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
     private boolean playPrevious() {
-        if (randomOpen == false) {
             if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+            if (randomOpen == false) {
             if (mPlayPosition == 0) {
                 mPlayPosition = mUriList.size() - 1;
             } else if (mPlayPosition <= (mUriList.size() - 1)) {
@@ -427,13 +428,13 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             }
         }else {
             int i;
-            for (i = (MainActivity.randomIndexList).size() - 1; i > 0; i--) {
-                if (mPlayPosition == (MainActivity.randomIndexList).get(i)) {
-                    mPlayPosition =  (MainActivity.randomIndexList).get(i - 1);
+            for (i = (randomIndexList).size() - 1; i > 0; i--) {
+                if (mPlayPosition == (randomIndexList).get(i)) {
+                    mPlayPosition =  (randomIndexList).get(i - 1);
                     break;
-                } else if (mPlayPosition == (MainActivity.randomIndexList).get(0)) {
-                    mPlayPosition = (MainActivity.randomIndexList).get((MainActivity.randomIndexList).size() - 1);
-                    i = (MainActivity.randomIndexList).size() - 1;
+                } else if (mPlayPosition == (randomIndexList).get(0)) {
+                    mPlayPosition = (randomIndexList).get((randomIndexList).size() - 1);
+                    i = (randomIndexList).size() - 1;
                     break;
                 }
             }
@@ -453,8 +454,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
      * @return true表示还有下一集
      */
     public boolean playNext() {
-        if(randomOpen == false) {
-            if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+             if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+             if(randomOpen == false) {
             if (mPlayPosition < (mUriList.size() - 1)) {
                 mPlayPosition += 1;
             } else if (mPlayPosition >= (mUriList.size() - 1)) {
@@ -463,12 +464,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }else{
             int i;
             //((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-            for (i = 0; i < (MainActivity.randomIndexList).size() - 1; i++) {
-                if (mPlayPosition == (MainActivity.randomIndexList).get(i)) {
-                    mPlayPosition = (MainActivity.randomIndexList).get(i + 1);
+            for (i = 0; i < (randomIndexList).size() - 1; i++) {
+                if (mPlayPosition == (randomIndexList).get(i)) {
+                    mPlayPosition = (randomIndexList).get(i + 1);
                     break;
-                } else if (mPlayPosition == (MainActivity.randomIndexList).get((MainActivity.randomIndexList).size() - 1)) {
-                    mPlayPosition = (MainActivity.randomIndexList).get(0);
+                } else if (mPlayPosition == (randomIndexList).get((randomIndexList).size() - 1)) {
+                    mPlayPosition = (randomIndexList).get(0);
                     i = 0;
                     break;
                 }
@@ -548,7 +549,17 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         mContext.sendBroadcast(intent);
 
     }
-
+    public LinkedList<Integer> getRandom() {
+        int random;
+        while (randomIndexList.size() < (mUriList.size())) {
+            random = (int) (Math.random() * (mUriList.size()));//生成1到list.size()-1之间的随机数
+            if (!randomIndexList.contains(random)) {
+                randomIndexList.add(random);
+            }
+        }
+        Log.i("main", "Jennifertest90=: " + randomIndexList);
+        return randomIndexList;
+    }
     public void mediaControl(int state, long position) {
         switch (state) {
             case STATE_PLAY:
@@ -563,9 +574,13 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 break;
             case STATE_RANDOM_CLOSE:
                 randomOpen=false;
+               if (randomIndexList.size() > 0) {
+                randomIndexList.clear();
+                }
                 break;
             case STATE_RANDOM_OPEN:
                 randomOpen=true;
+                getRandom();
                 break;
             case STATE_ALL_REPEAT:
                 playMode=0;
