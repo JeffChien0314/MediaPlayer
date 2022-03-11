@@ -60,7 +60,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     private onAutoCompletionListener mListener;
     private MediaInfo mediaInfo;
-    private static CSDMediaPlayer mInstance;
+    public static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRandom;
     private ImageView imageViewAudio;
     private int playMode = 0;

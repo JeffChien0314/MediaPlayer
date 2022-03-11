@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.fxc.bt.BtMusicManager;
 import com.example.fxc.bt.ConnectBlueCallBack;
+import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.MediaController;
@@ -79,7 +80,7 @@ public class ContentFragment extends Fragment {
             ((MainActivity) getActivity()).playMusic(position);
             //Sandra@20220311 add-->
             DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
-            MediaPlayerService.mediaPlayer.setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
+            CSDMediaPlayer.mInstance.setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
             //<--Sandra@20220311 add
         }
     };

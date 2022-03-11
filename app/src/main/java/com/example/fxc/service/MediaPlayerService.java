@@ -44,7 +44,7 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
     //public static CSDMediaPlayer mediaPlayer= CSDMediaPlayer.getInstance(this.getApplicationContext());;//本地音乐播放器
-    public static CSDMediaPlayer mediaPlayer;
+    private CSDMediaPlayer mediaPlayer;
     private DeviceItemUtil mDeviceItemUtil;
     private final int UPDATE_DEVICE_LIST = 0;
     public static boolean isAlive = false;
