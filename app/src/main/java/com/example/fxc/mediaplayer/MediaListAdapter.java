@@ -69,7 +69,7 @@ public class MediaListAdapter extends BaseAdapter {
         }
         mediaItem = mediaItems.get(position);
         viewHolder.musicTitle.setText(mediaItem.getTitle());//顯示標題
-        viewHolder.musicArtist.setText(mediaItem.getArtist());//顯示藝術家
+        viewHolder.musicArtist.setText(mediaItem.getArtist()+ "-" +mediaItem.getAlbum());//顯示藝術家
         viewHolder.musicDuration.setText(MediaItemUtil.formatTime(mediaItem.getDuration()));//顯示時長
         viewHolder.albumImage.setImageBitmap(mediaItem.getThumbBitmap());
 

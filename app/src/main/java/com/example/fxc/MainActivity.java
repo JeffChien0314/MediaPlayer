@@ -51,10 +51,8 @@ import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
-    public static int playMode = 0;// 0循环播放,1单曲循环
+    private int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer csdMediaPlayer;
-    protected ImageView mPreviousButton;
-    protected ImageView mNextButton;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
@@ -73,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab = 0;
     private String currentDevicestoragePath = "";
     private MediaInfo mMediaInfo;
-    private LinkedList<Integer> randomIndexList = new LinkedList<>();
+    public static LinkedList<Integer> randomIndexList = new LinkedList<>();
     private ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
@@ -209,8 +207,6 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
-        mPreviousButton = (ImageView) findViewById(R.id.previous);
-        mNextButton = (ImageView) findViewById(R.id.next);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         frameLayout.removeAllViews();
@@ -327,11 +323,13 @@ public class MainActivity extends AppCompatActivity {
             case 0://列表循环
                 playMode = 1;
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_SINGLE_REPEAT, -1);
                 Log.i("main", "Jennifertest7=: " + playMode);
                 break;
             case 1://单曲循环
                 playMode = 0;
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_ALL_REPEAT, -1);
                 Log.i("main", "Jennifertest8=: " + playMode);
                 break;
 
@@ -343,11 +341,13 @@ public class MainActivity extends AppCompatActivity {
             randomOpen = true;
             getRandom();
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+            MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_OPEN, -1);
         } else {
             randomOpen = false;
             if (randomIndexList.size() > 0) {
                 randomIndexList.clear();
             }
+            MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_CLOSE, -1);
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
         }
     }

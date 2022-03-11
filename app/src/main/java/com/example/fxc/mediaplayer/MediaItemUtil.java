@@ -74,7 +74,7 @@ public class MediaItemUtil {
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
             String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
             Log.i(TAG, "getMusicInfos:isMusicType " + isMusicType);
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist+ "-" + album);
             Bitmap thumbBitmap = null;
             if (url != null) {
                   thumbBitmap = getArtwork(context, id, albumId, true); //根据专辑路径获取到专辑封面图
@@ -85,7 +85,7 @@ public class MediaItemUtil {
                 musicInfo.setId(id);
                 musicInfo.setTitle(title);
                 musicInfo.setArtist(artist);
-                //  musicInfo.setAlbum(album);
+                musicInfo.setAlbum(album);
                 //   musicInfo.setDisplayName(displayName);
                 //    musicInfo.setAlbumId(albumId);
                 musicInfo.setDuration(duration);
@@ -129,7 +129,7 @@ public class MediaItemUtil {
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist + "-" + album);
             Bitmap thumbBitmap = null;
             if (url != null) {
                 try {
@@ -143,7 +143,7 @@ public class MediaItemUtil {
                 videoinfo.setId(id);
                 videoinfo.setTitle(title);
                 videoinfo.setArtist(artist);
-                // videoinfo.setAlbum(album);
+                videoinfo.setAlbum(album);
                 // videoinfo.setDisplayName(displayName);
                 //   musicInfo.setAlbumId(albumId);
                 videoinfo.setDuration(duration);

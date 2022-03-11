@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.example.fxc.ContentFragment;
 import com.example.fxc.MainActivity;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
@@ -26,6 +27,7 @@ import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ import moe.codeest.enviews.ENPlayView;
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private final String TAG = CSDMediaPlayer.class.getSimpleName();
     public static final String ACTION_STATE_CHANGED = "CSDMediaPlayer.stateChanged";
-    public static final String ACTION_CHANGE_STATE = "CSDMediaPlayer.changestate";
+    public static final String  ACTION_CHANGE_STATE = "CSDMediaPlayer.changestate";
     public static final String STATE_EXTRA = "state";
     public static final String POS_EXTRA = "pos";
     public static final int PLAYSTATE_CHANGED = 1;
@@ -49,15 +51,18 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_NEXT = 2;
     public static final int STATE_PREVIOUS = 3;
     public static final int STATE_SEEKTO = 4;
-    public static final int STATE_RANDOM = 5;
-    /* public static final int STATE_RANDOM_FALSE = 6;*/
-    public static final int STATE_SHUFFLE = 6;
+    public static final int STATE_RANDOM_OPEN = 5;
+    public static final int STATE_RANDOM_CLOSE = 6;
+    public static final int STATE_SINGLE_REPEAT = 7;
+    public static final int STATE_ALL_REPEAT = 8;
 
     private onAutoCompletionListener mListener;
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRandom;
     private ImageView imageViewAudio;
+    private int playMode = 0;
+    private boolean randomOpen = false;
 
     public CSDMediaPlayer(Context context, Boolean fullFlag) {
         super(context, fullFlag);
@@ -268,8 +273,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     public void onAutoCompletion() {
         Log.i("main", "Jennifertest10=: ");
-        if (MainActivity.playMode == 0 || MainActivity.playMode == 1) {
-            playNext();
+        if (playMode==0) {
+            Log.i("main", "Jennifertest11=: ");
+          playNext();
+          return;
+        } else if (playMode==1) {
+            setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
+            Log.i("main", "Jennifertest12=: ");
+            startPlayLogic();
             return;
         }
         super.onAutoCompletion();
@@ -405,12 +416,25 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
     private boolean playPrevious() {
-        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
-
-        if (mPlayPosition == 0) {
-            mPlayPosition = mUriList.size() - 1;
-        } else if (mPlayPosition <= (mUriList.size() - 1)) {
-            mPlayPosition--;
+        if (randomOpen == false) {
+            if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+            if (mPlayPosition == 0) {
+                mPlayPosition = mUriList.size() - 1;
+            } else if (mPlayPosition <= (mUriList.size() - 1)) {
+                mPlayPosition--;
+            }
+        }else {
+            int i;
+            for (i = (MainActivity.randomIndexList).size() - 1; i > 0; i--) {
+                if (mPlayPosition == (MainActivity.randomIndexList).get(i)) {
+                    mPlayPosition =  (MainActivity.randomIndexList).get(i - 1);
+                    break;
+                } else if (mPlayPosition == (MainActivity.randomIndexList).get(0)) {
+                    mPlayPosition = (MainActivity.randomIndexList).get((MainActivity.randomIndexList).size() - 1);
+                    i = (MainActivity.randomIndexList).size() - 1;
+                    break;
+                }
+            }
         }
         GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
         mSaveChangeViewTIme = 0;
@@ -421,18 +445,32 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         startPlayLogic();
         return true;
     }
-
     /**
      * 播放下一集
      *
      * @return true表示还有下一集
      */
     public boolean playNext() {
-        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
-        if (mPlayPosition < (mUriList.size() - 1)) {
-            mPlayPosition += 1;
-        } else if (mPlayPosition >= (mUriList.size() - 1)) {
-            mPlayPosition = 0;
+        if(randomOpen == false) {
+            if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+            if (mPlayPosition < (mUriList.size() - 1)) {
+                mPlayPosition += 1;
+            } else if (mPlayPosition >= (mUriList.size() - 1)) {
+                mPlayPosition = 0;
+            }
+        }else{
+            int i;
+            //((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+            for (i = 0; i < (MainActivity.randomIndexList).size() - 1; i++) {
+                if (mPlayPosition == (MainActivity.randomIndexList).get(i)) {
+                    mPlayPosition = (MainActivity.randomIndexList).get(i + 1);
+                    break;
+                } else if (mPlayPosition == (MainActivity.randomIndexList).get((MainActivity.randomIndexList).size() - 1)) {
+                    mPlayPosition = (MainActivity.randomIndexList).get(0);
+                    i = 0;
+                    break;
+                }
+            }
         }
         GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
         mSaveChangeViewTIme = 0;
@@ -516,11 +554,24 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             case STATE_PREVIOUS:
                 playPrevious();
                 break;
-            case STATE_RANDOM:
-            case STATE_SHUFFLE:
+            case STATE_RANDOM_CLOSE:
+                randomOpen=false;
+                break;
+            case STATE_RANDOM_OPEN:
+                randomOpen=true;
+                break;
+            case STATE_ALL_REPEAT:
+                playMode=0;
+                break;
+            case STATE_SINGLE_REPEAT:
+                playMode=1;
                 break;
 
         }
+<<<<<<< HEAD
+        //updateStartImage();
+=======
    //     updateStartImage();
+>>>>>>> b3044e0d85a026338d6a27fd63a1cd94db3dc671
     }
 }
