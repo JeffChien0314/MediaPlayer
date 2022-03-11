@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
         unregisterReceiver();
-        saveData.saveToFile(getApplicationContext(), currentTab, mDeviceItemUtil.getCurrentDevice().getStoragePath(), mDeviceItemUtil.getCurrentDevice().getDescription());
     }
 
     private void recoverPreviousUIstatus() {
@@ -210,6 +209,10 @@ public class MainActivity extends AppCompatActivity {
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         frameLayout.removeAllViews();
+        if (csdMediaPlayer.getParent()!=null){//Sandra@20220311 add-->
+            ((ViewGroup)csdMediaPlayer.getParent()).removeAllViews();
+            ((ViewGroup)csdMediaPlayer.getParent()).removeView(csdMediaPlayer);
+        }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         frameLayout.addView(csdMediaPlayer);
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             csdMediaPlayer.setVisibility(View.GONE);
