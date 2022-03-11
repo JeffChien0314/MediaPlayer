@@ -33,7 +33,6 @@ import static android.content.ContentValues.TAG;
 
 public class MediaItemUtil {
     public static final int TYPE_MUSIC = 0;
-    public static final int TYPE_VIDEO = 1;
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
 

@@ -36,9 +36,6 @@ import java.util.Map;
 import moe.codeest.enviews.ENDownloadView;
 import moe.codeest.enviews.ENPlayView;
 
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_VIDEO;
-
 /**
  * Created by Jennifer on 2022/1/17.
  */
@@ -586,9 +583,9 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
         MediaItem mediaItem=mediaInfo.getMediaItems().get(mPlayPosition);
         if (mediaItem.isIfVideo()){
-            editor.putInt("currentTab", TYPE_VIDEO);
+            editor.putInt("currentTab", 1);
         }else {
-            editor.putInt("currentTab", TYPE_MUSIC);
+            editor.putInt("currentTab", 0);
         }
         editor.putString("description", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getDescription());
         editor.putString("storagePath", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath());
