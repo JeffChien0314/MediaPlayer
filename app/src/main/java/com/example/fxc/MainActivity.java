@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab = 0;
     private String currentDevicestoragePath = "";
     private MediaInfo mMediaInfo;
+    public static LinkedList<Integer> randomIndexList = new LinkedList<>();
     private ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
@@ -247,6 +248,19 @@ public class MainActivity extends AppCompatActivity {
         });
         //Sandra@20220215 add<--
     }
+
+    public LinkedList<Integer> getRandom() {
+        int random;
+        while (randomIndexList.size() < ((ContentFragment) fragments.get(currentTab)).mediaItems.size()) {
+            random = (int) (Math.random() * ((ContentFragment) fragments.get(currentTab)).mediaItems.size());//生成1到list.size()-1之间的随机数
+            if (!randomIndexList.contains(random)) {
+                randomIndexList.add(random);
+            }
+        }
+        Log.i("main", "Jennifertest90=: " + randomIndexList);
+        return randomIndexList;
+    }
+
     private void initCondition() {
         requestAllPower();
     }
@@ -328,10 +342,14 @@ public class MainActivity extends AppCompatActivity {
     public void onRandomOpenClick(View v) {
         if (randomOpen == false) {
             randomOpen = true;
+            getRandom();
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
             MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_OPEN, -1);
         } else {
             randomOpen = false;
+            if (randomIndexList.size() > 0) {
+                randomIndexList.clear();
+            }
             MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_CLOSE, -1);
             mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
         }
