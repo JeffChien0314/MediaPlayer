@@ -3,6 +3,7 @@ package com.example.fxc.mediaplayer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -485,6 +486,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     public void startPlayLogic() {
         super.startPlayLogic();
+        saveData(); //保存Playing歌曲信息
         broadCastStateChanged(MEDIAITEM_CHANGED);
     }
 
@@ -516,6 +518,10 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     public MediaInfo getMediaInfo() {
         return mediaInfo;
+    }
+
+    public void setMediaInfo(MediaInfo mediaInfo) {
+        this.mediaInfo = mediaInfo;
     }
 
     public String getCurrentUri() {
@@ -569,5 +575,22 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
         }
         //updateStartImage();
+    }
+ public void saveData() {
+        if (mediaInfo==null){return;}
+        SharedPreferences sharedPreferences = getActivityContext().getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE); //私有数据
+        SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
+        MediaItem mediaItem=mediaInfo.getMediaItems().get(mPlayPosition);
+        if (mediaItem.isIfVideo()){
+            editor.putInt("currentTab", 1);
+        }else {
+            editor.putInt("currentTab", 0);
+        }
+        editor.putString("description", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getDescription());
+        editor.putString("storagePath", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath());
+        editor.putString("title",mediaItem.getTitle());
+        editor.putLong("id",mediaItem.getId());
+        Log.i(TAG, "saveData: SavePlayingStatus"+MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath()+"\n"+mediaItem.isIfVideo()+mediaItem.getTitle()+"\n"+mediaItem.getId());
+        editor.apply();
     }
 }

@@ -11,7 +11,7 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
  */
 
 public class MediaItem implements Parcelable {
-    private long id; // 歌曲ID
+    private Long id; // 歌曲ID
     private String title; // 歌曲名稱
     private String album; // 專輯
     private String artist; // 歌手名稱
@@ -19,6 +19,7 @@ public class MediaItem implements Parcelable {
     private Bitmap thumbBitmap;
     private GSYVideoModel gsyVideoModel;
     private boolean ifVideo;
+    private String storagePath;//对应设备路径
     /* private long albumId;//專輯ID*/
     //   private String displayName; //顯示名稱
     //  private long size; // 歌曲大小
@@ -35,6 +36,7 @@ public class MediaItem implements Parcelable {
         duration = in.readLong();
         thumbBitmap = in.readParcelable(Bitmap.class.getClassLoader());
         ifVideo = in.readByte() != 0;
+        storagePath=in.readString();
     }
 
     public static final Creator<MediaItem> CREATOR = new Creator<MediaItem>() {
@@ -78,11 +80,11 @@ public class MediaItem implements Parcelable {
         this.thumbBitmap = thumbBitmap;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -118,6 +120,15 @@ public class MediaItem implements Parcelable {
         this.duration = duration;
     }
 
+    public String getStoragePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
@@ -132,6 +143,7 @@ public class MediaItem implements Parcelable {
         dest.writeLong(duration);
         dest.writeParcelable(thumbBitmap, flags);
         dest.writeByte((byte) (ifVideo ? 1 : 0));
+        dest.writeString(storagePath);
     }
 
 }

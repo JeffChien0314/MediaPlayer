@@ -49,6 +49,22 @@ public class MediaItemUtil {
         return mediaInfo;
     }
 
+    public static int IfIDExist(Long id,int mediaType, Context context, DeviceItem deviceItem){
+        ArrayList<MediaItem> mediaItems = new ArrayList<>();
+        if (mediaType == TYPE_MUSIC) {//TYPE_MUSIC = 0
+            mediaItems= getMusicInfos(context, deviceItem.getStoragePath());
+        } else {
+            mediaItems=getVideoInfos(context, deviceItem.getStoragePath());
+        }
+        for (int i=0;i<mediaItems.size();i++){
+            if (mediaItems.get(i).getId()==id){
+                Log.i(TAG, "IDExist!!! ");
+                return i;
+            }
+        }
+        return 0;
+    }
+
     public static ArrayList<MediaItem> getMusicInfos(Context context, String path) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -58,10 +74,10 @@ public class MediaItemUtil {
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = context.getContentResolver();
         Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
-        ArrayList<MediaItem> musicInfos = new ArrayList<MediaItem>();
+        ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
-            MediaItem musicInfo = new MediaItem();
+            MediaItem mediaItem = new MediaItem();
             Long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID));    //音樂id
             String title = cursor.getString((cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))); // 音樂標題
             String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)); // 藝術家
@@ -81,22 +97,23 @@ public class MediaItemUtil {
 
             }
             if (isMusic != 0) { // 只把音樂新增到集合當中
-                musicInfo.setIfVideo(false);
-                musicInfo.setId(id);
-                musicInfo.setTitle(title);
-                musicInfo.setArtist(artist);
-                musicInfo.setAlbum(album);
-                //   musicInfo.setDisplayName(displayName);
-                //    musicInfo.setAlbumId(albumId);
-                musicInfo.setDuration(duration);
-                // musicInfo.setSize(size);
-                // musicInfo.setUrl(url);
-                musicInfo.setThumbBitmap(thumbBitmap);
-                musicInfo.setGsyVideoModel(gsyVideoModel);
-                musicInfos.add(musicInfo);
+                mediaItem.setIfVideo(false);
+                mediaItem.setId(id);
+                mediaItem.setTitle(title);
+                mediaItem.setArtist(artist);
+                //  mediaItem.setAlbum(album);
+                //   mediaItem.setDisplayName(displayName);
+                //    mediaItem.setAlbumId(albumId);
+                mediaItem.setDuration(duration);
+                // mediaItem.setSize(size);
+                // mediaItem.setUrl(url);
+                mediaItem.setThumbBitmap(thumbBitmap);
+                mediaItem.setGsyVideoModel(gsyVideoModel);
+                mediaItem.setStoragePath(path);
+                mediaItems.add(mediaItem);
             }
         }
-        return musicInfos;
+        return mediaItems;
     }
 
     public static ArrayList<MediaItem> getVideoInfos(Context context, String path) {
@@ -109,8 +126,8 @@ public class MediaItemUtil {
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
-            MediaItem videoinfo = new MediaItem();
-            int id = cursor.getInt(cursor
+            MediaItem mediaItem = new MediaItem();
+            Long id = cursor.getLong(cursor
                     .getColumnIndex(MediaStore.Video.Media._ID));    //視頻id
             String title = cursor.getString((cursor
                     .getColumnIndex(MediaStore.Video.Media.TITLE))); // 視頻標題
@@ -129,7 +146,7 @@ public class MediaItemUtil {
                     .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
             String mime_type =
                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist + "-" + album);
+            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
             Bitmap thumbBitmap = null;
             if (url != null) {
                 try {
@@ -139,19 +156,20 @@ public class MediaItemUtil {
                 }
             }
             if (mime_type != null) {
-                videoinfo.setIfVideo(true);
-                videoinfo.setId(id);
-                videoinfo.setTitle(title);
-                videoinfo.setArtist(artist);
-                videoinfo.setAlbum(album);
-                // videoinfo.setDisplayName(displayName);
+                mediaItem.setIfVideo(true);
+                mediaItem.setId(id);
+                mediaItem.setTitle(title);
+                mediaItem.setArtist(artist);
+                // mediaItem.setAlbum(album);
+                // mediaItem.setDisplayName(displayName);
                 //   musicInfo.setAlbumId(albumId);
-                videoinfo.setDuration(duration);
-                // videoinfo.setSize(size);
-                // videoinfo.setUrl(url);
-                videoinfo.setThumbBitmap(thumbBitmap);
-                videoinfo.setGsyVideoModel(gsyVideoModel);
-                mediaItems.add(videoinfo);
+                mediaItem.setDuration(duration);
+                // mediaItem.setSize(size);
+                // mediaItem.setUrl(url);
+                mediaItem.setThumbBitmap(thumbBitmap);
+                mediaItem.setGsyVideoModel(gsyVideoModel);
+                mediaItem.setStoragePath(path);
+                mediaItems.add(mediaItem);
             }
         }
         return mediaItems;
