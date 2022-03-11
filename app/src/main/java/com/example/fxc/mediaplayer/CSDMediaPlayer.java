@@ -18,6 +18,7 @@ import android.widget.ImageView;
 
 import com.example.fxc.ContentFragment;
 import com.example.fxc.MainActivity;
+import com.example.fxc.service.MediaPlayerService;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;

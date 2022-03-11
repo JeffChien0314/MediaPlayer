@@ -27,6 +27,7 @@ import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
+import com.example.fxc.service.MediaPlayerService;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -76,6 +77,10 @@ public class ContentFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
             ((MainActivity) getActivity()).playMusic(position);
+            //Sandra@20220311 add-->
+            DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
+            MediaPlayerService.mediaPlayer.setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
+            //<--Sandra@20220311 add
         }
     };
 
