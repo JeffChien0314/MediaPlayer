@@ -568,10 +568,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 break;
 
         }
-<<<<<<< HEAD
         //updateStartImage();
-=======
-   //     updateStartImage();
->>>>>>> b3044e0d85a026338d6a27fd63a1cd94db3dc671
     }
 }
