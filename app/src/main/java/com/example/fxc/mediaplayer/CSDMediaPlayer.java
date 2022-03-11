@@ -507,10 +507,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public void mediaControl(int state, long position) {
         switch (state) {
             case STATE_PLAY:
-                getGSYVideoManager().start();
-                break;
             case STATE_PAUSE:
-                getGSYVideoManager().pause();
+                clickStartIcon();
                 break;
             case STATE_NEXT:
                 playNext();
@@ -523,6 +521,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 break;
 
         }
-        updateStartImage();
+   //     updateStartImage();
     }
 }
