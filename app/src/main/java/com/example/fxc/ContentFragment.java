@@ -76,10 +76,10 @@ public class ContentFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
-            ((MainActivity) getActivity()).playMusic(position);
             //Sandra@20220311 add-->
             DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
             MediaPlayerService.mediaPlayer.setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
+            ((MainActivity) getActivity()).playMusic(position);
             //<--Sandra@20220311 add
         }
     };
