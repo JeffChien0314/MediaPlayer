@@ -19,9 +19,8 @@ import com.example.fxc.mediaplayer.R;
 import com.example.fxc.service.MediaPlayerService;
 import com.example.fxc.util.applicationUtils;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.MEDIAITEM_CHANGED;
-import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_ERROR;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
 
@@ -57,6 +56,7 @@ public class MusicWidget extends AppWidgetProvider {
                     intentShow.setClass(context, MainActivity.class);
                     intentShow.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intentShow);
+                    break;
             }
         } else if (action != null && action.equals("CSDMediaPlayer.stateChanged")) { //刷新widget显示
             int currentState = intent.getIntExtra(CSDMediaPlayer.PLAYSTATE_CHANGED + "", -1);
@@ -73,7 +73,7 @@ public class MusicWidget extends AppWidgetProvider {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        } else if (action != null && action.equals("DeviceItemUtil.deviceChanged")) { //第一次使用或当前设备失联
+        } else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
 
 
         }

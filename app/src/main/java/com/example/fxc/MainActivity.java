@@ -14,9 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -27,7 +24,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.example.fxc.bt.client.MediaBroswerConnector;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
@@ -35,18 +31,13 @@ import com.example.fxc.mediaplayer.DeviceListAdapter;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.R;
-import com.example.fxc.mediaplayer.SaveData;
-import com.example.fxc.service.MediaPlayerService;
 import com.example.fxc.util.applicationUtils;
-import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
-import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,68 +47,27 @@ public class MainActivity extends AppCompatActivity {
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
-    private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
+    private FrameLayout mFrameLayout;
+    private View mBtPlayerLayer;
+
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
-    private android.os.Bundle outState;
-
-
     private boolean randomOpen = false;
-    private GSYVideoModel url = new GSYVideoModel("", "");
-    private OrientationUtils orientationUtils;
     private TabLayout mTabLayout;
+
     public TabLayout getmTabLayout() {
         return mTabLayout;
     }
+
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
     private int currentTab = 0;
-    private String currentDevicestoragePath = "";
     private MediaInfo mMediaInfo;
     private ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
-    private MediaPlayerService mediaService;
-    private MediaController mediaController;
 
-    //蓝牙音乐UI控制，接收蓝牙音乐相关状态
-    private MediaBroswerConnector.MediaControllerCallback mediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
-        @Override
-        public void onSessionDestroyed() {
-            super.onSessionDestroyed();
-        }
-
-        @Override
-        public void onSessionReady() {
-            super.onSessionReady();
-        }
-
-        @Override
-        public void onPlaybackStateChanged(PlaybackStateCompat state) {
-            super.onPlaybackStateChanged(state);
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
-            super.onMetadataChanged(metadata);
-        }
-
-        @Override
-        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
-            super.onQueueChanged(queue);
-        }
-
-        @Override
-        public void onRepeatModeChanged(int repeatMode) {
-            super.onRepeatModeChanged(repeatMode);
-        }
-
-        @Override
-        public void onShuffleModeChanged(int shuffleMode) {
-            super.onShuffleModeChanged(shuffleMode);
-        }
-    };
     private final int UPDATE_DEVICE_LIST = 1;
     private Handler handler = new Handler() {
         @Override
@@ -130,12 +80,11 @@ public class MainActivity extends AppCompatActivity {
                         ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mDeviceItemUtil.getCurrentDevice());
                         //实际currentDeviceInfo内容为空，所以刷新后文件列表为空
                     } else {
-                        if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.ifExsitThisDeviceByStoragePath(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
+                        if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.isDeviceExist(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
                         } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
                             ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceItems.get(0));
                             mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(0));
                             currentTab = 0;
-
                         }
                     }
                     break;
@@ -153,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         applicationUtils.startService(this);
         initCondition();
         setContentView(R.layout.activity_main);
-        mediaController = MediaController.getInstance(this);
         mDeviceItemUtil = DeviceItemUtil.getInstance(this);
         initView();
         registerReceiver();
@@ -178,19 +126,21 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver();
     }
+
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
-        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
-        frameLayout.removeAllViews();
-        if (csdMediaPlayer.getParent()!=null){//Sandra@20220311 add-->
-            ((ViewGroup)csdMediaPlayer.getParent()).removeAllViews();
-           // ((ViewGroup)csdMediaPlayer.getParent()).removeView(csdMediaPlayer);//Sandra@20220314 delete
+        mBtPlayerLayer = findViewById(R.id.bt_player);
+        mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
+        if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
+            ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
-        frameLayout.addView(csdMediaPlayer);
+        mFrameLayout.addView(csdMediaPlayer);
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
-            csdMediaPlayer.setVisibility(View.GONE);
+            mFrameLayout.setVisibility(View.GONE);
+        } else {
+            mBtPlayerLayer.setVisibility(View.GONE);
         }
 
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
@@ -223,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         });
         //Sandra@20220215 add<--
     }
+
     private void initCondition() {
         requestAllPower();
     }
@@ -383,6 +334,19 @@ public class MainActivity extends AppCompatActivity {
         deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems, mDeviceItemUtil.getCurrentDevice());
         devicelistview.setAdapter(deviceListAdapter);
         devicelistview.invalidateViews();
+    }
+
+    public void setPlayerLayer(int device_Type) {
+        switch (device_Type) {
+            case BLUETOOTH_DEVICE:
+                mFrameLayout.setVisibility(View.GONE);
+                mBtPlayerLayer.setVisibility(View.VISIBLE);
+                break;
+            case USB_DEVICE:
+                mFrameLayout.setVisibility(View.VISIBLE);
+                mBtPlayerLayer.setVisibility(View.GONE);
+                break;
+        }
     }
 
 }

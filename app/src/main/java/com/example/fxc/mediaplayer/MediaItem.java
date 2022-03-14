@@ -3,6 +3,7 @@ package com.example.fxc.mediaplayer;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
@@ -51,6 +52,7 @@ public class MediaItem implements Parcelable {
         }
     };
 
+
     public boolean isIfVideo() {
         return ifVideo;
     }
@@ -63,6 +65,17 @@ public class MediaItem implements Parcelable {
         super();
     }
 
+    public MediaItem(Long id, String title, String album, String artist, long duration, Bitmap thumbBitmap, GSYVideoModel gsyVideoModel, boolean ifVideo, String storagePath) {
+        this.id = id;
+        this.title = title;
+        this.album = album;
+        this.artist = artist;
+        this.duration = duration;
+        this.thumbBitmap = thumbBitmap;
+        this.gsyVideoModel = gsyVideoModel;
+        this.ifVideo = ifVideo;
+        this.storagePath = storagePath;
+    }
 
     public GSYVideoModel getGsyVideoModel() {
         return gsyVideoModel;

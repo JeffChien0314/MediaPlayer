@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
@@ -115,7 +115,7 @@ public class MediaController {
      * @param value
      */
     public void setPlayerState(int state, int value) {
-        Intent intent = new Intent(ACTION_CHANGE_STATE);
+        Intent intent = new Intent(ACTION_CHANGE_STATE_RECEIVER);
         intent.putExtra(STATE_EXTRA, state);
         intent.putExtra(POS_EXTRA, value);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -130,4 +130,7 @@ public class MediaController {
         return DeviceItemUtil.getInstance(mContext).getExternalDeviceInfoList();
     }
 
+    public void setCurrentSourceType(int device_type) {
+        currentSourceType = device_type;
+    }
 }

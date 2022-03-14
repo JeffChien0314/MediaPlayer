@@ -2,15 +2,26 @@ package com.example.fxc.bt.client;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import com.example.fxc.mediaplayer.MediaItem;
+
 import java.util.List;
+
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_ID;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.MEDIAITEM_CHANGED;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.PLAYSTATE_CHANGED;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.REPEATMODE_CHANGED;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.SHUFFLEMODE_CHANGED;
 
 public class MediaBroswerConnector {
     private final String TAG = MediaBroswerConnector.class.getSimpleName();
@@ -28,11 +39,14 @@ public class MediaBroswerConnector {
     private MediaBrowserCompat mMediaBrowser;
     private MediaBrowserConnectionCallback mConnectionCallback;
     private MediaControllerCompat mMediaController;
-    private MediaControllerCallback mControllerCallback;
+    //  private MediaControllerCallback mControllerCallback;
     private Context mContext;
     private String packageName = "com.android.bluetooth";
     private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
     private static MediaBroswerConnector mInstance;
+    private boolean isBtPlaying = false;
+    private MediaItem currentBtItem;
+
 
     public static MediaBroswerConnector getInstance() {
         if (mInstance == null) {
@@ -41,9 +55,9 @@ public class MediaBroswerConnector {
         return mInstance;
     }
 
-    public void initBroswer(Context context, MediaControllerCallback controllerCallback) {
+    public void initBroswer(Context context/*, MediaControllerCallback controllerCallback*/) {
         mContext = context;
-        mControllerCallback = controllerCallback;
+        //  mControllerCallback = controllerCallback;
         mConnectionCallback = new MediaBrowserConnectionCallback();
         mMediaBrowser = new MediaBrowserCompat(context,
                 new ComponentName(packageName, className),
@@ -97,12 +111,95 @@ public class MediaBroswerConnector {
         }
     }
 
-    public class MediaControllerCallback extends MediaControllerCompat.Callback {
+    MediaControllerCompat.Callback mControllerCallback =
+
+            new MediaControllerCompat.Callback() {
+                public void onSessionDestroyed() {
+                    mMediaBrowser.disconnect();
+                    //Session销毁
+                    Log.i(TAG, "onSessionDestroyed: ");
+                }
+
+                @Override
+                public void onPlaybackStateChanged(PlaybackStateCompat state) {
+                    super.onPlaybackStateChanged(state);
+                    boolean playingState = state != null &&
+                            state.getState() == PlaybackStateCompat.STATE_PLAYING;
+                    if (isBtPlaying != playingState) {
+                        isBtPlaying = playingState;
+                        broadCastStateChanged(PLAYSTATE_CHANGED, isBtPlaying);
+                    }
+
+                }
+
+                @Override
+                public void onMetadataChanged(MediaMetadataCompat metadata) {
+                    if (metadata == null) {
+                        return;
+                    }
+                    MediaItem item = new MediaItem(metadata.getLong(METADATA_KEY_MEDIA_ID),
+                            metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE),
+                            metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
+                            metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST),
+                            metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
+                            metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON), null, false, null);
+                    currentBtItem = item;
+                    broadCastStateChanged(MEDIAITEM_CHANGED, item);
+                }
+
+                @Override
+                public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+                    super.onQueueChanged(queue);
+                }
+
+                @Override
+                public void onRepeatModeChanged(int repeatMode) {
+                    super.onRepeatModeChanged(repeatMode);
+                    broadCastStateChanged(REPEATMODE_CHANGED, repeatMode);
+                }
+
+                @Override
+                public void onShuffleModeChanged(int shuffleMode) {
+                    super.onShuffleModeChanged(shuffleMode);
+                    broadCastStateChanged(SHUFFLEMODE_CHANGED, shuffleMode);
+                }
+            };
+
+    MediaBrowserCompat.SubscriptionCallback subscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
+
         @Override
-        public void onSessionDestroyed() {
-            super.onSessionDestroyed();
-            mMediaBrowser.disconnect();
+        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
+            super.onChildrenLoaded(parentId, children);
+            Log.d(TAG, "onChildrenLoaded: ");
+            if (children != null && children.size() != 0) {
+                for (int i = 0; i < children.size(); i++) {
+                    MediaBrowserCompat.MediaItem mediaItem = children.get(i);
+                    Log.d(TAG, "" + mediaItem.getDescription().getTitle().toString());
+                    // 将返回的音乐列表保存起来
+                }
+            }
         }
+    };
+
+    private void broadCastStateChanged(int extraName, Object value) {
+        Intent intent = new Intent(ACTION_STATE_CHANGED_BROADCAST);
+        intent.setPackage("com.example.fxc.mediaplayer");
+        switch (extraName) {
+            case PLAYSTATE_CHANGED:
+                intent.putExtra(PLAYSTATE_CHANGED + "", (Boolean) value);
+                break;
+            case MEDIAITEM_CHANGED:
+                //目前第几首要计算，后续增加
+                intent.putExtra(MEDIAITEM_CHANGED + "", currentBtItem);
+                break;
+            case REPEATMODE_CHANGED:
+            case SHUFFLEMODE_CHANGED:
+                intent.putExtra(extraName + "", (Integer) value);
+                break;
+        }
+        Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
+        mContext.sendBroadcast(intent);
+
     }
 
     public void setBTDeviceState(int state, long value) {
@@ -138,57 +235,6 @@ public class MediaBroswerConnector {
         }
 
     }
-
-    MediaControllerCompat.Callback controllerCallback =
-
-            new MediaControllerCompat.Callback() {
-                public void onSessionDestroyed() {
-                    mMediaBrowser.disconnect();
-                    //Session销毁
-                    Log.i(TAG, "onSessionDestroyed: ");
-                }
-
-                @Override
-                public void onRepeatModeChanged(int repeatMode) {
-                    //循环模式发生变化
-                    Log.i(TAG, "onRepeatModeChanged: ");
-                }
-
-                @Override
-                public void onShuffleModeChanged(int shuffleMode) {
-                    //随机模式发生变化
-                    Log.i(TAG, "onShuffleModeChanged: ");
-                }
-
-                @Override
-                public void onMetadataChanged(MediaMetadataCompat metadata) {
-                    //数据变化->修改音频展示信息？
-                    Log.i(TAG, "onMetadataChanged: ");
-                }
-
-                @Override
-                public void onPlaybackStateChanged(PlaybackStateCompat state) {
-                    //播放状态变化
-                    Log.i(TAG, "onPlaybackStateChanged: state=" + state.getPosition());
-                    //根据状态变化改变seekbar位置
-                }
-            };
-
-    MediaBrowserCompat.SubscriptionCallback subscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
-
-        @Override
-        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
-            super.onChildrenLoaded(parentId, children);
-            Log.d(TAG, "onChildrenLoaded: ");
-            if (children != null && children.size() != 0) {
-                for (int i = 0; i < children.size(); i++) {
-                    MediaBrowserCompat.MediaItem mediaItem = children.get(i);
-                    Log.d(TAG, "" + mediaItem.getDescription().getTitle().toString());
-                    // 将返回的音乐列表保存起来
-                }
-            }
-        }
-    };
 
 
 }

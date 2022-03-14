@@ -28,7 +28,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="CSDMediaPlayer.stateChanged" />
-                <action android:name="DeviceItemUtil.deviceChanged" />
+                <action android:name="device.lost" />
 
             </intent-filter>
             <meta-data

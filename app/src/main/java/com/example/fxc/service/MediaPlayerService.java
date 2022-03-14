@@ -14,15 +14,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,82 +36,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
 import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
-    //public static CSDMediaPlayer mediaPlayer= CSDMediaPlayer.getInstance(this.getApplicationContext());;//本地音乐播放器
     private CSDMediaPlayer mediaPlayer;
     private DeviceItemUtil mDeviceItemUtil;
     private final int UPDATE_DEVICE_LIST = 0;
     public static boolean isAlive = false;
+
 
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
                 case UPDATE_DEVICE_LIST:
-                    List<DeviceItem> deviceItems =
-                            mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
+                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
                     //同时需要更新文件列表
-                   /*  boolean isExist = false;
-                   if (null != mediaPlayer.getMediaInfo()) {
-                        for (DeviceItem item : deviceItems) {
-                            if (mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath().equals(item.getStoragePath())) {
-                                isExist = true;
+                    if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == USB_DEVICE) {
+                        if (null != mediaPlayer.getMediaInfo()) {
+                            if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
+                                Intent intent = new Intent(DEVICE_LOST);
+                                intent.setPackage("com.example.fxc.mediaplayer");
+                                sendBroadcast(intent);
                             }
                         }
-                        if (!isExist) {
-                       // mediaPlayer
-                        }
-                    }*/
+                    }
 
                     break;
                 default:
                     break;
             }
-        }
-    };
-    //蓝牙音乐UI控制，接收蓝牙音乐相关状态
-    private MediaBroswerConnector.MediaControllerCallback btMediaControllerCallback = MediaBroswerConnector.getInstance().new MediaControllerCallback() {
-        @Override
-        public void onSessionDestroyed() {
-            super.onSessionDestroyed();
-        }
-
-        @Override
-        public void onSessionReady() {
-            super.onSessionReady();
-        }
-
-        @Override
-        public void onPlaybackStateChanged(PlaybackStateCompat state) {
-            super.onPlaybackStateChanged(state);
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
-            super.onMetadataChanged(metadata);
-        }
-
-        @Override
-        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
-            super.onQueueChanged(queue);
-        }
-
-        @Override
-        public void onRepeatModeChanged(int repeatMode) {
-            super.onRepeatModeChanged(repeatMode);
-        }
-
-        @Override
-        public void onShuffleModeChanged(int shuffleMode) {
-            super.onShuffleModeChanged(shuffleMode);
         }
     };
 
@@ -125,7 +82,7 @@ public class MediaPlayerService extends Service {
         Log.i(TAG, "onCreate: ");
         isAlive = true;
         registerReceiver();
-        MediaBroswerConnector.getInstance().initBroswer(this.getApplicationContext(), btMediaControllerCallback);
+        MediaBroswerConnector.getInstance().initBroswer(this.getApplicationContext());
         mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
@@ -159,7 +116,7 @@ public class MediaPlayerService extends Service {
                             position= MediaItemUtil.IfIDExist(share.getLong("id",0), TYPE_MUSIC,context,mediaItems);
                         }else {//是视频的话，展示音乐，第一首歌
                             position=0;
-                        }
+    }
                     }else {//上次使用的设备没有音乐，待确认行为
 
                     }
@@ -190,6 +147,12 @@ public class MediaPlayerService extends Service {
         isAlive = false;
         applicationUtils.startService(this);
         super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     public void saveData() {
@@ -229,7 +192,7 @@ public class MediaPlayerService extends Service {
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         registerReceiver(bluetoothReceiver, filter);
 
-        IntentFilter playerFilter = new IntentFilter(ACTION_CHANGE_STATE);
+        IntentFilter playerFilter = new IntentFilter(ACTION_CHANGE_STATE_RECEIVER);
         LocalBroadcastManager.getInstance(this).registerReceiver(playerControlReceiver, playerFilter);
     }
 
@@ -316,7 +279,7 @@ public class MediaPlayerService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case ACTION_CHANGE_STATE:
+                case ACTION_CHANGE_STATE_RECEIVER:
                     int state = intent.getIntExtra(STATE_EXTRA, STATE_PLAY);
                     int pos = intent.getIntExtra(POS_EXTRA, -1);
                     if (USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
@@ -332,18 +295,6 @@ public class MediaPlayerService extends Service {
         }
     };
 
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return new MediaServiceBinder();
-    }
-
-    public class MediaServiceBinder extends Binder {
-        public MediaPlayerService getService() {
-            return MediaPlayerService.this;
-        }
-    }
 
     private static void startForeground(Service service) {
 

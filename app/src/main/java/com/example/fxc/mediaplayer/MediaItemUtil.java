@@ -45,7 +45,6 @@ public class MediaItemUtil {
             mediaInfo.setMediaItems(getMusicInfos(context, deviceItem.getStoragePath()));
         } else {
             mediaInfo.setMediaItems(getVideoInfos(context, deviceItem.getStoragePath()));
-            // return getVideoInfos(context, deviceItem.getStoragePath());
         }
         return mediaInfo;
     }

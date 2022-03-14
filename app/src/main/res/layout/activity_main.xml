@@ -10,43 +10,20 @@
     <FrameLayout
         android:id="@+id/mediaPlayer_csd_container"
         android:layout_width="match_parent"
-        
-android:layout_height="486px"
+        android:layout_height="486px"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-   <!-- <com.example.fxc.mediaplayer.CSDMediaPlayer
-        android:id="@+id/mediaPlayer_csd"
+    <include
+        android:id="@+id/bt_player"
+        layout="@layout/layout_bt_media_play_control"
         android:layout_width="match_parent"
-        android:layout_height="186px"
-        android:layout_marginBottom="30px"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="486px"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent">
-        &lt;!&ndash;ImageView
-            android:id="@+id/previous"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            android:layout_marginTop="200px"
-            android:layout_marginLeft="252px"
-            android:layout_gravity="left"
-            android:scaleType="fitXY"
-            android:onClick="onPreviousClick"
-            android:src="@drawable/icon_skip_back_normal" />
-        <ImageView
-            android:layout_width="100px"
-            android:layout_height="100px"
-            android:layout_gravity="right"
-            android:id="@+id/next"
-            android:layout_marginRight="252px"
-            android:onClick="onNextClick"
-            android:scaleType="fitXY"
-            android:src="@drawable/icon_skip_fwd_normal"
-            android:layout_marginTop="200px" />&ndash;&gt;
-    </com.example.fxc.mediaplayer.CSDMediaPlayer>
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
--->
     <LinearLayout
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"

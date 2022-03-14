@@ -21,6 +21,7 @@ import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
 public class DeviceItemUtil {
     public static final String ACTION_DEVICE_CHANGED = "DeviceItemUtil.deviceChanged";
+    public static final String DEVICE_LOST = "device.lost";
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
     public DeviceItem currentDevice;
@@ -118,7 +119,7 @@ public class DeviceItemUtil {
         currentDevice = deviceItem;
     }
 
-    public boolean ifExsitThisDeviceByStoragePath(String StoragePath) {
+    public boolean isDeviceExist(String StoragePath) {
         if (StoragePath == null) return false;
         boolean exist = false;
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {

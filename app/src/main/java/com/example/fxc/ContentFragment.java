@@ -3,7 +3,6 @@ package com.example.fxc;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,10 +27,8 @@ import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaItemUtil;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
-import com.example.fxc.service.MediaPlayerService;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -41,6 +38,7 @@ import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_VIDEO;
 
@@ -56,6 +54,7 @@ public class ContentFragment extends Fragment {
     public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
+    private DeviceItem mDeviceItem;
     private boolean ifVideo = false;
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
@@ -186,6 +185,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(int mediaType, DeviceItem deviceItem) {
+        mDeviceItem = deviceItem;
         if (deviceItem == null){//此对策，待验证
             if ( CSDMediaPlayer.getInstance(mContext).getMediaInfo()!=null &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems()!=null
                     &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size()!=0){
@@ -204,16 +204,6 @@ public class ContentFragment extends Fragment {
                 urls.add(mediaItems.get(i).getGsyVideoModel());
             }
         }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
     }
 
     @Override
@@ -267,8 +257,13 @@ public class ContentFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
-            ((MainActivity) getActivity()).playMusic(position);
-            //Sandra@20220311 add-->
+            MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
+            if (MediaController.getInstance(mContext).currentSourceType == USB_DEVICE) {
+                ((MainActivity) getActivity()).playMusic(position);
+            } else {//设置蓝牙选中歌曲播放
+             //   MediaController.getInstance(mContext).setPlayerState();
+            }
+            
             DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
             CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
             if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(position).isIfVideo()){
@@ -288,13 +283,6 @@ public class ContentFragment extends Fragment {
             CSDMediaPlayer.getInstance(mContext).onVideoPause();
     }
     }
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
+   
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }

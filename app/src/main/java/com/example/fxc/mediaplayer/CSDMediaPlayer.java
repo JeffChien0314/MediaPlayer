@@ -16,9 +16,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.example.fxc.ContentFragment;
-import com.example.fxc.MainActivity;
-import com.example.fxc.service.MediaPlayerService;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -41,13 +38,15 @@ import moe.codeest.enviews.ENPlayView;
  */
 
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
-    private static String TAG = CSDMediaPlayer.class.getSimpleName();
-    public static final String ACTION_STATE_CHANGED = "CSDMediaPlayer.stateChanged";
-    public static final String  ACTION_CHANGE_STATE = "CSDMediaPlayer.changestate";
+    private final String TAG = CSDMediaPlayer.class.getSimpleName();
+    public static final String ACTION_STATE_CHANGED_BROADCAST = "CSDMediaPlayer.stateChanged";
+    public static final String ACTION_CHANGE_STATE_RECEIVER = "CSDMediaPlayer.changestate";
     public static final String STATE_EXTRA = "state";
     public static final String POS_EXTRA = "pos";
     public static final int PLAYSTATE_CHANGED = 1;
     public static final int MEDIAITEM_CHANGED = 2;
+    public static final int REPEATMODE_CHANGED = 3;
+    public static final int SHUFFLEMODE_CHANGED = 4;
     public static final int STATE_PLAY = 0;
     public static final int STATE_PAUSE = 1;
     public static final int STATE_NEXT = 2;
@@ -58,8 +57,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_SINGLE_REPEAT = 7;
     public static final int STATE_ALL_REPEAT = 8;
 
-    private onAutoCompletionListener mListener;
-    private static MediaInfo mediaInfo;
+    private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRandom;
     private ImageView imageViewAudio;
@@ -67,12 +65,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private boolean randomOpen = false;
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
 
-    public CSDMediaPlayer(Context context, Boolean fullFlag) {
-        super(context, fullFlag);
-    }
-
     public CSDMediaPlayer(Context context) {
         super(context);
+    }
+
+    public CSDMediaPlayer(Context context, Boolean fullFlag) {
+        super(context, fullFlag);
     }
 
     protected Context getActivityContext() {
@@ -90,14 +88,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static CSDMediaPlayer getInstance(Context context) {
         Log.i("CSDMediaPlayer", "CSDMediaPlayer: context=" + context);
         if (mInstance == null) {
-            Log.i("CSDMediaPlayer", "CSDMediaPlayer: context=" + context);
-            mInstance = new CSDMediaPlayer(context);
+            synchronized (CSDMediaPlayer.class) {
+                mInstance = new CSDMediaPlayer(context);
+            }
         }
         return mInstance;
-    }
-
-    public void setOnAutoCompletionListener(onAutoCompletionListener listener) {
-        mListener = listener;
     }
 
 
@@ -238,6 +233,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         CSDMediaPlayer st = (CSDMediaPlayer) to;
         st.mPlayPosition = sf.mPlayPosition;
         st.mUriList = sf.mUriList;
+        st.mediaInfo = sf.mediaInfo;
     }
 
     @Override
@@ -277,11 +273,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     public void onAutoCompletion() {
         Log.i("main", "Jennifertest10=: ");
-        if (playMode==0) {
+        if (playMode == 0) {
             Log.i("main", "Jennifertest11=: ");
             playNext();
             return;
-        } else if (playMode==1) {
+        } else if (playMode == 1) {
             setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
             Log.i("main", "Jennifertest12=: ");
             startPlayLogic();
@@ -420,18 +416,18 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
     private boolean playPrevious() {
-            if (mPlayPosition < 0 || mUriList.size() == 0) return false;
-            if (randomOpen == false) {
+        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+        if (randomOpen == false) {
             if (mPlayPosition == 0) {
                 mPlayPosition = mUriList.size() - 1;
             } else if (mPlayPosition <= (mUriList.size() - 1)) {
                 mPlayPosition--;
             }
-        }else {
+        } else {
             int i;
             for (i = (randomIndexList).size() - 1; i > 0; i--) {
                 if (mPlayPosition == (randomIndexList).get(i)) {
-                    mPlayPosition =  (randomIndexList).get(i - 1);
+                    mPlayPosition = (randomIndexList).get(i - 1);
                     break;
                 } else if (mPlayPosition == (randomIndexList).get(0)) {
                     mPlayPosition = (randomIndexList).get((randomIndexList).size() - 1);
@@ -449,20 +445,21 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         startPlayLogic();
         return true;
     }
+
     /**
      * 播放下一集
      *
      * @return true表示还有下一集
      */
     public boolean playNext() {
-             if (mPlayPosition < 0 || mUriList.size() == 0) return false;
-             if(randomOpen == false) {
+        if (mPlayPosition < 0 || mUriList.size() == 0) return false;
+        if (randomOpen == false) {
             if (mPlayPosition < (mUriList.size() - 1)) {
                 mPlayPosition += 1;
             } else if (mPlayPosition >= (mUriList.size() - 1)) {
                 mPlayPosition = 0;
             }
-        }else{
+        } else {
             int i;
             //((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
             for (i = 0; i < (randomIndexList).size() - 1; i++) {
@@ -535,7 +532,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
     private void broadCastStateChanged(int extraName) {
-        Intent intent = new Intent(ACTION_STATE_CHANGED);
+        Intent intent = new Intent(ACTION_STATE_CHANGED_BROADCAST);
         intent.setPackage("com.example.fxc.mediaplayer");
         switch (extraName) {
             case PLAYSTATE_CHANGED:
@@ -574,26 +571,26 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 playPrevious();
                 break;
             case STATE_RANDOM_CLOSE:
-                randomOpen=false;
-               if (randomIndexList.size() > 0) {
-                randomIndexList.clear();
+                randomOpen = false;
+                if (randomIndexList.size() > 0) {
+                    randomIndexList.clear();
                 }
                 break;
             case STATE_RANDOM_OPEN:
-                randomOpen=true;
+                randomOpen = true;
                 getRandom();
                 break;
             case STATE_ALL_REPEAT:
-                playMode=0;
+                playMode = 0;
                 break;
             case STATE_SINGLE_REPEAT:
-                playMode=1;
+                playMode = 1;
                 break;
 
         }
         //updateStartImage();
     }
- public void saveData() {
+    public void saveData() {
         if (mediaInfo==null){return;}
         SharedPreferences sharedPreferences = getActivityContext().getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE); //私有数据
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
