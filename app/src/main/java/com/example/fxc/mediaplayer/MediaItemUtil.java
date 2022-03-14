@@ -33,6 +33,7 @@ import static android.content.ContentValues.TAG;
 
 public class MediaItemUtil {
     public static final int TYPE_MUSIC = 0;
+    public static final int TYPE_VIDEO= 1;
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
 
@@ -49,13 +50,7 @@ public class MediaItemUtil {
         return mediaInfo;
     }
 
-    public static int IfIDExist(Long id,int mediaType, Context context, DeviceItem deviceItem){
-        ArrayList<MediaItem> mediaItems = new ArrayList<>();
-        if (mediaType == TYPE_MUSIC) {//TYPE_MUSIC = 0
-            mediaItems= getMusicInfos(context, deviceItem.getStoragePath());
-        } else {
-            mediaItems=getVideoInfos(context, deviceItem.getStoragePath());
-        }
+    public static int IfIDExist(Long id,int mediaType, Context context,  ArrayList<MediaItem> mediaItems){
         for (int i=0;i<mediaItems.size();i++){
             if (mediaItems.get(i).getId()==id){
                 Log.i(TAG, "IDExist!!! ");

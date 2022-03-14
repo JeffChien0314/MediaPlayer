@@ -59,12 +59,15 @@ public class MainActivity extends AppCompatActivity {
     private List<HashMap<String, String>> listRandom = new ArrayList<HashMap<String, String>>();
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private android.os.Bundle outState;
-    private boolean ifVideo = false;
+
 
     private boolean randomOpen = false;
     private GSYVideoModel url = new GSYVideoModel("", "");
     private OrientationUtils orientationUtils;
     private TabLayout mTabLayout;
+    public TabLayout getmTabLayout() {
+        return mTabLayout;
+    }
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
@@ -152,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mediaController = MediaController.getInstance(this);
         mDeviceItemUtil = DeviceItemUtil.getInstance(this);
-        recoverPreviousUIstatus();
         initView();
         registerReceiver();
 
@@ -161,9 +163,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (ifVideo) {//這個判斷條件需要優化，以防越界--儅播放音樂又點擊了另一個Tab
-            csdMediaPlayer.onVideoPause();
-        }
         Log.i(TAG, "onPause: ");
     }
 
@@ -171,13 +170,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.i(TAG, "onStop: ");
-        outState = new Bundle();
-        outState.putInt("currentTab", currentTab);
-        outState.putParcelable("currentDevice", mDeviceItemUtil.getCurrentDevice());
-        onSaveInstanceState(outState);
     }
-
-    SaveData saveData = new SaveData();
 
     @Override
     protected void onDestroy() {
@@ -185,23 +178,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver();
     }
-
-    private void recoverPreviousUIstatus() {
-        currentDevicestoragePath = saveData.getCurrentDevicestoragePath(getApplicationContext());
-        currentTab = saveData.getCurrentTab(getApplicationContext());
-        if (mDeviceItemUtil.ifExsitThisDeviceByStoragePath(currentDevicestoragePath)) { //反推路径对应的Device
-            DeviceItem deviceItem = mDeviceItemUtil.getDeviceByStoragePath(currentDevicestoragePath);
-            mDeviceItemUtil.setCurrentDevice(deviceItem);
-        } else {
-            List<DeviceItem> deviceItems = MediaController.getInstance(this).getDevices();
-            if (deviceItems != null && deviceItems.size() != 0) {
-                mDeviceItemUtil.setCurrentDevice(deviceItems.get(0));
-            }
-            currentTab = 0;
-        }
-    }
-
-
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -210,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         frameLayout.removeAllViews();
         if (csdMediaPlayer.getParent()!=null){//Sandra@20220311 add-->
             ((ViewGroup)csdMediaPlayer.getParent()).removeAllViews();
-            ((ViewGroup)csdMediaPlayer.getParent()).removeView(csdMediaPlayer);
+           // ((ViewGroup)csdMediaPlayer.getParent()).removeView(csdMediaPlayer);//Sandra@20220314 delete
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         frameLayout.addView(csdMediaPlayer);
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
@@ -258,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
             csdMediaPlayer.setUp(mMediaInfo, true, currPosition);
             csdMediaPlayer.startPlayLogic();
         }
-        ifVideo = ((ContentFragment) fragments.get(currentTab)).mediaItems.get(currPosition).isIfVideo();
     }
 
     private void initTabData() {

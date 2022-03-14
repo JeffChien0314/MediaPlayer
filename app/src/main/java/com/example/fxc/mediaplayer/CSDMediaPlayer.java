@@ -41,7 +41,7 @@ import moe.codeest.enviews.ENPlayView;
  */
 
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
-    private final String TAG = CSDMediaPlayer.class.getSimpleName();
+    private static String TAG = CSDMediaPlayer.class.getSimpleName();
     public static final String ACTION_STATE_CHANGED = "CSDMediaPlayer.stateChanged";
     public static final String  ACTION_CHANGE_STATE = "CSDMediaPlayer.changestate";
     public static final String STATE_EXTRA = "state";
@@ -59,8 +59,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public static final int STATE_ALL_REPEAT = 8;
 
     private onAutoCompletionListener mListener;
-    private MediaInfo mediaInfo;
-    public static CSDMediaPlayer mInstance;
+    private static MediaInfo mediaInfo;
+    private static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRandom;
     private ImageView imageViewAudio;
     private int playMode = 0;
@@ -214,6 +214,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             SpannableString spanText = new SpannableString(Title);
             spanText.setSpan(new TextAppearanceSpan(getActivityContext(), R.style.text_artist_style), Title.indexOf("\n"), Title.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             mTitleTextView.setText(spanText);
+            if (mediaInfo.getMediaItems().get(mPlayPosition)!=null)
             if (mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
                 imageViewAudio.setVisibility(GONE);
                 ImageView imageView = new ImageView(getActivityContext());
@@ -602,11 +603,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }else {
             editor.putInt("currentTab", 0);
         }
-        editor.putString("description", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getDescription());
-        editor.putString("storagePath", MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath());
+        if (mediaInfo.getDeviceItem()!=null){
+            editor.putString("description",mediaInfo.getDeviceItem().getDescription());
+            editor.putString("storagePath",mediaInfo.getDeviceItem().getStoragePath());
+        }
         editor.putString("title",mediaItem.getTitle());
         editor.putLong("id",mediaItem.getId());
-        Log.i(TAG, "saveData: SavePlayingStatus"+MediaPlayerService.mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath()+"\n"+mediaItem.isIfVideo()+mediaItem.getTitle()+"\n"+mediaItem.getId());
         editor.apply();
     }
 }

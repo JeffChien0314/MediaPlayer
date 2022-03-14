@@ -3,9 +3,11 @@ package com.example.fxc;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +28,7 @@ import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
+import com.example.fxc.mediaplayer.MediaItemUtil;
 import com.example.fxc.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.service.MediaPlayerService;
@@ -38,6 +41,8 @@ import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
+import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
+import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_VIDEO;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -51,6 +56,7 @@ public class ContentFragment extends Fragment {
     public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
+    private boolean ifVideo = false;
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
         public void onStartConnect() {
@@ -72,18 +78,6 @@ public class ContentFragment extends Fragment {
     };
 
 
-    ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            playingAnimation(position);
-            ((MainActivity) getActivity()).playMusic(position);
-            //Sandra@20220311 add-->
-            DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
-            CSDMediaPlayer.mInstance.setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
-            //<--Sandra@20220311 add
-        }
-    };
 
     public ContentFragment() {
         super();
@@ -192,7 +186,12 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(int mediaType, DeviceItem deviceItem) {
-        if (deviceItem == null) return;
+        if (deviceItem == null){//此对策，待验证
+            if ( CSDMediaPlayer.getInstance(mContext).getMediaInfo()!=null &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems()!=null
+                    &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size()!=0){
+                deviceItem= CSDMediaPlayer.getInstance(mContext).getMediaInfo().getDeviceItem();
+            }
+        }
         mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false).getMediaItems();
 
         listAdapter = new MediaListAdapter(mContext, mediaItems);
@@ -222,15 +221,31 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        if (DeviceItemUtil.getInstance(mContext).getCurrentDevice() != null) {
-            updateMediaList(((MainActivity) getActivity()).getCurrentTab(), (DeviceItemUtil.getInstance(mContext).getCurrentDevice()));
+        MediaInfo mMediaInfo= CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+        Log.i(TAG, "onResume: CSDMediaPlayer.mInstance.getMediaInfo();");
+        if (mMediaInfo==null){
+
+        }else {
+            if (mMediaInfo.getMediaItems() != null) {
+                if (mMediaInfo.getMediaItems().size() > 0) {
+                    if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
+                        updateMediaList(TYPE_VIDEO, mMediaInfo.getDeviceItem());
+                        TabLayout.Tab tab = ((MainActivity)getActivity()).getmTabLayout().getTabAt(TYPE_VIDEO);
+                        tab.select();
+                    } else {
+                        updateMediaList(TYPE_MUSIC, mMediaInfo.getDeviceItem());
+                        TabLayout.Tab tab= ((MainActivity)getActivity()).getmTabLayout().getTabAt(TYPE_MUSIC);
+                        tab.select();
+                    }
+                }
+
+
+            }else {
+                Log.i(TAG, "onResume: ");
+            }
         }
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
-        MediaInfo mMediaInfo =new MediaInfo(mediaItems, DeviceItemUtil.getInstance(mContext).getCurrentDevice());
-        if (mMediaInfo != null) {
-            ((MainActivity) getActivity()).csdMediaPlayer.setUp(mMediaInfo, true, 0);
-        }
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -247,14 +262,32 @@ public class ContentFragment extends Fragment {
             }
         });
     }
+    ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            playingAnimation(position);
+            ((MainActivity) getActivity()).playMusic(position);
+            //Sandra@20220311 add-->
+            DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
+            CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
+            if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(position).isIfVideo()){
+                ifVideo = true;
+            }else {
+                ifVideo = false;
+            }
+            Log.i(TAG, "onItemClick: mediaItems"+mediaItems.size());
+            //<--Sandra@20220311 add
+        }
+    };
 
     @Override
     public void onPause() {
         super.onPause();
-      //  Currentprogress = ((MainActivity) getActivity()).csdMediaPlayer.getCurrentPositionWhenPlaying();
+        if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(0).isIfVideo()) {
+            CSDMediaPlayer.getInstance(mContext).onVideoPause();
     }
-
+    }
     @Override
     public void onStop() {
         super.onStop();
