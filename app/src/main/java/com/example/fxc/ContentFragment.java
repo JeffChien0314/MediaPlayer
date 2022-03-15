@@ -187,7 +187,9 @@ public class ContentFragment extends Fragment {
         if (null != deviceItem) {
             mDeviceItem = deviceItem;
         }
-        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
+        if (MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false)!=null){
+            mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
+        }
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);
@@ -252,8 +254,9 @@ public class ContentFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
-
-            MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
+            if (mDeviceItem!=null){
+                MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
+            }
             if (MediaController.getInstance(mContext).currentSourceType == USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
                 DeviceItem deviceItem = DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
@@ -272,10 +275,12 @@ public class ContentFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        if (CSDMediaPlayer.getInstance(mContext).getMediaInfo()!=null
+                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems()!=null
+                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size()!=0){//Sandra@20220315 add
         if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(0).isIfVideo()) {
             CSDMediaPlayer.getInstance(mContext).onVideoPause();
         }
     }
-
-
+    }
 }

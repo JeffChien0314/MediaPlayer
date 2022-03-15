@@ -61,12 +61,14 @@ public class MediaPlayerService extends Service {
                     //同时需要更新文件列表
                     if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == USB_DEVICE) {
                         if (null != mediaPlayer.getMediaInfo()) {
+                            if (mediaPlayer.getMediaInfo().getDeviceItem()!=null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath()!=null){
                             if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
                                 Intent intent = new Intent(DEVICE_LOST);
                                 intent.setPackage("com.example.fxc.mediaplayer");
                                 sendBroadcast(intent);
                             }
                         }
+                    }
                     }
 
                     break;

@@ -73,6 +73,10 @@ public class MediaController {
     }*/
 
     public MediaInfo getMeidaInfosByDevice(DeviceItem deviceInfo, int media_Type, boolean needPlay) {
+        if (deviceInfo==null){
+            ArrayList<MediaItem> items = new ArrayList<>();
+            return  new MediaInfo(items, deviceInfo);
+        }
         if (needPlay) currentSourceType = deviceInfo.getType();
         if (deviceInfo.getType() == BLUETOOTH_DEVICE) {
             if (deviceInfo.getBluetoothDevice().isConnected()) {
