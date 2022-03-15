@@ -7,15 +7,10 @@
     android:background="@drawable/background_music"
     tools:context="com.example.fxc.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/mediaPlayer_csd_container"
-        android:layout_width="match_parent"
-        android:layout_height="486px"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
     <include
-        android:id="@+id/bt_player"
+        
+android:id="@+id/player"
         layout="@layout/layout_bt_media_play_control"
         android:layout_width="match_parent"
         android:layout_height="486px"
@@ -28,10 +23,13 @@
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container">
-
+        
+app:layout_constraintTop_toBottomOf="@id/player"
+        tools:ignore="MissingConstraints">
+<!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
         <View
             android:id="@+id/input_source_indicated"
             android:layout_width="108px"
