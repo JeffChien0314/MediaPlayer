@@ -36,11 +36,17 @@ import com.example.fxc.util.applicationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_ALL_REPEAT;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_NEXT;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PREVIOUS;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_RANDOM_CLOSE;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_RANDOM_OPEN;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_SINGLE_REPEAT;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
     private int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer csdMediaPlayer;
@@ -154,6 +160,10 @@ public class MainActivity extends AppCompatActivity {
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
+        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(this).getMediaInfo();
+        if (mMediaInfo != null) {
+            mDeviceItemUtil.setCurrentDevice(mMediaInfo.getDeviceItem());
+        }
         updateDeviceListView();
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -233,35 +243,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onPlayModeClick(View v) {
-        switch (playMode) {
-            case 0://列表循环
-                playMode = 1;
-                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
-                MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_SINGLE_REPEAT, -1);
-                Log.i("main", "Jennifertest7=: " + playMode);
-                break;
-            case 1://单曲循环
-                playMode = 0;
-                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
-                MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_ALL_REPEAT, -1);
-                Log.i("main", "Jennifertest8=: " + playMode);
-                break;
-
-        }
-    }
-
-    public void onRandomOpenClick(View v) {
-        if (randomOpen == false) {
-            randomOpen = true;
-            mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
-            MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_OPEN, -1);
-        } else {
-            randomOpen = false;
-            MediaController.getInstance(this).setPlayerState(CSDMediaPlayer.STATE_RANDOM_CLOSE, -1);
-            mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
-        }
-    }
 
     public void onInputSourceClick(View v) {
         if (devicelistview.getVisibility() == View.GONE) {
@@ -337,6 +318,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setPlayerLayer(int device_Type) {
+        Log.i(TAG, "setPlayerLayer: device_Type="+device_Type);
         switch (device_Type) {
             case BLUETOOTH_DEVICE:
                 mFrameLayout.setVisibility(View.GONE);
@@ -349,4 +331,51 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    @Override
+    public void onClick(View v) {
+        int state = CSDMediaPlayer.STATE_PLAY;
+        switch (v.getId()) {
+            case R.id.bt_next:
+                state = STATE_NEXT;
+                break;
+            case R.id.bt_previous:
+                state = STATE_PREVIOUS;
+                break;
+            case R.id.bt_start:
+                break;
+            case R.id.play_mode:
+                switch (playMode) {
+                    case 0://列表循环
+                        playMode = 1;
+                        state = STATE_SINGLE_REPEAT;
+                        mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                     //   MediaController.getInstance(this).setPlayerState(STATE_SINGLE_REPEAT, -1);
+                        Log.i("main", "Jennifertest7=: " + playMode);
+                        break;
+                    case 1://单曲循环
+                        playMode = 0;
+                        state=STATE_ALL_REPEAT;
+                        mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                       // MediaController.getInstance(this).setPlayerState(STATE_ALL_REPEAT, -1);
+                        Log.i("main", "Jennifertest8=: " + playMode);
+                        break;
+                }
+                break;
+            case R.id.random:
+                if (randomOpen == false) {
+                    randomOpen = true;
+                    state=STATE_RANDOM_OPEN;
+                    mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+                 //   MediaController.getInstance(this).setPlayerState(STATE_RANDOM_OPEN, -1);
+                } else {
+                    randomOpen = false;
+                    state=STATE_RANDOM_CLOSE;
+                   // MediaController.getInstance(this).setPlayerState(STATE_RANDOM_CLOSE, -1);
+                    mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+                }
+                break;
+        }
+        MediaController.getInstance(this).setPlayerState(state, -1);
+    }
 }

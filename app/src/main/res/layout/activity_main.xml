@@ -9,8 +9,7 @@
 
 
     <include
-        
-android:id="@+id/player"
+        android:id="@+id/player"
         layout="@layout/layout_bt_media_play_control"
         android:layout_width="match_parent"
         android:layout_height="486px"
@@ -26,8 +25,7 @@ android:id="@+id/player"
 
         android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical"
-        
-app:layout_constraintTop_toBottomOf="@id/player"
+        app:layout_constraintTop_toBottomOf="@id/player"
         tools:ignore="MissingConstraints">
 <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
         <View
@@ -68,7 +66,7 @@ app:layout_constraintTop_toBottomOf="@id/player"
                 android:layout_height="60px"
                 android:layout_marginTop="30px"
                 android:background="@drawable/icon_shuffle_normal"
-                android:onClick="onRandomOpenClick" />
+                android:onClick="onClick" />
 
             <ImageView
                 android:id="@+id/play_mode"
@@ -77,7 +75,7 @@ app:layout_constraintTop_toBottomOf="@id/player"
                 android:layout_marginLeft="60px"
                 android:layout_marginTop="30px"
                 android:background="@drawable/icon_repeat_normal"
-                android:onClick="onPlayModeClick" />
+                android:onClick="onClick" />
         </LinearLayout>
         <ListView
             android:id="@+id/input_source_list"

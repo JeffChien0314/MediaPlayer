@@ -12,6 +12,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
 
 import java.util.List;
@@ -45,8 +46,8 @@ public class MediaBroswerConnector {
     private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
     private static MediaBroswerConnector mInstance;
     private boolean isBtPlaying = false;
-    private MediaItem currentBtItem;
-
+    private MediaItem currentBtItem;//需要通知UI显示内容
+    private MediaInfo mediaInfo;
 
     public static MediaBroswerConnector getInstance() {
         if (mInstance == null) {
@@ -188,8 +189,7 @@ public class MediaBroswerConnector {
             case PLAYSTATE_CHANGED:
                 intent.putExtra(PLAYSTATE_CHANGED + "", (Boolean) value);
                 break;
-            case MEDIAITEM_CHANGED:
-                //目前第几首要计算，后续增加
+            case MEDIAITEM_CHANGED:  //目前第几首要计算，后续增加
                 intent.putExtra(MEDIAITEM_CHANGED + "", currentBtItem);
                 break;
             case REPEATMODE_CHANGED:

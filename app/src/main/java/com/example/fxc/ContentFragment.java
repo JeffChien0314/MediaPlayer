@@ -55,7 +55,7 @@ public class ContentFragment extends Fragment {
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private DeviceItem mDeviceItem;
-    private boolean ifVideo = false;
+    // private boolean ifVideo = false;
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
         public void onStartConnect() {
@@ -75,7 +75,6 @@ public class ContentFragment extends Fragment {
             Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
         }
     };
-
 
 
     public ContentFragment() {
@@ -185,15 +184,10 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(int mediaType, DeviceItem deviceItem) {
-        mDeviceItem = deviceItem;
-        if (deviceItem == null){//此对策，待验证
-            if ( CSDMediaPlayer.getInstance(mContext).getMediaInfo()!=null &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems()!=null
-                    &&  CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size()!=0){
-                deviceItem= CSDMediaPlayer.getInstance(mContext).getMediaInfo().getDeviceItem();
-            }
+        if (null != deviceItem) {
+            mDeviceItem = deviceItem;
         }
-        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false).getMediaItems();
-
+        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);
@@ -211,26 +205,26 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        MediaInfo mMediaInfo= CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
         Log.i(TAG, "onResume: CSDMediaPlayer.mInstance.getMediaInfo();");
-        if (mMediaInfo==null){
+        if (mMediaInfo == null) {
 
-        }else {
+        } else {
             if (mMediaInfo.getMediaItems() != null) {
                 if (mMediaInfo.getMediaItems().size() > 0) {
                     if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
                         updateMediaList(TYPE_VIDEO, mMediaInfo.getDeviceItem());
-                        TabLayout.Tab tab = ((MainActivity)getActivity()).getmTabLayout().getTabAt(TYPE_VIDEO);
+                        TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(TYPE_VIDEO);
                         tab.select();
                     } else {
                         updateMediaList(TYPE_MUSIC, mMediaInfo.getDeviceItem());
-                        TabLayout.Tab tab= ((MainActivity)getActivity()).getmTabLayout().getTabAt(TYPE_MUSIC);
+                        TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(TYPE_MUSIC);
                         tab.select();
                     }
                 }
 
 
-            }else {
+            } else {
                 Log.i(TAG, "onResume: ");
             }
         }
@@ -252,27 +246,26 @@ public class ContentFragment extends Fragment {
             }
         });
     }
+
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
+
             MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
             if (MediaController.getInstance(mContext).currentSourceType == USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
-            } else {//设置蓝牙选中歌曲播放
-             //   MediaController.getInstance(mContext).setPlayerState();
+                DeviceItem deviceItem = DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
+                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, deviceItem));
+                //  ifVideo=CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(position).isIfVideo();
+                Log.i(TAG, "onItemClick: mediaItems" + mediaItems.size());
+                //<--Sandra@20220311 add
+            } else {//设置蓝牙选中歌曲播放，还有控制Activity的UI设置
+
+                //   MediaController.getInstance(mContext).setPlayerState();
             }
-            
-            DeviceItem deviceItem=DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
-            CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems,deviceItem ));
-            if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(position).isIfVideo()){
-                ifVideo = true;
-            }else {
-                ifVideo = false;
-            }
-            Log.i(TAG, "onItemClick: mediaItems"+mediaItems.size());
-            //<--Sandra@20220311 add
+            ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
         }
     };
 
@@ -281,8 +274,8 @@ public class ContentFragment extends Fragment {
         super.onPause();
         if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(0).isIfVideo()) {
             CSDMediaPlayer.getInstance(mContext).onVideoPause();
+        }
     }
-    }
-   
+
 
 }

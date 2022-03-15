@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
-xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-android:background="@drawable/background_music"
+    android:background="@drawable/background_music"
     tools:context="com.example.fxc.MainActivity">
     <FrameLayout
         android:id="@+id/mediaPlayer_csd_container"
@@ -23,62 +22,62 @@ android:background="@drawable/background_music"
         android:background="@android:color/black"
         android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/audiocover" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/audiocover" />
     <!--TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30px"
-        android:layout_marginTop="30px"
-        android:textColor="@android:color/white"
-        android:textSize="28px"
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30px"
+            android:layout_marginTop="30px"
+            android:textColor="@android:color/white"
+            android:textSize="28px"
         android:text="title" />
-    <TextView
-        android:id="@+id/current"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:text="current time00:00"
-        android:textColor="#ffffff"
+        <TextView
+            android:id="@+id/current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="current time00:00"
+            android:textColor="#ffffff"
         android:layout_below="@+id/title"/>
 
-    <SeekBar
-        android:id="@+id/progress"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_below="@+id/current"
-        android:layout_weight="1.0"
-        android:background="@null"
-        android:max="100"
-        android:maxHeight="4dp"
-        android:minHeight="4dp"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:progressDrawable="@drawable/video_seek_progress"
+        <SeekBar
+            android:id="@+id/progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_below="@+id/current"
+            android:layout_weight="1.0"
+            android:background="@null"
+            android:max="100"
+            android:maxHeight="4dp"
+            android:minHeight="4dp"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:progressDrawable="@drawable/video_seek_progress"
         android:thumb="@drawable/video_seek_thumb" />
 
-    <TextView
-        android:id="@+id/total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        android:layout_below="@+id/progress"
-        android:text="total:00:00"
-        android:textColor="#ffffff"
-        tools:ignore="MissingConstraints" />
+        <TextView
+            android:id="@+id/total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:layout_below="@+id/progress"
+            android:text="total:00:00"
+            android:textColor="#ffffff"
+            tools:ignore="MissingConstraints" />
 
-    <ImageView
-        android:id="@+id/fullscreen"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:paddingRight="16dp"
-        android:scaleType="center"
-        android:layout_below="@+id/total"
-        android:src="@drawable/video_enlarge"
+        <ImageView
+            android:id="@+id/fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:paddingRight="16dp"
+            android:scaleType="center"
+            android:layout_below="@+id/total"
+            android:src="@drawable/video_enlarge"
         tools:ignore="MissingConstraints" />-->
         <LinearLayout
             android:id="@+id/layout_bottom"
@@ -173,34 +172,37 @@ android:background="@drawable/background_music"
 
 
         <ImageView
-        android:id="@+id/start"
-        android:layout_width="120px"
-        android:layout_height="120px"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/icon_play_normal"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/bt_previous"
-        android:layout_width="120px"
-        android:layout_height="120px"
-        android:layout_marginRight="108px"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/start"
-        android:scaleType="fitXY"
-        android:src="@drawable/icon_skip_back_normal"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/bt_next"
-        android:layout_width="120px"
-        android:layout_height="120px"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/start"
-        android:layout_marginLeft="108px"
-        android:scaleType="fitXY"
-        android:src="@drawable/icon_skip_fwd_normal"
-        tools:ignore="MissingConstraints" />
+        android:id="@+id/bt_start"
+            android:layout_width="120px"
+            android:layout_height="120px"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:onClick="onClick"
+            android:src="@drawable/icon_play_normal"
+            tools:ignore="MissingConstraints" />
+        <ImageView
+            android:id="@+id/bt_previous"
+            android:layout_width="120px"
+            android:layout_height="120px"
+            android:layout_marginRight="108px"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/start"
+            android:scaleType="fitXY"
+            android:onClick="onClick"
+            android:src="@drawable/icon_skip_back_normal"
+            tools:ignore="MissingConstraints" />
+        <ImageView
+            android:id="@+id/bt_next"
+            android:layout_width="120px"
+            android:layout_height="120px"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/start"
+            android:layout_marginLeft="108px"
+            android:scaleType="fitXY"
+            android:onClick="onClick"
+            android:src="@drawable/icon_skip_fwd_normal"
+            tools:ignore="MissingConstraints" />
 
 
 </RelativeLayout>
