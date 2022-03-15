@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -11,14 +14,17 @@ import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
+import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
@@ -102,6 +108,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         mPrevious = findViewById(R.id.bt_previous);
         mNext = findViewById(R.id.bt_next);
         imageViewAudio = (ImageView) findViewById(R.id.audiocover);
+        mFullscreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mContext instanceof Activity) {
+                    startWindowFullscreen(mContext, true, true);
+                }
+            }
+        });
         mPrevious.setOnClickListener(this);
         mNext.setOnClickListener(this);
     }
@@ -247,6 +261,59 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             }
         }
         return gsyBaseVideoPlayer;
+    }
+    @Override
+    protected void resolveFullVideoShow(Context context, final GSYBaseVideoPlayer gsyVideoPlayer, final FrameLayout frameLayout){
+        LayoutParams lp = (LayoutParams) gsyVideoPlayer.getLayoutParams();
+        lp.setMargins(0, 0, 0, 0);
+        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        lp.gravity = Gravity.CENTER;
+        gsyVideoPlayer.setLayoutParams(lp);
+        gsyVideoPlayer.setIfCurrentIsFullscreen(true);
+        mOrientationUtils = new OrientationUtils((Activity) context, gsyVideoPlayer);
+        mOrientationUtils.setEnable(isRotateViewAuto());
+        mOrientationUtils.setRotateWithSystem(mRotateWithSystem);
+        //gsyVideoPlayer.mOrientationUtils = mOrientationUtils;
+
+        final boolean isVertical = isVerticalFullByVideoSize();
+        final boolean isLockLand = isLockLandByAutoFullSize();
+
+        if (isShowFullAnimation()) {
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Debuger.printfLog("GSYVideoBase resolveFullVideoShow isVerticalFullByVideoSize " + isVertical);
+                    //autoFull模式下，非横屏视频视频不横屏，并且不自动旋转
+                    if (!isVertical && isLockLand && mOrientationUtils.getIsLand() != 1) {
+                        mOrientationUtils.resolveByClick();
+                    }
+                    gsyVideoPlayer.setVisibility(VISIBLE);
+                    frameLayout.setVisibility(VISIBLE);
+                    if(!mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
+                        Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
+                        Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
+                        frameLayout.setBackground(drawable);
+                        //gsyVideoPlayer.setBackground(drawable);
+                    }
+                }
+            }, 200);
+        } else {
+            if (!isVertical && isLockLand) {
+                mOrientationUtils.resolveByClick();
+            }
+            gsyVideoPlayer.setVisibility(VISIBLE);
+            frameLayout.setVisibility(VISIBLE);
+        }
+
+
+        if (mVideoAllCallBack != null) {
+            Debuger.printfError("onEnterFullscreen");
+            mVideoAllCallBack.onEnterFullscreen(mOriginUrl, mTitle, gsyVideoPlayer);
+        }
+        mIfCurrentIsFullscreen = true;
+
+        checkoutState();
     }
 
     @Override
