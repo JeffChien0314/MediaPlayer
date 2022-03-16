@@ -22,7 +22,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.fxc.bt.client.MediaBroswerConnector;
+import com.example.fxc.bt.client.MediaBrowserConnecter;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
@@ -84,7 +84,7 @@ public class MediaPlayerService extends Service {
         Log.i(TAG, "onCreate: ");
         isAlive = true;
         registerReceiver();
-        MediaBroswerConnector.getInstance().initBroswer(this.getApplicationContext());
+        MediaBrowserConnecter.getInstance().initBroswer(this.getApplicationContext());
         mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
@@ -287,7 +287,7 @@ public class MediaPlayerService extends Service {
                     if (USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
                         mediaPlayer.mediaControl(state, pos);
                     } else {//蓝牙设备控制
-                        MediaBroswerConnector.getInstance().setBTDeviceState(state, pos);
+                        MediaBrowserConnecter.getInstance().setBTDeviceState(state, pos);
                     }
 
                     break;

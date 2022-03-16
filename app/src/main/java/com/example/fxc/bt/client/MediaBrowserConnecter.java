@@ -18,15 +18,11 @@ import com.example.fxc.mediaplayer.MediaItem;
 import java.util.List;
 
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_ID;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.MEDIAITEM_CHANGED;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.PLAYSTATE_CHANGED;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.REPEATMODE_CHANGED;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.SHUFFLEMODE_CHANGED;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.*;
 
-public class MediaBroswerConnector {
-    private final String TAG = MediaBroswerConnector.class.getSimpleName();
-    public static final int STATE_PLAY = 0;
+public class MediaBrowserConnecter {
+    private final String TAG = MediaBrowserConnecter.class.getSimpleName();
+  /*  public static final int STATE_PLAY = 0;
     public static final int STATE_PAUSE = 1;
     public static final int STATE_REPEAT_MODE_ONE = 2;
     public static final int STATE_REPEAT_MODE_ALL = 3;
@@ -35,7 +31,7 @@ public class MediaBroswerConnector {
     public static final int STATE_SKIP2NEXT = 6;
     public static final int STATE_SKIP2PREVIOUS = 7;
     public static final int STATE_SKIP2ITEM = 8;
-    public static final int STATE_SEEKTO = 9;
+    public static final int STATE_SEEKTO = 9;*/
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaBrowserConnectionCallback mConnectionCallback;
@@ -44,14 +40,14 @@ public class MediaBroswerConnector {
     private Context mContext;
     private String packageName = "com.android.bluetooth";
     private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
-    private static MediaBroswerConnector mInstance;
+    private static MediaBrowserConnecter mInstance;
     private boolean isBtPlaying = false;
     private MediaItem currentBtItem;//需要通知UI显示内容
     private MediaInfo mediaInfo;
 
-    public static MediaBroswerConnector getInstance() {
+    public static MediaBrowserConnecter getInstance() {
         if (mInstance == null) {
-            mInstance = new MediaBroswerConnector();
+            mInstance = new MediaBrowserConnecter();
         }
         return mInstance;
     }
@@ -210,23 +206,23 @@ public class MediaBroswerConnector {
             case STATE_PAUSE:
                 mMediaController.getTransportControls().pause();
                 break;
-            case STATE_REPEAT_MODE_ONE:
-            case STATE_REPEAT_MODE_ALL:
+            case STATE_SINGLE_REPEAT:
+            case STATE_ALL_REPEAT:
                 mMediaController.getTransportControls().setRepeatMode(state - 1);//因为使用sdk定义会有case的重复，所以自定义相关case内容
                 break;
-            case STATE_SHUFFLE_MODE_ALL:
-            case STATE_SHUFFLE_MODE_NONE:
+            case STATE_RANDOM_OPEN:
+            case STATE_RANDOM_CLOSE:
                 mMediaController.getTransportControls().setShuffleMode(state - 4);
                 break;
-            case STATE_SKIP2NEXT:
+            case STATE_NEXT:
                 mMediaController.getTransportControls().skipToNext();
                 break;
-            case STATE_SKIP2PREVIOUS:
+            case STATE_PREVIOUS:
                 mMediaController.getTransportControls().skipToPrevious();
                 break;
-            case STATE_SKIP2ITEM://还要确认点击事件怎么播放
+          /*  case STATE_SKIP2ITEM://还要确认点击事件怎么播放
                 mMediaController.getTransportControls().skipToQueueItem(value);
-                break;
+                break;*/
             case STATE_SEEKTO://快进快退的位置
                 mMediaController.getTransportControls().seekTo(value);
                 break;

@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void setPlayerLayer(int device_Type) {
-        Log.i(TAG, "setPlayerLayer: device_Type="+device_Type);
+        Log.i(TAG, "setPlayerLayer: device_Type=" + device_Type);
         switch (device_Type) {
             case BLUETOOTH_DEVICE:
                 mFrameLayout.setVisibility(View.GONE);
@@ -350,14 +350,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         playMode = 1;
                         state = STATE_SINGLE_REPEAT;
                         mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
-                     //   MediaController.getInstance(this).setPlayerState(STATE_SINGLE_REPEAT, -1);
+                        //   MediaController.getInstance(this).setPlayerState(STATE_SINGLE_REPEAT, -1);
                         Log.i("main", "Jennifertest7=: " + playMode);
                         break;
                     case 1://单曲循环
                         playMode = 0;
-                        state=STATE_ALL_REPEAT;
+                        state = STATE_ALL_REPEAT;
                         mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
-                       // MediaController.getInstance(this).setPlayerState(STATE_ALL_REPEAT, -1);
+                        // MediaController.getInstance(this).setPlayerState(STATE_ALL_REPEAT, -1);
                         Log.i("main", "Jennifertest8=: " + playMode);
                         break;
                 }
@@ -365,13 +365,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.random:
                 if (randomOpen == false) {
                     randomOpen = true;
-                    state=STATE_RANDOM_OPEN;
+                    state = STATE_RANDOM_OPEN;
                     mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
-                 //   MediaController.getInstance(this).setPlayerState(STATE_RANDOM_OPEN, -1);
+                    //   MediaController.getInstance(this).setPlayerState(STATE_RANDOM_OPEN, -1);
                 } else {
                     randomOpen = false;
-                    state=STATE_RANDOM_CLOSE;
-                   // MediaController.getInstance(this).setPlayerState(STATE_RANDOM_CLOSE, -1);
+                    state = STATE_RANDOM_CLOSE;
+                    // MediaController.getInstance(this).setPlayerState(STATE_RANDOM_CLOSE, -1);
                     mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
                 }
                 break;
