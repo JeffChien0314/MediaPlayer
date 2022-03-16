@@ -13,7 +13,8 @@
         android:id="@+id/playlist_icon"
         android:layout_width="90px"
         android:layout_height="90px"
-        android:layout_marginLeft="60px" />
+        
+android:layout_marginLeft="60px" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,7 +50,8 @@
         android:visibility="gone"
         android:layout_toRightOf="@+id/playlist" />
     <TextView
-        android:layout_width="60px"
+        
+android:layout_width="60px"
         android:layout_height="wrap_content"
         android:text="00:00:00"
         android:layout_marginLeft="3px"

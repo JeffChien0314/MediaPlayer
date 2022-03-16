@@ -14,17 +14,14 @@ import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
-import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.ListGSYVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
@@ -111,7 +108,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         mFullscreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mContext instanceof Activity) {
+                if (mContext instanceof Activity) {
                     startWindowFullscreen(mContext, true, true);
                 }
             }
@@ -152,54 +149,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
 
-    /*
-
-     */
-/**
- * 设置播放URL
- *
- * @param url           播放url
- * @param position      需要播放的位置
- * @param cacheWithPlay 是否边播边缓存
- * @return
- *//*
-
-    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, int playmode) {
-        return setUp(url, cacheWithPlay, position, null, new HashMap<String, String>());
-    }
-
-    */
-/**
- * 设置播放URL
- *
- * @param url           播放url
- * @param cacheWithPlay 是否边播边缓存
- * @param position      需要播放的位置
- * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
- * @return
- *//*
-
-    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath) {
-        return setUp(url, cacheWithPlay, position, cachePath, new HashMap<String, String>());
-    }
-
-    */
-/**
- * 设置播放URL
- *
- * @param url           播放url
- * @param cacheWithPlay 是否边播边缓存
- * @param position      需要播放的位置
- * @param cachePath     缓存路径，如果是M3U8或者HLS，请设置为false
- * @param mapHeadData   http header
- * @return
- *//*
-
-    public boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath, Map<String, String> mapHeadData) {
-        return setUp(url, cacheWithPlay, position, cachePath, mapHeadData, true);
-    }
-*/
-
     /**
      * 设置播放URL
      *
@@ -223,18 +172,23 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             SpannableString spanText = new SpannableString(Title);
             spanText.setSpan(new TextAppearanceSpan(getActivityContext(), R.style.text_artist_style), Title.indexOf("\n"), Title.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             mTitleTextView.setText(spanText);
-            if (mediaInfo.getMediaItems().get(mPlayPosition)!=null)
+            imageViewAudio.setVisibility(GONE);//暂时GONE
+            if (mediaInfo.getMediaItems().get(mPlayPosition) != null)
             if (mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
-                imageViewAudio.setVisibility(GONE);
+                findViewById(R.id.surface_container).setBackground(null);
+               /*  imageViewAudio.setVisibility(GONE);
                 ImageView imageView = new ImageView(getActivityContext());
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
                 mThumbImageViewLayout.removeAllViews();
-                setThumbImageView(imageView);
+                setThumbImageView(imageView);*/
             } else {
-                imageViewAudio.setVisibility(VISIBLE);
+                Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
+                Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
+                findViewById(R.id.surface_container).setBackground(drawable);
+               /* imageViewAudio.setVisibility(VISIBLE);
                 imageViewAudio.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageViewAudio.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
+                imageViewAudio.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());*/
             }
         }
         return set;
@@ -248,6 +202,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         st.mPlayPosition = sf.mPlayPosition;
         st.mUriList = sf.mUriList;
         st.mediaInfo = sf.mediaInfo;
+        if (!mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
+            Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
+            Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
+            to.findViewById(R.id.surface_container).setBackground(drawable);
+        } else {
+            findViewById(R.id.surface_container).setBackground(null);
+        }
+
     }
 
     @Override
@@ -261,59 +223,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             }
         }
         return gsyBaseVideoPlayer;
-    }
-    @Override
-    protected void resolveFullVideoShow(Context context, final GSYBaseVideoPlayer gsyVideoPlayer, final FrameLayout frameLayout){
-        LayoutParams lp = (LayoutParams) gsyVideoPlayer.getLayoutParams();
-        lp.setMargins(0, 0, 0, 0);
-        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        lp.gravity = Gravity.CENTER;
-        gsyVideoPlayer.setLayoutParams(lp);
-        gsyVideoPlayer.setIfCurrentIsFullscreen(true);
-        mOrientationUtils = new OrientationUtils((Activity) context, gsyVideoPlayer);
-        mOrientationUtils.setEnable(isRotateViewAuto());
-        mOrientationUtils.setRotateWithSystem(mRotateWithSystem);
-        //gsyVideoPlayer.mOrientationUtils = mOrientationUtils;
-
-        final boolean isVertical = isVerticalFullByVideoSize();
-        final boolean isLockLand = isLockLandByAutoFullSize();
-
-        if (isShowFullAnimation()) {
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Debuger.printfLog("GSYVideoBase resolveFullVideoShow isVerticalFullByVideoSize " + isVertical);
-                    //autoFull模式下，非横屏视频视频不横屏，并且不自动旋转
-                    if (!isVertical && isLockLand && mOrientationUtils.getIsLand() != 1) {
-                        mOrientationUtils.resolveByClick();
-                    }
-                    gsyVideoPlayer.setVisibility(VISIBLE);
-                    frameLayout.setVisibility(VISIBLE);
-                    if(!mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
-                        Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
-                        Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
-                        frameLayout.setBackground(drawable);
-                        //gsyVideoPlayer.setBackground(drawable);
-                    }
-                }
-            }, 200);
-        } else {
-            if (!isVertical && isLockLand) {
-                mOrientationUtils.resolveByClick();
-            }
-            gsyVideoPlayer.setVisibility(VISIBLE);
-            frameLayout.setVisibility(VISIBLE);
-        }
-
-
-        if (mVideoAllCallBack != null) {
-            Debuger.printfError("onEnterFullscreen");
-            mVideoAllCallBack.onEnterFullscreen(mOriginUrl, mTitle, gsyVideoPlayer);
-        }
-        mIfCurrentIsFullscreen = true;
-
-        checkoutState();
     }
 
     @Override
@@ -658,21 +567,23 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         //updateStartImage();
     }
     public void saveData() {
-        if (mediaInfo==null){return;}
+        if (mediaInfo == null) {
+            return;
+        }
         SharedPreferences sharedPreferences = getActivityContext().getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE); //私有数据
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
-        MediaItem mediaItem=mediaInfo.getMediaItems().get(mPlayPosition);
-        if (mediaItem.isIfVideo()){
+        MediaItem mediaItem = mediaInfo.getMediaItems().get(mPlayPosition);
+        if (mediaItem.isIfVideo()) {
             editor.putInt("currentTab", 1);
-        }else {
+        } else {
             editor.putInt("currentTab", 0);
         }
-        if (mediaInfo.getDeviceItem()!=null){
-            editor.putString("description",mediaInfo.getDeviceItem().getDescription());
-            editor.putString("storagePath",mediaInfo.getDeviceItem().getStoragePath());
+        if (mediaInfo.getDeviceItem() != null) {
+            editor.putString("description", mediaInfo.getDeviceItem().getDescription());
+            editor.putString("storagePath", mediaInfo.getDeviceItem().getStoragePath());
         }
-        editor.putString("title",mediaItem.getTitle());
-        editor.putLong("id",mediaItem.getId());
+        editor.putString("title", mediaItem.getTitle());
+        editor.putLong("id", mediaItem.getId());
         editor.apply();
     }
 }

@@ -187,9 +187,7 @@ public class ContentFragment extends Fragment {
         if (null != deviceItem) {
             mDeviceItem = deviceItem;
         }
-        if (MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false)!=null){
-            mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
-        }
+        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);
@@ -255,7 +253,7 @@ public class ContentFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
             if (mDeviceItem!=null){
-                MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
+            MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
             }
             if (MediaController.getInstance(mContext).currentSourceType == USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
