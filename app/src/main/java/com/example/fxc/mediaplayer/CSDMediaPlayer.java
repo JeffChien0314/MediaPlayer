@@ -62,8 +62,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
-    private ImageView mPrevious, mNext, mRandom;
-    private ImageView imageViewAudio;
+    private ImageView mPrevious, mNext;
     private int playMode = 0;
     private boolean randomOpen = false;
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
@@ -104,7 +103,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         super.init(context);
         mPrevious = findViewById(R.id.bt_previous);
         mNext = findViewById(R.id.bt_next);
-        imageViewAudio = (ImageView) findViewById(R.id.audiocover);
         mFullscreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,23 +170,18 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             SpannableString spanText = new SpannableString(Title);
             spanText.setSpan(new TextAppearanceSpan(getActivityContext(), R.style.text_artist_style), Title.indexOf("\n"), Title.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             mTitleTextView.setText(spanText);
-            imageViewAudio.setVisibility(GONE);//暂时GONE
             if (mediaInfo.getMediaItems().get(mPlayPosition) != null)
             if (mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
                 findViewById(R.id.surface_container).setBackground(null);
-               /*  imageViewAudio.setVisibility(GONE);
                 ImageView imageView = new ImageView(getActivityContext());
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
                 mThumbImageViewLayout.removeAllViews();
-                setThumbImageView(imageView);*/
+                setThumbImageView(imageView);
             } else {
                 Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
                 Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
                 findViewById(R.id.surface_container).setBackground(drawable);
-               /* imageViewAudio.setVisibility(VISIBLE);
-                imageViewAudio.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageViewAudio.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());*/
             }
         }
         return set;
@@ -488,7 +481,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 imageView.setImageResource(R.drawable.icon_play_normal);
             }
         }
-        broadCastStateChanged(PLAYSTATE_CHANGED);
+        //broadCastStateChanged(PLAYSTATE_CHANGED);
     }
 
 
@@ -511,13 +504,13 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Intent intent = new Intent(ACTION_STATE_CHANGED_BROADCAST);
         intent.setPackage("com.example.fxc.mediaplayer");
         switch (extraName) {
-            case PLAYSTATE_CHANGED:
+            /*case PLAYSTATE_CHANGED:
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
-                break;
-           /* case MEDIAITEM_CHANGED:
-                intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
-                intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;*/
+            case MEDIAITEM_CHANGED:
+                //intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
+                intent.putExtra(POS_EXTRA, mPlayPosition);
+                break;
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
         mContext.sendBroadcast(intent);

@@ -36,6 +36,8 @@ import com.example.fxc.util.applicationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_ALL_REPEAT;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_NEXT;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PREVIOUS;
@@ -286,10 +288,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void registerReceiver() {
         IntentFilter intentFilter = new IntentFilter(ACTION_DEVICE_CHANGED);// sd卡被插入，且已经挂载
         registerReceiver(DeviceChangedReceiver, intentFilter);
+        IntentFilter Filter = new IntentFilter(ACTION_STATE_CHANGED_BROADCAST);// sd卡被插入，且已经挂载
+        registerReceiver(mPositionChangedReceiver, Filter);
     }
 
     public void unregisterReceiver() {
         unregisterReceiver(DeviceChangedReceiver);
+        unregisterReceiver(mPositionChangedReceiver);
     }
 
     private final BroadcastReceiver DeviceChangedReceiver = new BroadcastReceiver() {
@@ -303,6 +308,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 default:
                     break;
+            }
+        }
+    };
+    private final BroadcastReceiver mPositionChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+            currPosition=intent.getIntExtra(POS_EXTRA,-1);
+            if(currPosition != -1){
+                ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
             }
         }
     };
