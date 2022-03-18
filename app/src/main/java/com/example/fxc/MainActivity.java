@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,29 +26,27 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.example.fxc.bt.client.MediaBrowserConnecter;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
 import com.example.fxc.mediaplayer.DeviceItemUtil;
 import com.example.fxc.mediaplayer.DeviceListAdapter;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaInfo;
+import com.example.fxc.mediaplayer.MediaItem;
+import com.example.fxc.mediaplayer.MediaSeekBar;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.util.applicationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_MEDIAITEM_CHANGED_BROADCAST;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_ALL_REPEAT;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_NEXT;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PREVIOUS;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_RANDOM_CLOSE;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_RANDOM_OPEN;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_SINGLE_REPEAT;
-import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
+import static com.example.fxc.mediaplayer.Constants.*;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected ImageView mInputSourceButton;
     private FrameLayout mFrameLayout;
     private View mBtPlayerLayer;
-
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DeviceItemUtil mDeviceItemUtil;
 
     private final int UPDATE_DEVICE_LIST = 1;
+    private final int UPDATE_MEDIAITEM = 2;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -95,6 +96,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             currentTab = 0;
                         }
                     }
+                    break;
+                case UPDATE_MEDIAITEM:
+                    // MediaItem item=new Gson().fromJson(getIntent())
+                    Bundle bundle = message.getData();
+                    updateMediaItem(bundle);
                     break;
 
                 default:
@@ -139,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
+        csdMediaPlayer.setContext(this);
         mBtPlayerLayer = findViewById(R.id.bt_player);
         mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
@@ -149,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mFrameLayout.setVisibility(View.GONE);
         } else {
             mBtPlayerLayer.setVisibility(View.GONE);
+            ((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.seekBar))).setMediaController(MediaBrowserConnecter.getInstance().getMediaController());
         }
 
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
@@ -286,44 +294,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void registerReceiver() {
-        IntentFilter intentFilter = new IntentFilter(ACTION_DEVICE_CHANGED);// sd卡被插入，且已经挂载
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_DEVICE_CHANGED);
+        intentFilter.addAction(ACTION_STATE_CHANGED_BROADCAST);
+        intentFilter.addAction(ACTION_MEDIAITEM_CHANGED_BROADCAST);
         registerReceiver(DeviceChangedReceiver, intentFilter);
-        IntentFilter Filter = new IntentFilter(ACTION_STATE_CHANGED_BROADCAST);// sd卡被插入，且已经挂载
-        registerReceiver(mPositionChangedReceiver, Filter);
+
     }
 
     public void unregisterReceiver() {
         unregisterReceiver(DeviceChangedReceiver);
-        unregisterReceiver(mPositionChangedReceiver);
     }
 
+    /**
+     * 设备列表变更
+     * 播放状态变更
+     * MediaItem变更
+     */
     private final BroadcastReceiver DeviceChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.i(TAG, "onReceive: action22" + action);
+      //      Log.i(TAG, "onReceive: action22" + action);
             switch (action) {
                 case ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
+                    break;
+                case ACTION_MEDIAITEM_CHANGED_BROADCAST:
+                    Message message = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(MEDIAITEM_CHANGED + "", intent.getParcelableExtra(MEDIAITEM_CHANGED + ""));
+                    bundle.putInt(POS_EXTRA, intent.getIntExtra(POS_EXTRA, -1));
+                    message.setData(bundle);
+                    message.what = UPDATE_MEDIAITEM;
+                    handler.sendMessage(message);
+                    break;
+                case ACTION_STATE_CHANGED_BROADCAST:
+
+                    if (null != intent.getExtras()) {
+                        //    updateStateButton(intent);
+
+                    }
+
                     break;
                 default:
                     break;
             }
         }
     };
-    private final BroadcastReceiver mPositionChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
-            currPosition=intent.getIntExtra(POS_EXTRA,-1);
-            if(currPosition != -1){
-                ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
-            }
-        }
-    };
 
+    /**
+     * 更新设备列表
+     */
     public void updateDeviceListView() {
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {
             externalDeviceItems.clear();
@@ -334,6 +356,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         devicelistview.invalidateViews();
     }
 
+    /**
+     * 本地播放跟蓝牙播放切换时UI更新
+     * @param device_Type
+     */
     public void setPlayerLayer(int device_Type) {
         Log.i(TAG, "setPlayerLayer: device_Type=" + device_Type);
         switch (device_Type) {
@@ -348,10 +374,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * 收到MediaItem广播后实际的UI更新
+     * @param bundle
+     */
+    private void updateMediaItem(Bundle bundle) {
+        MediaItem item = (MediaItem) bundle.getParcelable(MEDIAITEM_CHANGED + "");
+        int pos = bundle.getInt(POS_EXTRA, -1);
+        switch (MediaController.getInstance(MainActivity.this).currentSourceType) {
+            case BLUETOOTH_DEVICE:
+
+                if (item == null) {
+                    ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText("");
+                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText("");
+                    mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(null);
+                } else {
+                    ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText(item.getTitle());
+                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText(item.getDuration() + "");
+                    if (null == item.getThumbBitmap()) return;
+                    Bitmap bm = item.getThumbBitmap();
+                    Drawable drawable = new BitmapDrawable(MainActivity.this.getResources(), bm);
+                    mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(drawable);
+                }
+
+                break;
+            case USB_DEVICE:
+
+                ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
+                if (-1 != pos) {
+                    currPosition = pos;
+                    ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
+                    ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                }
+
+                break;
+        }
+    }
+
+    /**
+     * 收到播放状态改变广播后更新UI
+     */
+    private void updateStateButton() {
+
+    }
 
     @Override
     public void onClick(View v) {
-        int state = CSDMediaPlayer.STATE_PLAY;
+        int state = STATE_PLAY;
         switch (v.getId()) {
             case R.id.bt_next:
                 state = STATE_NEXT;

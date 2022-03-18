@@ -8,18 +8,25 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.MediaController;
 import com.example.fxc.mediaplayer.MediaItem;
 import com.example.fxc.mediaplayer.R;
 import com.example.fxc.service.MediaPlayerService;
 import com.example.fxc.util.applicationUtils;
 
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.MEDIAITEM_CHANGED;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_MEDIAITEM_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.Constants.MEDIAITEM_CHANGED;
+import static com.example.fxc.mediaplayer.Constants.PLAYSTATE_CHANGED;
+import static com.example.fxc.mediaplayer.Constants.STATE_NEXT;
+import static com.example.fxc.mediaplayer.Constants.STATE_PAUSE;
+import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
+import static com.example.fxc.mediaplayer.Constants.STATE_PREVIOUS;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
@@ -36,16 +43,16 @@ public class MusicWidget extends AppWidgetProvider {
             int buttonId = Integer.parseInt(data.getSchemeSpecificPart());
             switch (buttonId) {
                 case R.id.player_pause:
-                    MediaController.getInstance(context).setPlayerState(CSDMediaPlayer.STATE_PLAY, -1);
+                    MediaController.getInstance(context).setPlayerState(STATE_PLAY, -1);
                     break;
                 case R.id.player_play:
-                    MediaController.getInstance(context).setPlayerState(CSDMediaPlayer.STATE_PAUSE, -1);
+                    MediaController.getInstance(context).setPlayerState(STATE_PAUSE, -1);
                     break;
                 case R.id.skip_fwd:
-                    MediaController.getInstance(context).setPlayerState(CSDMediaPlayer.STATE_NEXT, -1);
+                    MediaController.getInstance(context).setPlayerState(STATE_NEXT, -1);
                     break;
                 case R.id.skip_back:
-                    MediaController.getInstance(context).setPlayerState(CSDMediaPlayer.STATE_PREVIOUS, -1);
+                    MediaController.getInstance(context).setPlayerState(STATE_PREVIOUS, -1);
                     break;
                 case R.id.widget_open:
                     /*Intent intentShow = new Intent("android.intent.action.MAIN");
@@ -58,8 +65,8 @@ public class MusicWidget extends AppWidgetProvider {
                     context.startActivity(intentShow);
                     break;
             }
-        } else if (action != null && action.equals("CSDMediaPlayer.stateChanged")) { //刷新widget显示
-            int currentState = intent.getIntExtra(CSDMediaPlayer.PLAYSTATE_CHANGED + "", -1);
+        } else if (action != null && action.equals(ACTION_STATE_CHANGED_BROADCAST)) { //刷新widget显示
+            int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
             MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
             if (currentState == CURRENT_STATE_PLAYING) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), null, true);
@@ -73,7 +80,15 @@ public class MusicWidget extends AppWidgetProvider {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        } else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
+        }
+        else if (action != null && action.equals(ACTION_MEDIAITEM_CHANGED_BROADCAST)) { //刷新widget显示
+         //   int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
+            MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
+            if (mediaItem != null) {
+                pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
+            }
+
+        }else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
 
 
         }
@@ -102,10 +117,10 @@ public class MusicWidget extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.song_name, mediaItem.getTitle());
 
             String artistAndAlbum = "";
-            if (!mediaItem.getArtist().isEmpty()) {
+            if (!TextUtils.isEmpty(mediaItem.getArtist()) ) {
                 artistAndAlbum = mediaItem.getArtist();
             }
-            if (!mediaItem.getAlbum().isEmpty()) {
+            if (!TextUtils.isEmpty(mediaItem.getAlbum()) ) {
                 artistAndAlbum = artistAndAlbum + "-" + mediaItem.getAlbum();
             }
             remoteViews.setTextViewText(R.id.artist_album, artistAndAlbum);

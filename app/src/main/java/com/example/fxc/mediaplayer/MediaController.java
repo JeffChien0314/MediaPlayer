@@ -28,7 +28,7 @@ public class MediaController {
     private final String TAG = MediaController.class.getSimpleName();
     private static MediaController mInstance;
     private static Context mContext;
-    public int currentSourceType = USB_DEVICE;
+    public int currentSourceType = BLUETOOTH_DEVICE;
 
 
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
@@ -73,9 +73,9 @@ public class MediaController {
     }*/
 
     public MediaInfo getMeidaInfosByDevice(DeviceItem deviceInfo, int media_Type, boolean needPlay) {
-        if (deviceInfo==null){
+        if (deviceInfo == null) {
             ArrayList<MediaItem> items = new ArrayList<>();
-            return  new MediaInfo(items, deviceInfo);
+            return new MediaInfo(items, deviceInfo);
         }
         if (needPlay) currentSourceType = deviceInfo.getType();
         if (deviceInfo.getType() == BLUETOOTH_DEVICE) {

@@ -39,7 +39,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFI
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_PLAY;
+import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
 import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
@@ -61,14 +61,14 @@ public class MediaPlayerService extends Service {
                     //同时需要更新文件列表
                     if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == USB_DEVICE) {
                         if (null != mediaPlayer.getMediaInfo()) {
-                            if (mediaPlayer.getMediaInfo().getDeviceItem()!=null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath()!=null){
-                            if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
-                                Intent intent = new Intent(DEVICE_LOST);
-                                intent.setPackage("com.example.fxc.mediaplayer");
-                                sendBroadcast(intent);
+                            if (mediaPlayer.getMediaInfo().getDeviceItem() != null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath() != null) {
+                                if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
+                                    Intent intent = new Intent(DEVICE_LOST);
+                                    intent.setPackage("com.example.fxc.mediaplayer");
+                                    sendBroadcast(intent);
+                                }
                             }
                         }
-                    }
                     }
 
                     break;
@@ -89,46 +89,47 @@ public class MediaPlayerService extends Service {
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
     }
+
     /**
      * 1.判断是否使用过设备
-     2.判断是否有设备列表，及上次使用的设备是否还在
-     3.判断记录的item是否在列表，计算item当前的position
+     * 2.判断是否有设备列表，及上次使用的设备是否还在
+     * 3.判断记录的item是否在列表，计算item当前的position
      * service 启动时需抓取上次记录的播放状态，如果上次记录内容还在，继续显示内容，否则清空
      **/
-    private  void resetPlayerCondition(Context context){
-        int position=-1;
-        ArrayList<MediaItem> mediaItems=null;
-        DeviceItem deviceItem=null;
+    private void resetPlayerCondition(Context context) {
+        int position = -1;
+        ArrayList<MediaItem> mediaItems = null;
+        DeviceItem deviceItem = null;
         SharedPreferences share = context.getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE);
-        String storagePath= share.getString("storagePath", "");
-        if (storagePath.equals("")){//初次使用 && 尚未点击播放
+        String storagePath = share.getString("storagePath", "");
+        if (storagePath.equals("")) {//初次使用 && 尚未点击播放
             //此时展示空的内容
-        }else {//再次叫起
+        } else {//再次叫起
             List<DeviceItem> externalDeviceItems;
-            externalDeviceItems=DeviceItemUtil.getInstance(context).getExternalDeviceInfoList(context,false);
-            if (externalDeviceItems==null || externalDeviceItems.size()==0){//没有设备
+            externalDeviceItems = DeviceItemUtil.getInstance(context).getExternalDeviceInfoList(context, false);
+            if (externalDeviceItems == null || externalDeviceItems.size() == 0) {//没有设备
                 Log.i(TAG, "recoverLastPlayingStatus:没有设备 ");
-                Toast.makeText(context,"没有设备加载",Toast.LENGTH_LONG);
-            }else {//有设备
-                deviceItem=DeviceItemUtil.getInstance(context).getDeviceByStoragePath( share.getString("storagePath", ""));
-                if (deviceItem!=null){//上次使用的设备还在
-                    mediaItems= MediaItemUtil.getMusicInfos(context,storagePath);//无论上次播放的是视频还是音乐，返回后都展示音乐
-                    if (mediaItems!= null && mediaItems.size()!=0){//设备有音乐
-                        if (share.getInt("currentTab",0)==TYPE_MUSIC){//判断上次播放的是音乐的话，就展示最后一次播放的歌曲
-                            position= MediaItemUtil.IfIDExist(share.getLong("id",0), TYPE_MUSIC,context,mediaItems);
-                        }else {//是视频的话，展示音乐，第一首歌
-                            position=0;
-    }
-                    }else {//上次使用的设备没有音乐，待确认行为
+                Toast.makeText(context, "没有设备加载", Toast.LENGTH_LONG);
+            } else {//有设备
+                deviceItem = DeviceItemUtil.getInstance(context).getDeviceByStoragePath(share.getString("storagePath", ""));
+                if (deviceItem != null) {//上次使用的设备还在
+                    mediaItems = MediaItemUtil.getMusicInfos(context, storagePath);//无论上次播放的是视频还是音乐，返回后都展示音乐
+                    if (mediaItems != null && mediaItems.size() != 0) {//设备有音乐
+                        if (share.getInt("currentTab", 0) == TYPE_MUSIC) {//判断上次播放的是音乐的话，就展示最后一次播放的歌曲
+                            position = MediaItemUtil.IfIDExist(share.getLong("id", 0), TYPE_MUSIC, context, mediaItems);
+                        } else {//是视频的话，展示音乐，第一首歌
+                            position = 0;
+                        }
+                    } else {//上次使用的设备没有音乐，待确认行为
 
                     }
 
-                }else {//上次设备失联，无内容自动展开设备清单
+                } else {//上次设备失联，无内容自动展开设备清单
 
-    }
+                }
             }
         }
-        mediaPlayer.setMediaInfo(new MediaInfo(mediaItems,deviceItem));
+        mediaPlayer.setMediaInfo(new MediaInfo(mediaItems, deviceItem));
         Log.i(TAG, " mInstance.setMediaInfo(mediaInfo);: ");
         mediaPlayer.setPlayPosition(position);
     }
@@ -136,7 +137,8 @@ public class MediaPlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(this);
-        return START_STICKY;
+        return START_NOT_STICKY;
+     // return START_STICKY;
     }
 
     @Override
