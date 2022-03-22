@@ -29,22 +29,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.fxc.bt.client.MediaBrowserConnecter;
-import com.example.fxc.mediaplayer.CSDMediaPlayer;
-import com.example.fxc.mediaplayer.DeviceItem;
-import com.example.fxc.mediaplayer.DeviceItemUtil;
-import com.example.fxc.mediaplayer.DeviceListAdapter;
-import com.example.fxc.mediaplayer.MediaController;
-import com.example.fxc.mediaplayer.MediaInfo;
-import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaSeekBar;
-import com.example.fxc.mediaplayer.R;
+import com.example.fxc.mediaplayer.*;
 import com.example.fxc.util.applicationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_MEDIAITEM_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.Constants.*;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
@@ -78,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private final int UPDATE_DEVICE_LIST = 1;
     private final int UPDATE_MEDIAITEM = 2;
+    private final int UPDATE_BT_STATE = 3;
+    private boolean seekbarRegisted = false;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -102,7 +94,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bundle bundle = message.getData();
                     updateMediaItem(bundle);
                     break;
-
+                case UPDATE_BT_STATE:
+                    updateStateButton(message.arg1);
+                    break;
                 default:
                     break;
             }
@@ -138,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
+        ((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress))).disconnectController();
         unregisterReceiver();
     }
 
@@ -146,7 +141,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
         csdMediaPlayer.setContext(this);
+        mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
+        mRandomButton = (ImageView) findViewById(R.id.random);
+        mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
+        csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mBtPlayerLayer = findViewById(R.id.bt_player);
+        MediaBrowserConnecter.getInstance(this).setSeekBar((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress)));
         mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
@@ -156,13 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mFrameLayout.setVisibility(View.GONE);
         } else {
             mBtPlayerLayer.setVisibility(View.GONE);
-            ((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.seekBar))).setMediaController(MediaBrowserConnecter.getInstance().getMediaController());
         }
-
-        mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
-        mRandomButton = (ImageView) findViewById(R.id.random);
-        mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
-        csdMediaPlayer.getBackButton().setVisibility(View.GONE);
 
         initTabData();
         TabLayout.Tab tab = mTabLayout.getTabAt(currentTab);
@@ -315,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-      //      Log.i(TAG, "onReceive: action22" + action);
+            Log.i(TAG, "onReceive: action=" + action);
             switch (action) {
                 case ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
@@ -330,12 +324,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     handler.sendMessage(message);
                     break;
                 case ACTION_STATE_CHANGED_BROADCAST:
-
-                    if (null != intent.getExtras()) {
-                        //    updateStateButton(intent);
-
-                    }
-
+                    int state = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
+                    Message msg = new Message();
+                    msg.arg1 = state;
+                    msg.what = UPDATE_BT_STATE;
+                    handler.sendMessage(msg);
                     break;
                 default:
                     break;
@@ -358,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 本地播放跟蓝牙播放切换时UI更新
+     *
      * @param device_Type
      */
     public void setPlayerLayer(int device_Type) {
@@ -376,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 收到MediaItem广播后实际的UI更新
+     *
      * @param bundle
      */
     private void updateMediaItem(Bundle bundle) {
@@ -390,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(null);
                 } else {
                     ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText(item.getTitle());
-                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText(item.getDuration() + "");
+                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText(MediaItemUtil.formatTime(item.getDuration()));
                     if (null == item.getThumbBitmap()) return;
                     Bitmap bm = item.getThumbBitmap();
                     Drawable drawable = new BitmapDrawable(MainActivity.this.getResources(), bm);
@@ -399,7 +394,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case USB_DEVICE:
-
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 if (-1 != pos) {
                     currPosition = pos;
@@ -414,8 +408,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 收到播放状态改变广播后更新UI
      */
-    private void updateStateButton() {
-
+    private void updateStateButton(int state) {
+        switch (state) {
+            case STATE_PLAY:
+                ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_pause_normal);
+                break;
+            case STATE_PAUSE:
+                ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_play_normal);
+                break;
+            case STATE_RANDOM_CLOSE:
+                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+                break;
+            case STATE_RANDOM_OPEN:
+                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+                break;
+            case STATE_SINGLE_REPEAT:
+                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                break;
+            case STATE_ALL_REPEAT:
+                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                break;
+        }
     }
 
     @Override

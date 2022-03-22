@@ -27,8 +27,10 @@
             android:label="Music">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="CSDMediaPlayer.stateChanged" />
-                <action android:name="CSDMediaPlayer.ITEMChanged"/>
+                <action 
+android:name="MediaPlayer.stateChanged" />
+                <action 
+android:name="MediaPlayer.ITEMChanged"/>
                 <action android:name="device.lost" />
 
             </intent-filter>

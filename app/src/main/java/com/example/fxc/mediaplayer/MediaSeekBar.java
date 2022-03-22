@@ -99,6 +99,10 @@ public class MediaSeekBar extends AppCompatSeekBar {
                 mProgressAnimator.cancel();
                 mProgressAnimator = null;
             }
+            int max = (int) mMediaController.getMetadata().getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+            if (max != getMax()) {
+                setMax(max);
+            }
 
             final int progress = state != null
                     ? (int) state.getPosition()

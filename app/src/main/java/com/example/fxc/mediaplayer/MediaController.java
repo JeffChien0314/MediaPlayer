@@ -15,11 +15,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
+import static com.example.fxc.mediaplayer.Constants.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
 /**
  *
@@ -29,7 +28,6 @@ public class MediaController {
     private static MediaController mInstance;
     private static Context mContext;
     public int currentSourceType = BLUETOOTH_DEVICE;
-
 
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override

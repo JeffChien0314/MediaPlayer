@@ -212,9 +212,11 @@ public class BtMusicManager implements IBtMusicManager {
      */
     @Override
     public void initBtData(Context context) {
+        if (mContext == null)
         mContext = context;
         initConnectDevice();
         //  registerBtReceiver(context);
+        if (!isEnabled()) return;
         registerProfile(context);
     }
 
@@ -226,21 +228,23 @@ public class BtMusicManager implements IBtMusicManager {
     @Override
     public void initConnectDevice() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!isEnabled()) return;
+        mBondedDevices = null;
+      /*  if (!isEnabled()) return;
         mBondedDevices = mBluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : mBondedDevices) {
             if (device.isConnected()) {
                 mConnectedDevice = device;
                 Log.e(TAG, "蓝牙连接上的设备：mConnectedDevice=" + mConnectedDevice);
             }
-        }
+        } */
     }
 //############################################regist 蓝牙相关广播   start############################################
 
     public Set<BluetoothDevice> getBondedDevices() {
-        if (isEnabled() && mBondedDevices == null) {
+        /*if (isEnabled() && mBondedDevices == null) {
             mBondedDevices = mBluetoothAdapter.getBondedDevices();
-        }
+        }*/
+            mBondedDevices = mBluetoothAdapter.getBondedDevices();
         return mBondedDevices;
     }
 
@@ -270,7 +274,6 @@ public class BtMusicManager implements IBtMusicManager {
     }
 
     public void registerProfile(Context context) {
-        if (!isEnabled()) return;
         if (BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, profileServiceListener, A2DP_SINK/*BluetoothProfile.A2DP_SINK*/)) {
             Log.i(TAG, "registerProfile: A2DP_SINK success");
         } else {

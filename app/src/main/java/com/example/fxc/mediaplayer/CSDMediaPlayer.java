@@ -44,9 +44,6 @@ import static com.example.fxc.mediaplayer.Constants.*;
 
 public class CSDMediaPlayer extends ListGSYVideoPlayer {
     private final String TAG = CSDMediaPlayer.class.getSimpleName();
-    public static final String ACTION_STATE_CHANGED_BROADCAST = "CSDMediaPlayer.stateChanged";
-    public static final String ACTION_MEDIAITEM_CHANGED_BROADCAST = "CSDMediaPlayer.ITEMChanged";
-    public static final String ACTION_CHANGE_STATE_RECEIVER = "CSDMediaPlayer.changestate";
     public static final String STATE_EXTRA = "state";
     public static final String POS_EXTRA = "pos";
 

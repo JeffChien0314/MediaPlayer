@@ -22,6 +22,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.fxc.bt.BtMusicManager;
 import com.example.fxc.bt.client.MediaBrowserConnecter;
 import com.example.fxc.mediaplayer.CSDMediaPlayer;
 import com.example.fxc.mediaplayer.DeviceItem;
@@ -36,9 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
+import static com.example.fxc.mediaplayer.Constants.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
@@ -49,6 +50,7 @@ public class MediaPlayerService extends Service {
     private CSDMediaPlayer mediaPlayer;
     private DeviceItemUtil mDeviceItemUtil;
     private final int UPDATE_DEVICE_LIST = 0;
+    private final int UPDATE_BT_STATE = 1;
     public static boolean isAlive = false;
 
 
@@ -70,7 +72,9 @@ public class MediaPlayerService extends Service {
                             }
                         }
                     }
-
+                    break;
+                case UPDATE_BT_STATE:
+                    BtMusicManager.getInstance().initBtData(MediaPlayerService.this);
                     break;
                 default:
                     break;
@@ -84,7 +88,7 @@ public class MediaPlayerService extends Service {
         Log.i(TAG, "onCreate: ");
         isAlive = true;
         registerReceiver();
-        MediaBrowserConnecter.getInstance().initBroswer(this.getApplicationContext());
+        MediaBrowserConnecter.getInstance(this.getApplicationContext()).initBroswer();
         mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
@@ -238,7 +242,6 @@ public class MediaPlayerService extends Service {
             switch (action) {
                 case BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
-                case BluetoothAdapter.ACTION_STATE_CHANGED:
                 case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothDevice.ACTION_NAME_CHANGED:
                 case BluetoothDevice.ACTION_UUID:
@@ -260,11 +263,11 @@ public class MediaPlayerService extends Service {
                 case BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED: //A2DP播放状态改变
                     Toast.makeText(context, "A2DP播放状态改变", Toast.LENGTH_SHORT);
                     break;*/
-                /*case BluetoothAdapter.ACTION_STATE_CHANGED:
-                    handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
+                case BluetoothAdapter.ACTION_STATE_CHANGED:
+                    handler.sendEmptyMessage(UPDATE_BT_STATE);
                     Log.e(TAG, "mBtReceiver，BluetoothAdapter.ACTION_STATE_CHANGED");
                     break;
-                case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
+             /*   case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
                     handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 100);
                     Log.e(TAG, "mBtReceiver，BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED");
                     //用这个广播判断蓝牙连接状态
@@ -289,7 +292,7 @@ public class MediaPlayerService extends Service {
                     if (USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
                         mediaPlayer.mediaControl(state, pos);
                     } else {//蓝牙设备控制
-                        MediaBrowserConnecter.getInstance().setBTDeviceState(state, pos);
+                        MediaBrowserConnecter.getInstance(MediaPlayerService.this).setBTDeviceState(state, pos);
                     }
 
                     break;

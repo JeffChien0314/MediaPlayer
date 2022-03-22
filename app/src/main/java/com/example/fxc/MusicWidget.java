@@ -19,8 +19,8 @@ import com.example.fxc.mediaplayer.R;
 import com.example.fxc.service.MediaPlayerService;
 import com.example.fxc.util.applicationUtils;
 
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_MEDIAITEM_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST;
+import static com.example.fxc.mediaplayer.Constants.ACTION_STATE_CHANGED_BROADCAST;
 import static com.example.fxc.mediaplayer.Constants.MEDIAITEM_CHANGED;
 import static com.example.fxc.mediaplayer.Constants.PLAYSTATE_CHANGED;
 import static com.example.fxc.mediaplayer.Constants.STATE_NEXT;
@@ -67,7 +67,7 @@ public class MusicWidget extends AppWidgetProvider {
             }
         } else if (action != null && action.equals(ACTION_STATE_CHANGED_BROADCAST)) { //刷新widget显示
             int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
-            MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
+          //  MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
             if (currentState == CURRENT_STATE_PLAYING) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), null, true);
             } /*else if (currentState == CURRENT_STATE_ERROR) {
@@ -75,20 +75,21 @@ public class MusicWidget extends AppWidgetProvider {
             }*/ else if (currentState == CURRENT_STATE_PAUSE) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), null, false);
             }
+/*
 
             if (mediaItem != null) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
+*/
 
-        }
-        else if (action != null && action.equals(ACTION_MEDIAITEM_CHANGED_BROADCAST)) { //刷新widget显示
+        } else if (action != null && action.equals(ACTION_MEDIAITEM_CHANGED_BROADCAST)) { //刷新widget显示
          //   int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
             MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
             if (mediaItem != null) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        }else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
+        } else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
 
 
         }
@@ -117,10 +118,10 @@ public class MusicWidget extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.song_name, mediaItem.getTitle());
 
             String artistAndAlbum = "";
-            if (!TextUtils.isEmpty(mediaItem.getArtist()) ) {
+            if (!TextUtils.isEmpty(mediaItem.getArtist())) {
                 artistAndAlbum = mediaItem.getArtist();
             }
-            if (!TextUtils.isEmpty(mediaItem.getAlbum()) ) {
+            if (!TextUtils.isEmpty(mediaItem.getAlbum())) {
                 artistAndAlbum = artistAndAlbum + "-" + mediaItem.getAlbum();
             }
             remoteViews.setTextViewText(R.id.artist_album, artistAndAlbum);

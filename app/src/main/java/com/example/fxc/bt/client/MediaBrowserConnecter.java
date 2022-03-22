@@ -12,9 +12,10 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
-import com.example.fxc.mediaplayer.MediaInfo;
 import com.example.fxc.mediaplayer.MediaItem;
+import com.example.fxc.mediaplayer.MediaSeekBar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_ID;
@@ -22,57 +23,74 @@ import static android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_A
 import static android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE;
 import static android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL;
 import static android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_MEDIAITEM_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.ACTION_STATE_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.CURRENT_STATE_PAUSE;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.CURRENT_STATE_PLAYING;
 import static com.example.fxc.mediaplayer.Constants.*;
 
 public class MediaBrowserConnecter {
     private final String TAG = MediaBrowserConnecter.class.getSimpleName();
-  /*  public static final int STATE_PLAY = 0;
-    public static final int STATE_PAUSE = 1;
-    public static final int STATE_REPEAT_MODE_ONE = 2;
-    public static final int STATE_REPEAT_MODE_ALL = 3;
-    public static final int STATE_SHUFFLE_MODE_NONE = 4;
-    public static final int STATE_SHUFFLE_MODE_ALL = 5;
-    public static final int STATE_SKIP2NEXT = 6;
-    public static final int STATE_SKIP2PREVIOUS = 7;
-    public static final int STATE_SKIP2ITEM = 8;
-    public static final int STATE_SEEKTO = 9;*/
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaBrowserConnectionCallback mConnectionCallback;
     private MediaControllerCompat mMediaController;
-    //  private MediaControllerCallback mControllerCallback;
     private Context mContext;
     private String packageName = "com.android.bluetooth";
     private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
     private static MediaBrowserConnecter mInstance;
     private boolean isBtPlaying = false;
     private MediaItem currentBtItem;//需要通知UI显示内容
-    private MediaInfo mediaInfo;
+    // private List<MediaBrowserCompat.MediaItem> items;
+    private ArrayList<MediaItem> items;
+    private MediaSeekBar mSeekbar;
+    private Object lock = new Object();
 
-    public static MediaBrowserConnecter getInstance() {
+    public MediaBrowserConnecter(Context context) {
+        mContext = context;
+    }
+
+    public static MediaBrowserConnecter getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new MediaBrowserConnecter();
+            mInstance = new MediaBrowserConnecter(context);
         }
         return mInstance;
     }
 
-    public void initBroswer(Context context/*, MediaControllerCallback controllerCallback*/) {
-        mContext = context;
+    public void initBroswer(/*, MediaControllerCallback controllerCallback*/) {
+        // synchronized (lock) {
+        //  mContext = context;
         //  mControllerCallback = controllerCallback;
         mConnectionCallback = new MediaBrowserConnectionCallback();
-        mMediaBrowser = new MediaBrowserCompat(context,
+        mMediaBrowser = new MediaBrowserCompat(mContext,
                 new ComponentName(packageName, className),
                 mConnectionCallback, null);
         mMediaBrowser.connect();
+        //    }
     }
 
 
     public MediaControllerCompat getMediaController() {
         return mMediaController;
+    }
+
+    public void setSeekBar(MediaSeekBar seekBar) {
+        synchronized (lock) {
+            mSeekbar = seekBar;
+            if (null != mMediaController)
+                mSeekbar.setMediaController(mMediaController);
+        }
+    }
+
+    /**
+     * mMediaController创建成功后主动bind Seekbar
+     */
+    private void bindUI() {
+        synchronized (lock) {
+            if (null != mSeekbar) {
+                mSeekbar.setMediaController(mMediaController);
+                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(REPEATMODE_CHANGED, mMediaController.getRepeatMode()));
+                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(SHUFFLEMODE_CHANGED, mMediaController.getShuffleMode()));
+                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING ? STATE_PLAY : STATE_PAUSE);
+
+            }
+        }
     }
 
     private class MediaBrowserConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
@@ -90,6 +108,7 @@ public class MediaBrowserConnecter {
 
                 try {
                     mMediaController = new MediaControllerCompat(mContext, mMediaBrowser.getSessionToken());
+                    bindUI();
                     mMediaController.registerCallback(mControllerCallback);
                     Log.i(TAG, "onConnected: ok");
                 } catch (RemoteException e) {
@@ -117,6 +136,7 @@ public class MediaBrowserConnecter {
         }
     }
 
+
     MediaControllerCompat.Callback mControllerCallback =
 
             new MediaControllerCompat.Callback() {
@@ -132,9 +152,8 @@ public class MediaBrowserConnecter {
                             state.getState() == PlaybackStateCompat.STATE_PLAYING;
                     if (isBtPlaying != playingState) {
                         isBtPlaying = playingState;
-                        broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, isBtPlaying ? CURRENT_STATE_PLAYING : CURRENT_STATE_PAUSE);
+                        broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, isBtPlaying ? STATE_PLAY : STATE_PAUSE);
                     }
-
                 }
 
                 @Override
@@ -181,11 +200,16 @@ public class MediaBrowserConnecter {
         public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
             super.onChildrenLoaded(parentId, children);
             Log.d(TAG, "onChildrenLoaded: ");
+
             if (children != null && children.size() != 0) {
+                items = new ArrayList<>();
                 for (int i = 0; i < children.size(); i++) {
                     MediaBrowserCompat.MediaItem mediaItem = children.get(i);
                     Log.d(TAG, "" + mediaItem.getDescription().getTitle().toString());
                     // 将返回的音乐列表保存起来
+                    MediaItem item = new MediaItem(Long.parseLong(mediaItem.getMediaId()),
+                            mediaItem.getDescription().getTitle() + "", "", mediaItem.getDescription().getDescription() + "", -1, mediaItem.getDescription().getIconBitmap(), null, false, "");
+                    items.add(item);
                 }
             }
         }
@@ -193,7 +217,7 @@ public class MediaBrowserConnecter {
 
     private void broadCastStateChanged(String action, int extraName, int value) {
         Intent intent = new Intent(action);
-        intent.setPackage("com.example.fxc.mediaplayer");
+        intent.setPackage(mContext.getPackageName());
         switch (extraName) {
             case PLAYSTATE_CHANGED:
                 intent.putExtra(PLAYSTATE_CHANGED + "", value);
@@ -201,7 +225,8 @@ public class MediaBrowserConnecter {
             case MEDIAITEM_CHANGED:  //目前第几首要计算，后续增加
                 intent.putExtra(MEDIAITEM_CHANGED + "", currentBtItem);
                 break;
-
+           /* case PLAYSTATE_INIT:
+                intent.putExtra()*/
         }
         Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
         mContext.sendBroadcast(intent);
@@ -209,6 +234,7 @@ public class MediaBrowserConnecter {
     }
 
     private int remapDefine(int mode, int value) {//转换成本地统一定义
+        Log.i(TAG, "remapDefine: mode=" + mode + "value=" + value);
         switch (mode) {
             case SHUFFLEMODE_CHANGED:
                 if (SHUFFLE_MODE_NONE == value)
