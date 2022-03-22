@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
+import static com.example.fxc.ContentFragment.printTime;
 
 /**
  * Created by Sandra on 2022/2/10.
@@ -66,9 +68,12 @@ public class MediaItemUtil {
         }
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
-        ContentResolver mResolver = context.getContentResolver();
-        Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
+        ContentResolver mResolver = null;
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
+        Cursor cursor = null;
+        if (context!=null){
+            mResolver = context.getContentResolver();
+            cursor = mResolver.query(uri, null, selection, selectionArgs, null);
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
             MediaItem mediaItem = new MediaItem();
@@ -83,7 +88,7 @@ public class MediaItemUtil {
             String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
             String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
-            Log.i(TAG, "getMusicInfos:isMusicType " + isMusicType);
+         
             GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist+ "-" + album);
             Bitmap thumbBitmap = null;
             if (url != null) {
@@ -107,95 +112,92 @@ public class MediaItemUtil {
                 mediaItems.add(mediaItem);
             }
         }
+        }
+     
+
         return mediaItems;
     }
 
-    public static ArrayList<MediaItem> getVideoInfos(Context context, String path) {
+    public static ArrayList<MediaItem> getVideoInfos(Context context, String devicepath) {
+        Log.i(TAG, "getVideoInfo satart: "+printTime());
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         Log.i(TAG, "getVideoInfos: " + uri);
         String selection = MediaStore.Video.Media.DATA + " like ? ";
-        String[] selectionArgs = {path + "%"};
-        ContentResolver mResolver = context.getContentResolver();
-        Cursor cursor = mResolver.query(uri, null, selection, selectionArgs, null);
+        String[] selectionArgs = {devicepath + "%"};
+        ContentResolver mResolver = null;
+        Cursor cursor = null;
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
-        for (int i = 0; i < cursor.getCount(); i++) {
-            cursor.moveToNext();
-            MediaItem mediaItem = new MediaItem();
-            Long id = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Video.Media._ID));    //視頻id
-            String title = cursor.getString((cursor
-                    .getColumnIndex(MediaStore.Video.Media.TITLE))); // 視頻標題
-            String artist = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
-            String album = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
+        if (context!=null){
+            mResolver = context.getContentResolver();
+            cursor = mResolver.query(uri, null, selection, selectionArgs, null);
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToNext();
+                MediaItem mediaItem = new MediaItem();
+                Long id = cursor.getLong(cursor
+                        .getColumnIndex(MediaStore.Video.Media._ID));    //視頻id
+                String title = cursor.getString((cursor
+                        .getColumnIndex(MediaStore.Video.Media.TITLE))); // 視頻標題
+                String artist = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
+                String album = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
             /*String displayName = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));*/
-            //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
-            long duration = cursor.getLong(cursor
-                    .getColumnIndex(MediaStore.Video.Media.DURATION)); // 時長
+                //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
+                long duration = cursor.getLong(cursor
+                        .getColumnIndex(MediaStore.Video.Media.DURATION)); // 時長
             /*long size = cursor.getLong(cursor
                     .getColumnIndex(MediaStore.Video.Media.SIZE)); // 檔案大小*/
-            String url = cursor.getString(cursor
-                    .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
-            String mime_type =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
-            GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
-            Bitmap thumbBitmap = null;
-            if (url != null) {
-                try {
-                    thumbBitmap = getBitmapFormUrl(url); //根据专辑路径获取到专辑封面图
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                String path = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Video.Media.DATA)); // 檔案路徑
+                String mime_type =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));/*video/mp4*/
+                GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
+                Bitmap thumbBitmap = null;
+                if (path != null) {
+                    try {
+                        thumbBitmap = getBitmapFormUrl(path,90,90,ThumbnailUtils.OPTIONS_RECYCLE_INPUT); //根据专辑路径获取到专辑封面图
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (mime_type != null) {
+                    mediaItem.setIfVideo(true);
+                    mediaItem.setId(id);
+                    mediaItem.setTitle(title);
+                    mediaItem.setArtist(artist);
+                    // mediaItem.setAlbum(album);
+                    // mediaItem.setDisplayName(displayName);
+                    //   musicInfo.setAlbumId(albumId);
+                    mediaItem.setDuration(duration);
+                    // mediaItem.setSize(size);
+                    // mediaItem.setUrl(path);
+                    mediaItem.setThumbBitmap(thumbBitmap);
+                    mediaItem.setGsyVideoModel(gsyVideoModel);
+                    mediaItem.setStoragePath(path);
+                    mediaItems.add(mediaItem);
                 }
             }
-            if (mime_type != null) {
-                mediaItem.setIfVideo(true);
-                mediaItem.setId(id);
-                mediaItem.setTitle(title);
-                mediaItem.setArtist(artist);
-                // mediaItem.setAlbum(album);
-                // mediaItem.setDisplayName(displayName);
-                //   musicInfo.setAlbumId(albumId);
-                mediaItem.setDuration(duration);
-                // mediaItem.setSize(size);
-                // mediaItem.setUrl(url);
-                mediaItem.setThumbBitmap(thumbBitmap);
-                mediaItem.setGsyVideoModel(gsyVideoModel);
-                mediaItem.setStoragePath(path);
-                mediaItems.add(mediaItem);
-            }
         }
+        Log.i(TAG, "getVideoInfos end: "+printTime());
         return mediaItems;
     }
-
-    public static Bitmap getBitmapFormUrl(String url) throws FileNotFoundException {
+    /**
+     * 获取视频的缩略图
+     * 先通过ThumbnailUtils来创建一个视频的缩略图，然后再利用ThumbnailUtils来生成指定大小的缩略图。
+     * 如果想要的缩略图的宽和高都小于MICRO_KIND，则类型要使用MICRO_KIND作为kind的值，这样会节省内存。
+     * @param videoPath 视频的路径
+     * @param width 指定输出视频缩略图的宽度
+     * @param height 指定输出视频缩略图的高度度
+     * @param kind 参照MediaStore.Images.Thumbnails类中的常量MINI_KIND和MICRO_KIND。
+     *            其中，MINI_KIND: 512 x 384，MICRO_KIND: 96 x 96
+     * @return 指定大小的视频缩略图
+     */
+    public static Bitmap getBitmapFormUrl(String videoPath,int width,int height,int kind) throws FileNotFoundException {
         Bitmap bitmap = null;
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        FileInputStream inputStream = new FileInputStream(new File(url).getAbsolutePath());
-        try {
-            if (Build.VERSION.SDK_INT >= 14) {
-                retriever.setDataSource(inputStream.getFD());
-            } else {
-                retriever.setDataSource(url);
-
-            }
-       /*getFrameAtTime()--->在setDataSource()之后调用此方法。
-       如果可能，该方法在任何时间位置找到代表性的帧，
-               并将其作为位图返回。这对于生成输入数据源的缩略图很有用。**/
-
-            bitmap = retriever.getFrameAtTime();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                retriever.release();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            }
-        }
+        bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, MediaStore.Images.Thumbnails.MICRO_KIND);       // 获取视频的缩略图
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,kind);
         return bitmap;
     }
 

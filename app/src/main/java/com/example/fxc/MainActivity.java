@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.fxc.bt.client.MediaBrowserConnecter;
 import com.example.fxc.mediaplayer.*;
@@ -38,6 +39,7 @@ import java.util.List;
 import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
 import static com.example.fxc.mediaplayer.Constants.*;
 import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
@@ -59,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
-    private int currentTab = 0;
+    public static int currentTab = 0;
     private MediaInfo mMediaInfo;
     private ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
-
+    private final int UPDATE_PLAYER_STATE_AND_UI=0;
     private final int UPDATE_DEVICE_LIST = 1;
     private final int UPDATE_MEDIAITEM = 2;
     private final int UPDATE_BT_STATE = 3;
@@ -75,6 +77,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message message) {
             switch (message.what) {
                 //Sandra@20220107 add 更新播放列表
+                case UPDATE_PLAYER_STATE_AND_UI:
+                    ArrayList<MediaItem> mediaItems = new ArrayList<>();
+                    ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems);
+                    devicelistview.setVisibility(View.VISIBLE);
+                    break;
                 case UPDATE_DEVICE_LIST:
                     updateDeviceListView();
                     if (externalDeviceItems.size() == 0) {
@@ -83,9 +90,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } else {
                         if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.isDeviceExist(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
                         } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
-                            ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, externalDeviceItems.get(0));
-                            mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(0));
-                            currentTab = 0;
+                            // mediaItems.clear();
+                             ArrayList<MediaItem> mediaItems2=new ArrayList<>();
+                            ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems2);
+                            Toast.makeText(getApplicationContext(),"您的设备已断开连接，您可以选择其他设备",Toast.LENGTH_LONG);
+                            devicelistview.setVisibility(View.VISIBLE);
                         }
                     }
                     break;
@@ -292,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(ACTION_DEVICE_CHANGED);
         intentFilter.addAction(ACTION_STATE_CHANGED_BROADCAST);
         intentFilter.addAction(ACTION_MEDIAITEM_CHANGED_BROADCAST);
+        intentFilter.addAction(ACTION_DEVICE_LOST);
         registerReceiver(DeviceChangedReceiver, intentFilter);
 
     }
@@ -313,6 +323,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (action) {
                 case ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
+                    break;
+                case ACTION_DEVICE_LOST:
+                    handler.sendEmptyMessage(UPDATE_PLAYER_STATE_AND_UI);
                     break;
                 case ACTION_MEDIAITEM_CHANGED_BROADCAST:
                     Message message = new Message();

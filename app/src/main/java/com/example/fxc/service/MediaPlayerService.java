@@ -42,7 +42,7 @@ import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
 import static com.example.fxc.mediaplayer.Constants.ACTION_CHANGE_STATE_RECEIVER;
 import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
 import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 
 public class MediaPlayerService extends Service {
@@ -51,6 +51,7 @@ public class MediaPlayerService extends Service {
     private DeviceItemUtil mDeviceItemUtil;
     private final int UPDATE_DEVICE_LIST = 0;
     private final int UPDATE_BT_STATE = 1;
+    private final int DEVICE_LOST = 2;
     public static boolean isAlive = false;
 
 
@@ -65,7 +66,7 @@ public class MediaPlayerService extends Service {
                         if (null != mediaPlayer.getMediaInfo()) {
                             if (mediaPlayer.getMediaInfo().getDeviceItem() != null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath() != null) {
                                 if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
-                                    Intent intent = new Intent(DEVICE_LOST);
+                                    Intent intent = new Intent(ACTION_DEVICE_LOST);
                                     intent.setPackage("com.example.fxc.mediaplayer");
                                     sendBroadcast(intent);
                                 }
@@ -75,6 +76,12 @@ public class MediaPlayerService extends Service {
                     break;
                 case UPDATE_BT_STATE:
                     BtMusicManager.getInstance().initBtData(MediaPlayerService.this);
+                    break;
+                case DEVICE_LOST:
+                    Log.i(TAG, "handleMessage: DEVICE_LOST");
+                    Intent intent = new Intent(ACTION_DEVICE_LOST);
+                    intent.setPackage("com.example.fxc.mediaplayer");
+                    sendBroadcast(intent);
                     break;
                 default:
                     break;

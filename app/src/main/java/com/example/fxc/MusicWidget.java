@@ -27,7 +27,7 @@ import static com.example.fxc.mediaplayer.Constants.STATE_NEXT;
 import static com.example.fxc.mediaplayer.Constants.STATE_PAUSE;
 import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
 import static com.example.fxc.mediaplayer.Constants.STATE_PREVIOUS;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.DEVICE_LOST;
+import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
 
@@ -89,7 +89,7 @@ public class MusicWidget extends AppWidgetProvider {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        } else if (action != null && action.equals(DEVICE_LOST)) { //第一次使用或当前设备失联
+        } else if (action != null && action.equals(ACTION_DEVICE_LOST)) { //第一次使用或当前设备失联
 
 
         }
