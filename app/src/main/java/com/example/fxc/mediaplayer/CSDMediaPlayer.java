@@ -49,8 +49,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
-    private ImageView mPrevious, mNext, mRandom;
-    private ImageView imageViewAudio;
+    private ImageView mPrevious, mNext, mRewind,mFwd;
     private int playMode = 0;
     private boolean randomOpen = false;
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
@@ -95,10 +94,14 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         super.init(context);
         mPrevious = findViewById(R.id.bt_previous);
         mNext = findViewById(R.id.bt_next);
+        mRewind = findViewById(R.id.bt_rewind);
+        mFwd = findViewById(R.id.bt_fwd);
 //        imageViewAudio = (ImageView) findViewById(R.id.audiocover);
         mFullscreenButton.setOnClickListener(this);
         mPrevious.setOnClickListener(this);
         mNext.setOnClickListener(this);
+        mRewind.setOnClickListener(this);
+        mFwd.setOnClickListener(this);
     }
 
     /**
@@ -246,6 +249,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         super.hideAllWidget();
         setViewShowState(mPrevious,INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
     }
 
 
@@ -255,6 +260,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToPreparingShow");
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mThumbImageViewLayout, VISIBLE);
     }
 
@@ -264,6 +271,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToPlayingShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        setViewShowState(mRewind, VISIBLE);
+        setViewShowState(mFwd, VISIBLE);
     }
 
     @Override
@@ -272,6 +281,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToPauseShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        /*setViewShowState(mRewind, VISIBLE);
+        setViewShowState(mFwd, VISIBLE);*/
     }
 
     @Override
@@ -280,6 +291,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToPlayingBufferingShow");
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
     }
 
     @Override
@@ -288,6 +301,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToCompleteShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        /*setViewShowState(mRewind, VISIBLE);
+        setViewShowState(mFwd, VISIBLE);*/
     }
 
     @Override
@@ -296,6 +311,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToError");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        /*setViewShowState(mRewind, VISIBLE);
+        setViewShowState(mFwd, VISIBLE);*/
     }
 
     /**
@@ -359,6 +376,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             if (mContext instanceof Activity) {
                 startWindowFullscreen(mContext, true, true);
             }
+            return;
+        }else if (i == mRewind.getId()) {
+            backWard();
+            return;
+        }else if (i == mFwd.getId()) {
+            forWard();
             return;
         }
     }
@@ -560,4 +583,61 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         editor.putLong("id", mediaItem.getId());
         editor.apply();
     }
+    public void backWard(){
+        if(CSDMediaPlayer.getInstance(mContext) != null){
+            int position = (int)(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getCurrentPosition());
+            if(position > 10000){
+                position-=10000;
+            }else{
+                position = 0;
+            }
+            CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().seekTo(position);
+        }
+    }
+    public void forWard(){
+        if(CSDMediaPlayer.getInstance(mContext) != null){
+            int position = (int)(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getCurrentPosition());
+            CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().seekTo(position + 10000);
+        }
+    }
+    @Override
+    protected void touchDoubleUp() {
+        Log.i("main", "Jennifertest78=: " +mHadPlay);
+        if (!mHadPlay) {
+            return;
+        }else{
+            mFwd.setVisibility(VISIBLE);
+            mRewind.setVisibility(VISIBLE);
+        }
+    }
+    @Override
+    protected void onClickUiToggle(){
+        super.onClickUiToggle();
+        mFwd.setVisibility(GONE);
+        mRewind.setVisibility(GONE);
+    }
+    /*    protected GestureDetector gestureDetectorPlayer = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.i("main", "Jennifertest78=: " );
+
+            switch (e.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    gestureDetectorPlayer.setIsLongpressEnabled(false);
+                    mFwd.setVisibility(VISIBLE);
+                    mRewind.setVisibility(VISIBLE);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    //action
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mFwd.setVisibility(GONE);
+                    mRewind.setVisibility(GONE);
+                    gestureDetectorPlayer.setIsLongpressEnabled(true);
+                    break;
+            }
+            return super.onDoubleTap(e);
+        }
+
+    });*/
 }
