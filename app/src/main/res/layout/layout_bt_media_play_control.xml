@@ -160,7 +160,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30px"
                 android:layout_marginTop="30px"
-                android:text="title content"
+                
+android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="28px" />
         </LinearLayout>

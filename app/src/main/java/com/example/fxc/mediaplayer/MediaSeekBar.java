@@ -2,14 +2,17 @@ package com.example.fxc.mediaplayer;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
-import android.view.animation.LinearInterpolator;
-import android.widget.SeekBar;
+import android.view.View;
+import android.widget.TextView;
 
 /**
  * SeekBar that can be used with a {@link MediaSessionCompat} to track and seek in playing
@@ -19,47 +22,84 @@ import android.widget.SeekBar;
 public class MediaSeekBar extends AppCompatSeekBar {
     private MediaControllerCompat mMediaController;
     private ControllerCallback mControllerCallback;
-
-    private boolean mIsTracking = false;
-    private OnSeekBarChangeListener mOnSeekBarChangeListener = new OnSeekBarChangeListener() {
+    private final int INIT_UPDATE = 0;
+    private final int REGULAR_UPDATE = 1;
+    private MediaMetadataCompat metadataCompat;
+    private Handler mHandler = new Handler() {
         @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            mIsTracking = true;
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            if (mMediaController != null) {
-                mMediaController.getTransportControls().seekTo(getProgress());
-                mIsTracking = false;
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case REGULAR_UPDATE:
+                    try {
+                        final int progress = mMediaController.getPlaybackState() != null
+                                ? (int) mMediaController.getPlaybackState().getPosition()
+                                : 0;
+                        setProgress(progress);
+                        ((TextView) ((View) getParent()).findViewById(R.id.current)).setText(MediaItemUtil.formatTime(mMediaController.getPlaybackState().getPosition()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    sendMsg(REGULAR_UPDATE, 1000);
+                    break;
+                case INIT_UPDATE:
+                    metadataCompat = mMediaController.getMetadata();
+                    if (null != mMediaController.getMetadata()) {
+                        setMax((int) mMediaController.getMetadata().getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+                    }
+                    sendMsg(REGULAR_UPDATE, 0);
+                    break;
             }
         }
     };
+
+    /* private boolean mIsTracking = false;
+    * private OnSeekBarChangeListener mOnSeekBarChangeListener = new OnSeekBarChangeListener() {
+          @Override
+          public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+          }
+
+          @Override
+          public void onStartTrackingTouch(SeekBar seekBar) {
+              mIsTracking = true;
+          }
+
+          @Override
+          public void onStopTrackingTouch(SeekBar seekBar) {
+              if (mMediaController != null) {
+                  mMediaController.getTransportControls().seekTo(getProgress());
+                  mIsTracking = false;
+              }
+          }
+      };*/
     private ValueAnimator mProgressAnimator;
 
     public MediaSeekBar(Context context) {
         super(context);
-        super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
+        //   super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
     }
 
     public MediaSeekBar(Context context, AttributeSet attrs) {
         super(context, attrs);
-        super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
+        //  super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
     }
 
     public MediaSeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
+        //  super.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
     }
 
-    @Override
+   /* @Override
     public final void setOnSeekBarChangeListener(OnSeekBarChangeListener l) {
         // Prohibit adding seek listeners to this subclass.
         throw new UnsupportedOperationException("Cannot add listeners to a MediaSeekBar");
+    }*/
+
+    private void sendMsg(int what, int delayTime) {
+        Message message = new Message();
+        message.what = what;
+        mHandler.sendMessageDelayed(message, delayTime);
+
     }
 
     public void setMediaController(final MediaControllerCompat mediaController) {
@@ -71,6 +111,7 @@ public class MediaSeekBar extends AppCompatSeekBar {
             mControllerCallback = null;
         }
         mMediaController = mediaController;
+        sendMsg(INIT_UPDATE, 0);
     }
 
     public void disconnectController() {
@@ -93,57 +134,27 @@ public class MediaSeekBar extends AppCompatSeekBar {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
-
-            // If there's an ongoing animation, stop it now.
-            if (mProgressAnimator != null) {
-                mProgressAnimator.cancel();
-                mProgressAnimator = null;
-            }
-            int max = (int) mMediaController.getMetadata().getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
-            if (max != getMax()) {
-                setMax(max);
-            }
-
-            final int progress = state != null
-                    ? (int) state.getPosition()
-                    : 0;
-            setProgress(progress);
-
-            // If the media is playing then the seekbar should follow it, and the easiest
-            // way to do that is to create a ValueAnimator to update it so the bar reaches
-            // the end of the media the same time as playback gets there (or close enough).
-            if (state != null && state.getState() == PlaybackStateCompat.STATE_PLAYING) {
-                final int timeToEnd = (int) ((getMax() - progress) / state.getPlaybackSpeed());
-
-                mProgressAnimator = ValueAnimator.ofInt(progress, getMax())
-                        .setDuration(timeToEnd);
-                mProgressAnimator.setInterpolator(new LinearInterpolator());
-                mProgressAnimator.addUpdateListener(this);
-                mProgressAnimator.start();
-            }
         }
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
-
             final int max = metadata != null
                     ? (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
                     : 0;
-            setProgress(0);
             setMax(max);
         }
 
         @Override
         public void onAnimationUpdate(final ValueAnimator valueAnimator) {
             // If the user is changing the slider, cancel the animation.
-            if (mIsTracking) {
+           /* if (mIsTracking) {
                 valueAnimator.cancel();
                 return;
-            }
+            }*/
 
-            final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
-            setProgress(animatedIntValue);
+           /* final int animatedIntValue = (int) valueAnimator.getAnimatedValue();
+            setProgress(animatedIntValue);*/
         }
     }
 }

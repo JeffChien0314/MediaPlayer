@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int UPDATE_DEVICE_LIST = 1;
     private final int UPDATE_MEDIAITEM = 2;
     private final int UPDATE_BT_STATE = 3;
-    private boolean seekbarRegisted = false;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -155,7 +154,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mBtPlayerLayer = findViewById(R.id.bt_player);
-        MediaBrowserConnecter.getInstance(this).setSeekBar((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress)));
+        MediaSeekBar mediaSeekBar=(MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress));
+        mediaSeekBar.setEnabled(false);
+        MediaBrowserConnecter.getInstance(this).setSeekBar(mediaSeekBar);
         mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();

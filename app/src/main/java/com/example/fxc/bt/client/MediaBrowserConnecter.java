@@ -206,10 +206,11 @@ public class MediaBrowserConnecter {
                 for (int i = 0; i < children.size(); i++) {
                     MediaBrowserCompat.MediaItem mediaItem = children.get(i);
                     Log.d(TAG, "" + mediaItem.getDescription().getTitle().toString());
+                    Log.i(TAG, "onChildrenLoaded: ");
                     // 将返回的音乐列表保存起来
-                    MediaItem item = new MediaItem(Long.parseLong(mediaItem.getMediaId()),
+                   /* MediaItem item = new MediaItem(-1l,
                             mediaItem.getDescription().getTitle() + "", "", mediaItem.getDescription().getDescription() + "", -1, mediaItem.getDescription().getIconBitmap(), null, false, "");
-                    items.add(item);
+                    items.add(item);*/
                 }
             }
         }
@@ -264,10 +265,15 @@ public class MediaBrowserConnecter {
     public void setBTDeviceState(int state, long value) {
         switch (state) {
             case STATE_PLAY:
-                mMediaController.getTransportControls().play();
-                break;
+                /*mMediaController.getTransportControls().play();
+                break;*/
             case STATE_PAUSE:
+                if (mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                 mMediaController.getTransportControls().pause();
+                } else {
+                    mMediaController.getTransportControls().play();
+                }
+
                 break;
             case STATE_SINGLE_REPEAT:
             case STATE_ALL_REPEAT:

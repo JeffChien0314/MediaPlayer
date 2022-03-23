@@ -5,7 +5,7 @@ public class Constants {
     public static final String ACTION_BT_STATE_INIT_BROADCAST = "BT_MediaPlayer.state.init";
     public static final String ACTION_MEDIAITEM_CHANGED_BROADCAST = "MediaPlayer.ITEMChanged";
     public static final String ACTION_CHANGE_STATE_RECEIVER = "CSDMediaPlayer.changestate";
-public static final String ACTION_MEDIALIST_NEED_CHANGE = "MediaItemUtil.MediaItem.Changed";
+    public static final String ACTION_MEDIALIST_NEED_CHANGE = "MediaItemUtil.MediaItem.Changed";
     public static final int USB_DEVICE = 0;
     public static final int BLUETOOTH_DEVICE = 1;
     public static final int PLAYSTATE_CHANGED = 1;
