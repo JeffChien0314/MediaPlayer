@@ -189,6 +189,15 @@ android:text=""
             android:src="@drawable/icon_skip_back_normal"
             tools:ignore="MissingConstraints" />
         <ImageView
+            android:id="@+id/bt_rewind"
+            android:layout_width="120px"
+            android:layout_height="120px"
+            android:layout_marginRight="108px"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/bt_previous"
+            android:scaleType="fitXY"
+            android:src="@drawable/icon_rewind_normal" />
+        <ImageView
             android:id="@+id/bt_next"
             android:layout_width="120px"
             android:layout_height="120px"
@@ -199,7 +208,15 @@ android:text=""
             android:onClick="onClick"
             android:src="@drawable/icon_skip_fwd_normal"
             tools:ignore="MissingConstraints" />
-
-
+        <ImageView
+            android:id="@+id/bt_fwd"
+            android:layout_width="120px"
+            android:layout_height="120px"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/bt_next"
+            android:layout_marginLeft="108px"
+            android:scaleType="fitXY"
+            android:src="@drawable/icon_fast_fwd_normal"
+            />
 </RelativeLayout>
 </android.support.constraint.ConstraintLayout>
