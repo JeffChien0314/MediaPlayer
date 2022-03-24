@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 public class Constants {
     public static final String ACTION_STATE_CHANGED_BROADCAST = "MediaPlayer.stateChanged";

@@ -1,4 +1,4 @@
-package com.example.fxc.bt.client;
+package com.fxc.ev.mediacenter.bt.client;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,8 +12,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
-import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaSeekBar;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
+import com.fxc.ev.mediacenter.mediaplayer.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,6 @@ import static android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_A
 import static android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE;
 import static android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL;
 import static android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE;
-import static com.example.fxc.mediaplayer.Constants.*;
 
 public class MediaBrowserConnecter {
     private final String TAG = MediaBrowserConnecter.class.getSimpleName();
@@ -85,9 +85,9 @@ public class MediaBrowserConnecter {
         synchronized (lock) {
             if (null != mSeekbar) {
                 mSeekbar.setMediaController(mMediaController);
-                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(REPEATMODE_CHANGED, mMediaController.getRepeatMode()));
-                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(SHUFFLEMODE_CHANGED, mMediaController.getShuffleMode()));
-                broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING ? STATE_PLAY : STATE_PAUSE);
+                broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.REPEATMODE_CHANGED, mMediaController.getRepeatMode()));
+                broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.SHUFFLEMODE_CHANGED, mMediaController.getShuffleMode()));
+                broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING ? Constants.STATE_PLAY : Constants.STATE_PAUSE);
 
             }
         }
@@ -152,7 +152,7 @@ public class MediaBrowserConnecter {
                             state.getState() == PlaybackStateCompat.STATE_PLAYING;
                     if (isBtPlaying != playingState) {
                         isBtPlaying = playingState;
-                        broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, isBtPlaying ? STATE_PLAY : STATE_PAUSE);
+                        broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, isBtPlaying ? Constants.STATE_PLAY : Constants.STATE_PAUSE);
                     }
                 }
 
@@ -168,7 +168,7 @@ public class MediaBrowserConnecter {
                             metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
                             metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON), null, false, null);
                     currentBtItem = item;
-                    broadCastStateChanged(ACTION_MEDIAITEM_CHANGED_BROADCAST, MEDIAITEM_CHANGED, -1);
+                    broadCastStateChanged(Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST, Constants.MEDIAITEM_CHANGED, -1);
                 }
 
                 @Override
@@ -182,14 +182,14 @@ public class MediaBrowserConnecter {
                     // super.onRepeatModeChanged(repeatMode);
                     //  int value = remapDefine(REPEATMODE_CHANGED, repeatMode);
 
-                    broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(REPEATMODE_CHANGED, repeatMode));
+                    broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.REPEATMODE_CHANGED, repeatMode));
                 }
 
                 @Override
                 public void onShuffleModeChanged(int shuffleMode) {
                     //  super.onShuffleModeChanged(shuffleMode);
                     //  int value = remapDefine(SHUFFLEMODE_CHANGED, shuffleMode);
-                    broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED, remapDefine(SHUFFLEMODE_CHANGED, shuffleMode));
+                    broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.SHUFFLEMODE_CHANGED, shuffleMode));
                 }
             };
 
@@ -220,11 +220,11 @@ public class MediaBrowserConnecter {
         Intent intent = new Intent(action);
         intent.setPackage(mContext.getPackageName());
         switch (extraName) {
-            case PLAYSTATE_CHANGED:
-                intent.putExtra(PLAYSTATE_CHANGED + "", value);
+            case Constants.PLAYSTATE_CHANGED:
+                intent.putExtra(Constants.PLAYSTATE_CHANGED + "", value);
                 break;
-            case MEDIAITEM_CHANGED:  //目前第几首要计算，后续增加
-                intent.putExtra(MEDIAITEM_CHANGED + "", currentBtItem);
+            case Constants.MEDIAITEM_CHANGED:  //目前第几首要计算，后续增加
+                intent.putExtra(Constants.MEDIAITEM_CHANGED + "", currentBtItem);
                 break;
            /* case PLAYSTATE_INIT:
                 intent.putExtra()*/
@@ -237,26 +237,26 @@ public class MediaBrowserConnecter {
     private int remapDefine(int mode, int value) {//转换成本地统一定义
         Log.i(TAG, "remapDefine: mode=" + mode + "value=" + value);
         switch (mode) {
-            case SHUFFLEMODE_CHANGED:
+            case Constants.SHUFFLEMODE_CHANGED:
                 if (SHUFFLE_MODE_NONE == value)
-                    return STATE_RANDOM_CLOSE;
+                    return Constants.STATE_RANDOM_CLOSE;
                 else if (SHUFFLE_MODE_ALL == value)
-                    return STATE_RANDOM_OPEN;
+                    return Constants.STATE_RANDOM_OPEN;
                 break;
-            case REPEATMODE_CHANGED:
+            case Constants.REPEATMODE_CHANGED:
                 if (value == REPEAT_MODE_ONE)
-                    return STATE_SINGLE_REPEAT;
+                    return Constants.STATE_SINGLE_REPEAT;
                 else if (value == REPEAT_MODE_ALL) {
-                    return STATE_ALL_REPEAT;
+                    return Constants.STATE_ALL_REPEAT;
                 }
                 break;
-            case STATE_SINGLE_REPEAT:
+            case Constants.STATE_SINGLE_REPEAT:
                 return REPEAT_MODE_ONE;
-            case STATE_ALL_REPEAT:
+            case Constants.STATE_ALL_REPEAT:
                 return REPEAT_MODE_ALL;
-            case STATE_RANDOM_OPEN:
+            case Constants.STATE_RANDOM_OPEN:
                 return SHUFFLE_MODE_ALL;
-            case STATE_RANDOM_CLOSE:
+            case Constants.STATE_RANDOM_CLOSE:
                 return SHUFFLE_MODE_NONE;
         }
         return -1;
@@ -264,10 +264,10 @@ public class MediaBrowserConnecter {
 
     public void setBTDeviceState(int state, long value) {
         switch (state) {
-            case STATE_PLAY:
+            case Constants.STATE_PLAY:
                 /*mMediaController.getTransportControls().play();
                 break;*/
-            case STATE_PAUSE:
+            case Constants.STATE_PAUSE:
                 if (mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                 mMediaController.getTransportControls().pause();
                 } else {
@@ -275,24 +275,24 @@ public class MediaBrowserConnecter {
                 }
 
                 break;
-            case STATE_SINGLE_REPEAT:
-            case STATE_ALL_REPEAT:
+            case Constants.STATE_SINGLE_REPEAT:
+            case Constants.STATE_ALL_REPEAT:
                 mMediaController.getTransportControls().setRepeatMode(remapDefine(state, -1));//因为使用sdk定义会有case的重复，所以自定义相关case内容
                 break;
-            case STATE_RANDOM_OPEN:
-            case STATE_RANDOM_CLOSE:
+            case Constants.STATE_RANDOM_OPEN:
+            case Constants.STATE_RANDOM_CLOSE:
                 mMediaController.getTransportControls().setShuffleMode(remapDefine(state, -1));
                 break;
-            case STATE_NEXT:
+            case Constants.STATE_NEXT:
                 mMediaController.getTransportControls().skipToNext();
                 break;
-            case STATE_PREVIOUS:
+            case Constants.STATE_PREVIOUS:
                 mMediaController.getTransportControls().skipToPrevious();
                 break;
           /*  case STATE_SKIP2ITEM://还要确认点击事件怎么播放
                 mMediaController.getTransportControls().skipToQueueItem(value);
                 break;*/
-            case STATE_SEEKTO://快进快退的位置
+            case Constants.STATE_SEEKTO://快进快退的位置
                 mMediaController.getTransportControls().seekTo(value);
                 break;
             //  mMediaController.getTransportControls().setShuffleMode();

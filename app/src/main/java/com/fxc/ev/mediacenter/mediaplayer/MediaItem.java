@@ -1,9 +1,8 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 

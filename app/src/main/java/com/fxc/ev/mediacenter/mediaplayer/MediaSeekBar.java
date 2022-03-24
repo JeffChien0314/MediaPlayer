@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -13,6 +13,8 @@ import android.support.v7.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+
+import com.example.fxc.mediaplayer.R;
 
 /**
  * SeekBar that can be used with a {@link MediaSessionCompat} to track and seek in playing

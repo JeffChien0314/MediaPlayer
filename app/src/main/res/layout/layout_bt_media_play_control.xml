@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_music"
-    tools:context="com.example.fxc.MainActivity">
+    tools:context="com.fxc.ev.mediacenter.MainActivity">
     <FrameLayout
         android:id="@+id/mediaPlayer_csd_container"
         android:layout_width="match_parent"
@@ -92,7 +92,7 @@
                 android:text="00:00"
                 android:textColor="#ffffff" />
 
-            <com.example.fxc.mediaplayer.MediaSeekBar
+            <com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar
                 android:id="@+id/progress"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

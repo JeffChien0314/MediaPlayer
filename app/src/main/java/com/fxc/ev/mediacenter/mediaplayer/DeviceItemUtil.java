@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -7,13 +7,12 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
-import com.example.fxc.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.example.fxc.mediaplayer.R;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
 /**
  * Created by Sandra on 2022/2/18.
@@ -124,7 +123,7 @@ public class DeviceItemUtil {
         boolean exist = false;
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {
             for (int i = 0; i < externalDeviceItems.size(); i++) {
-                if (externalDeviceItems.get(i).getType() == USB_DEVICE) {
+                if (externalDeviceItems.get(i).getType() == Constants.USB_DEVICE) {
                     if (StoragePath.equals(externalDeviceItems.get(i).getStoragePath())) {
                         exist = true;
                     }
@@ -150,7 +149,7 @@ public class DeviceItemUtil {
     public DeviceItem getDeviceByStoragePath(String StoragePath) {
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {
             for (int i = 0; i < externalDeviceItems.size(); i++) {
-                if (externalDeviceItems.get(i).getType() == USB_DEVICE) {
+                if (externalDeviceItems.get(i).getType() == Constants.USB_DEVICE) {
                     if (StoragePath.equals(externalDeviceItems.get(i).getStoragePath())) {
                         return externalDeviceItems.get(i);
                     }

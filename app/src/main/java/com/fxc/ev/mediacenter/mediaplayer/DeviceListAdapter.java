@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,8 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.fxc.mediaplayer.R;
+
 import java.util.List;
-import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 
 /**
  * Created by Sandra on 2022/2/11.
@@ -60,7 +61,7 @@ public class DeviceListAdapter extends BaseAdapter {
         }
         externalDeviceItem = externalDeviceItems.get(position);
         viewHolder.description.setText(externalDeviceItem.getDescription());//設備名稱
-        if (externalDeviceItem.getType() == BLUETOOTH_DEVICE) {
+        if (externalDeviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標

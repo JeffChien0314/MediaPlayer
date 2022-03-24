@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -7,7 +7,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -15,19 +14,17 @@ import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import static android.content.ContentValues.TAG;
-import static com.example.fxc.ContentFragment.printTime;
+import static com.fxc.ev.mediacenter.ContentFragment.printTime;
 
 /**
  * Created by Sandra on 2022/2/10.

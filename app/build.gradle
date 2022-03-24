@@ -4,7 +4,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId "com.example.fxc.mediaplayer"
+        applicationId "com.fxc.ev.mediacenter"
         minSdkVersion 29
         targetSdkVersion 29
         versionCode 1

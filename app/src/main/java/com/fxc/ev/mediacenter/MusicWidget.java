@@ -1,4 +1,4 @@
-package com.example.fxc;
+package com.fxc.ev.mediacenter;
 
 
 import android.app.PendingIntent;
@@ -13,21 +13,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.example.fxc.mediaplayer.MediaController;
-import com.example.fxc.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaController;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
 import com.example.fxc.mediaplayer.R;
-import com.example.fxc.service.MediaPlayerService;
-import com.example.fxc.util.applicationUtils;
+import com.fxc.ev.mediacenter.service.MediaPlayerService;
+import com.fxc.ev.mediacenter.util.applicationUtils;
+import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
 
-import static com.example.fxc.mediaplayer.Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.Constants.ACTION_STATE_CHANGED_BROADCAST;
-import static com.example.fxc.mediaplayer.Constants.MEDIAITEM_CHANGED;
-import static com.example.fxc.mediaplayer.Constants.PLAYSTATE_CHANGED;
-import static com.example.fxc.mediaplayer.Constants.STATE_NEXT;
-import static com.example.fxc.mediaplayer.Constants.STATE_PAUSE;
-import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
-import static com.example.fxc.mediaplayer.Constants.STATE_PREVIOUS;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
 
@@ -43,16 +36,16 @@ public class MusicWidget extends AppWidgetProvider {
             int buttonId = Integer.parseInt(data.getSchemeSpecificPart());
             switch (buttonId) {
                 case R.id.player_pause:
-                    MediaController.getInstance(context).setPlayerState(STATE_PLAY, -1);
+                    MediaController.getInstance(context).setPlayerState(Constants.STATE_PLAY, -1);
                     break;
                 case R.id.player_play:
-                    MediaController.getInstance(context).setPlayerState(STATE_PAUSE, -1);
+                    MediaController.getInstance(context).setPlayerState(Constants.STATE_PAUSE, -1);
                     break;
                 case R.id.skip_fwd:
-                    MediaController.getInstance(context).setPlayerState(STATE_NEXT, -1);
+                    MediaController.getInstance(context).setPlayerState(Constants.STATE_NEXT, -1);
                     break;
                 case R.id.skip_back:
-                    MediaController.getInstance(context).setPlayerState(STATE_PREVIOUS, -1);
+                    MediaController.getInstance(context).setPlayerState(Constants.STATE_PREVIOUS, -1);
                     break;
                 case R.id.widget_open:
                     /*Intent intentShow = new Intent("android.intent.action.MAIN");
@@ -65,8 +58,8 @@ public class MusicWidget extends AppWidgetProvider {
                     context.startActivity(intentShow);
                     break;
             }
-        } else if (action != null && action.equals(ACTION_STATE_CHANGED_BROADCAST)) { //刷新widget显示
-            int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
+        } else if (action != null && action.equals(Constants.ACTION_STATE_CHANGED_BROADCAST)) { //刷新widget显示
+            int currentState = intent.getIntExtra(Constants.PLAYSTATE_CHANGED + "", -1);
           //  MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
             if (currentState == CURRENT_STATE_PLAYING) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), null, true);
@@ -82,14 +75,14 @@ public class MusicWidget extends AppWidgetProvider {
             }
 */
 
-        } else if (action != null && action.equals(ACTION_MEDIAITEM_CHANGED_BROADCAST)) { //刷新widget显示
+        } else if (action != null && action.equals(Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST)) { //刷新widget显示
          //   int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
-            MediaItem mediaItem = intent.getParcelableExtra(MEDIAITEM_CHANGED + "");
+            MediaItem mediaItem = intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + "");
             if (mediaItem != null) {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        } else if (action != null && action.equals(ACTION_DEVICE_LOST)) { //第一次使用或当前设备失联
+        } else if (action != null && action.equals(DeviceItemUtil.ACTION_DEVICE_LOST)) { //第一次使用或当前设备失联
 
 
         }

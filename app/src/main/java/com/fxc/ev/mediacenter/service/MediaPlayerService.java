@@ -1,4 +1,4 @@
-package com.example.fxc.service;
+package com.fxc.ev.mediacenter.service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -22,28 +22,22 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.fxc.bt.BtMusicManager;
-import com.example.fxc.bt.client.MediaBrowserConnecter;
-import com.example.fxc.mediaplayer.CSDMediaPlayer;
-import com.example.fxc.mediaplayer.DeviceItem;
-import com.example.fxc.mediaplayer.DeviceItemUtil;
-import com.example.fxc.mediaplayer.MediaController;
-import com.example.fxc.mediaplayer.MediaInfo;
-import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaItemUtil;
-import com.example.fxc.util.applicationUtils;
+import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bt.client.MediaBrowserConnecter;
+import com.fxc.ev.mediacenter.mediaplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
+import com.fxc.ev.mediacenter.mediaplayer.MediaController;
+import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
+import com.fxc.ev.mediacenter.util.applicationUtils;
+import com.fxc.ev.mediacenter.mediaplayer.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
-import static com.example.fxc.mediaplayer.Constants.ACTION_CHANGE_STATE_RECEIVER;
-import static com.example.fxc.mediaplayer.Constants.STATE_PLAY;
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
 
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
@@ -62,11 +56,11 @@ public class MediaPlayerService extends Service {
                 case UPDATE_DEVICE_LIST:
                     mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
                     //同时需要更新文件列表
-                    if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == USB_DEVICE) {
+                    if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == Constants.USB_DEVICE) {
                         if (null != mediaPlayer.getMediaInfo()) {
                             if (mediaPlayer.getMediaInfo().getDeviceItem() != null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath() != null) {
                                 if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
-                                    Intent intent = new Intent(ACTION_DEVICE_LOST);
+                                    Intent intent = new Intent(DeviceItemUtil.ACTION_DEVICE_LOST);
                                     intent.setPackage("com.example.fxc.mediaplayer");
                                     sendBroadcast(intent);
                                 }
@@ -79,7 +73,7 @@ public class MediaPlayerService extends Service {
                     break;
                 case DEVICE_LOST:
                     Log.i(TAG, "handleMessage: DEVICE_LOST");
-                    Intent intent = new Intent(ACTION_DEVICE_LOST);
+                    Intent intent = new Intent(DeviceItemUtil.ACTION_DEVICE_LOST);
                     intent.setPackage("com.example.fxc.mediaplayer");
                     sendBroadcast(intent);
                     break;
@@ -126,8 +120,8 @@ public class MediaPlayerService extends Service {
                 if (deviceItem != null) {//上次使用的设备还在
                     mediaItems = MediaItemUtil.getMusicInfos(context, storagePath);//无论上次播放的是视频还是音乐，返回后都展示音乐
                     if (mediaItems != null && mediaItems.size() != 0) {//设备有音乐
-                        if (share.getInt("currentTab", 0) == TYPE_MUSIC) {//判断上次播放的是音乐的话，就展示最后一次播放的歌曲
-                            position = MediaItemUtil.IfIDExist(share.getLong("id", 0), TYPE_MUSIC, context, mediaItems);
+                        if (share.getInt("currentTab", 0) == MediaItemUtil.TYPE_MUSIC) {//判断上次播放的是音乐的话，就展示最后一次播放的歌曲
+                            position = MediaItemUtil.IfIDExist(share.getLong("id", 0), MediaItemUtil.TYPE_MUSIC, context, mediaItems);
                         } else {//是视频的话，展示音乐，第一首歌
                             position = 0;
                         }
@@ -207,7 +201,7 @@ public class MediaPlayerService extends Service {
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         registerReceiver(bluetoothReceiver, filter);
 
-        IntentFilter playerFilter = new IntentFilter(ACTION_CHANGE_STATE_RECEIVER);
+        IntentFilter playerFilter = new IntentFilter(Constants.ACTION_CHANGE_STATE_RECEIVER);
         LocalBroadcastManager.getInstance(this).registerReceiver(playerControlReceiver, playerFilter);
     }
 
@@ -293,10 +287,10 @@ public class MediaPlayerService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case ACTION_CHANGE_STATE_RECEIVER:
-                    int state = intent.getIntExtra(STATE_EXTRA, STATE_PLAY);
-                    int pos = intent.getIntExtra(POS_EXTRA, -1);
-                    if (USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
+                case Constants.ACTION_CHANGE_STATE_RECEIVER:
+                    int state = intent.getIntExtra(CSDMediaPlayer.STATE_EXTRA, Constants.STATE_PLAY);
+                    int pos = intent.getIntExtra(CSDMediaPlayer.POS_EXTRA, -1);
+                    if (Constants.USB_DEVICE == MediaController.getInstance(context).currentSourceType) {
                         mediaPlayer.mediaControl(state, pos);
                     } else {//蓝牙设备控制
                         MediaBrowserConnecter.getInstance(MediaPlayerService.this).setBTDeviceState(state, pos);

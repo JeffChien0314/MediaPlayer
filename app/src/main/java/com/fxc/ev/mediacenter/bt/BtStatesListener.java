@@ -1,4 +1,4 @@
-package com.example.fxc.bt;
+package com.fxc.ev.mediacenter.bt;
 
 public interface BtStatesListener {
     void stateChanged();

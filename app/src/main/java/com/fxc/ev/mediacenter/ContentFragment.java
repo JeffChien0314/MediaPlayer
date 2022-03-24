@@ -1,4 +1,4 @@
-package com.example.fxc;
+package com.fxc.ev.mediacenter;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -20,17 +20,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.fxc.bt.BtMusicManager;
-import com.example.fxc.bt.ConnectBlueCallBack;
-import com.example.fxc.mediaplayer.CSDMediaPlayer;
-import com.example.fxc.mediaplayer.DeviceItem;
-import com.example.fxc.mediaplayer.DeviceItemUtil;
-import com.example.fxc.mediaplayer.MediaController;
-import com.example.fxc.mediaplayer.MediaInfo;
-import com.example.fxc.mediaplayer.MediaItem;
-import com.example.fxc.mediaplayer.MediaItemUtil;
-import com.example.fxc.mediaplayer.MediaListAdapter;
+import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bt.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.mediaplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
+import com.fxc.ev.mediacenter.mediaplayer.MediaController;
+import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
+import com.fxc.ev.mediacenter.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.mediaplayer.Constants;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -41,11 +42,6 @@ import java.util.Date;
 import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
-import static com.example.fxc.MainActivity.currentTab;
-import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_MUSIC;
-import static com.example.fxc.mediaplayer.MediaItemUtil.TYPE_VIDEO;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -161,7 +157,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void deviceItemOnClick(int mediaType, DeviceItem deviceItem) {
-        if (deviceItem.getType() == BLUETOOTH_DEVICE) {
+        if (deviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
             if (deviceItem.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
             } else {
@@ -278,7 +274,7 @@ public class ContentFragment extends Fragment {
             if (mDeviceItem!=null){
             MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
             }
-            if (MediaController.getInstance(mContext).currentSourceType == USB_DEVICE) {
+            if (MediaController.getInstance(mContext).currentSourceType == Constants.USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
                 DeviceItem deviceItem = DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
                 CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, deviceItem));
@@ -337,7 +333,7 @@ public class ContentFragment extends Fragment {
           //  MediaInfo mediaInfo=MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice(),currentTab, false);
                      Log.i(TAG, "doInBackground start:  "+ printTime());
 
-            if (currentTab== MediaItemUtil.TYPE_MUSIC){
+            if (MainActivity.currentTab== MediaItemUtil.TYPE_MUSIC){
                 mediaItems= MediaItemUtil.getMusicInfos(getContext(),storagePath[0]);
             }else {
                 mediaItems= MediaItemUtil.getVideoInfos(getContext(),storagePath[0]);

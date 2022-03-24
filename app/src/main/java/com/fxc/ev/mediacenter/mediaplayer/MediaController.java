@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -7,18 +7,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.fxc.bt.BtMusicManager;
-import com.example.fxc.bt.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bt.ConnectBlueCallBack;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.STATE_EXTRA;
-import static com.example.fxc.mediaplayer.Constants.ACTION_CHANGE_STATE_RECEIVER;
-import static com.example.fxc.mediaplayer.Constants.BLUETOOTH_DEVICE;
 
 /**
  *
@@ -27,7 +22,7 @@ public class MediaController {
     private final String TAG = MediaController.class.getSimpleName();
     private static MediaController mInstance;
     private static Context mContext;
-    public int currentSourceType = BLUETOOTH_DEVICE;
+    public int currentSourceType = Constants.BLUETOOTH_DEVICE;
 
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
@@ -76,7 +71,7 @@ public class MediaController {
             return new MediaInfo(items, deviceInfo);
         }
         if (needPlay) currentSourceType = deviceInfo.getType();
-        if (deviceInfo.getType() == BLUETOOTH_DEVICE) {
+        if (deviceInfo.getType() == Constants.BLUETOOTH_DEVICE) {
             if (deviceInfo.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
                 ArrayList<MediaItem> items = new ArrayList<>();
@@ -117,9 +112,9 @@ public class MediaController {
      * @param value
      */
     public void setPlayerState(int state, int value) {
-        Intent intent = new Intent(ACTION_CHANGE_STATE_RECEIVER);
-        intent.putExtra(STATE_EXTRA, state);
-        intent.putExtra(POS_EXTRA, value);
+        Intent intent = new Intent(Constants.ACTION_CHANGE_STATE_RECEIVER);
+        intent.putExtra(CSDMediaPlayer.STATE_EXTRA, state);
+        intent.putExtra(CSDMediaPlayer.POS_EXTRA, value);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 

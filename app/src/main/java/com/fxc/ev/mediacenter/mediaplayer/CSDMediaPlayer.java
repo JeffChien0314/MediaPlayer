@@ -1,4 +1,4 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.example.fxc.mediaplayer.R;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -36,7 +37,7 @@ import java.util.Map;
 import moe.codeest.enviews.ENDownloadView;
 import moe.codeest.enviews.ENPlayView;
 
-import static com.example.fxc.mediaplayer.Constants.*;
+import static com.fxc.ev.mediacenter.mediaplayer.Constants.*;
 
 /**
  * Created by Jennifer on 2022/1/17.
@@ -504,7 +505,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     private void broadCastStateChanged(String action,int extraName) {
         Intent intent = new Intent(action);
-        intent.setPackage("com.example.fxc.mediaplayer");
+        intent.setPackage(mContext.getPackageName());
         switch (extraName) {
             case PLAYSTATE_CHANGED:
                 Log.i(TAG, "broadCastStateChanged: mCurrentState="+mCurrentState);

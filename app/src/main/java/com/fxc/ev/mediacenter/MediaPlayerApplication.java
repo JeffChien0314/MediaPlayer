@@ -1,9 +1,9 @@
-package com.example.fxc;
+package com.fxc.ev.mediacenter;
 
 import android.app.Application;
 import android.os.Build;
 
-import com.example.fxc.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bt.BtMusicManager;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 

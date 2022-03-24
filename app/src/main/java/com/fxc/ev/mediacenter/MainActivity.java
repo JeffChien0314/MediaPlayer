@@ -1,4 +1,4 @@
-package com.example.fxc;
+package com.fxc.ev.mediacenter;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -29,17 +29,22 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.fxc.bt.client.MediaBrowserConnecter;
+import com.fxc.ev.mediacenter.bt.client.MediaBrowserConnecter;
 import com.example.fxc.mediaplayer.*;
-import com.example.fxc.util.applicationUtils;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaController;
+import com.fxc.ev.mediacenter.util.applicationUtils;
+import com.fxc.ev.mediacenter.mediaplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceListAdapter;
+import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
+import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.fxc.mediaplayer.CSDMediaPlayer.POS_EXTRA;
-import static com.example.fxc.mediaplayer.Constants.*;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
-import static com.example.fxc.mediaplayer.DeviceItemUtil.ACTION_DEVICE_LOST;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
@@ -162,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         mFrameLayout.addView(csdMediaPlayer);
-        if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
+        if (MediaController.getInstance(this).currentSourceType == Constants.BLUETOOTH_DEVICE) {
             mFrameLayout.setVisibility(View.GONE);
         } else {
             mBtPlayerLayer.setVisibility(View.GONE);
@@ -299,10 +304,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void registerReceiver() {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_DEVICE_CHANGED);
-        intentFilter.addAction(ACTION_STATE_CHANGED_BROADCAST);
-        intentFilter.addAction(ACTION_MEDIAITEM_CHANGED_BROADCAST);
-        intentFilter.addAction(ACTION_DEVICE_LOST);
+        intentFilter.addAction(DeviceItemUtil.ACTION_DEVICE_CHANGED);
+        intentFilter.addAction(Constants.ACTION_STATE_CHANGED_BROADCAST);
+        intentFilter.addAction(Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST);
+        intentFilter.addAction(DeviceItemUtil.ACTION_DEVICE_LOST);
         registerReceiver(DeviceChangedReceiver, intentFilter);
 
     }
@@ -322,23 +327,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String action = intent.getAction();
             Log.i(TAG, "onReceive: action=" + action);
             switch (action) {
-                case ACTION_DEVICE_CHANGED:
+                case DeviceItemUtil.ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
                     break;
-                case ACTION_DEVICE_LOST:
+                case DeviceItemUtil.ACTION_DEVICE_LOST:
                     handler.sendEmptyMessage(UPDATE_PLAYER_STATE_AND_UI);
                     break;
-                case ACTION_MEDIAITEM_CHANGED_BROADCAST:
+                case Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST:
                     Message message = new Message();
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable(MEDIAITEM_CHANGED + "", intent.getParcelableExtra(MEDIAITEM_CHANGED + ""));
-                    bundle.putInt(POS_EXTRA, intent.getIntExtra(POS_EXTRA, -1));
+                    bundle.putParcelable(Constants.MEDIAITEM_CHANGED + "", intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + ""));
+                    bundle.putInt(CSDMediaPlayer.POS_EXTRA, intent.getIntExtra(CSDMediaPlayer.POS_EXTRA, -1));
                     message.setData(bundle);
                     message.what = UPDATE_MEDIAITEM;
                     handler.sendMessage(message);
                     break;
-                case ACTION_STATE_CHANGED_BROADCAST:
-                    int state = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
+                case Constants.ACTION_STATE_CHANGED_BROADCAST:
+                    int state = intent.getIntExtra(Constants.PLAYSTATE_CHANGED + "", -1);
                     Message msg = new Message();
                     msg.arg1 = state;
                     msg.what = UPDATE_BT_STATE;
@@ -371,11 +376,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setPlayerLayer(int device_Type) {
         Log.i(TAG, "setPlayerLayer: device_Type=" + device_Type);
         switch (device_Type) {
-            case BLUETOOTH_DEVICE:
+            case Constants.BLUETOOTH_DEVICE:
                 mFrameLayout.setVisibility(View.GONE);
                 mBtPlayerLayer.setVisibility(View.VISIBLE);
                 break;
-            case USB_DEVICE:
+            case Constants.USB_DEVICE:
                 mFrameLayout.setVisibility(View.VISIBLE);
                 mBtPlayerLayer.setVisibility(View.GONE);
                 break;
@@ -388,10 +393,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param bundle
      */
     private void updateMediaItem(Bundle bundle) {
-        MediaItem item = (MediaItem) bundle.getParcelable(MEDIAITEM_CHANGED + "");
-        int pos = bundle.getInt(POS_EXTRA, -1);
+        MediaItem item = (MediaItem) bundle.getParcelable(Constants.MEDIAITEM_CHANGED + "");
+        int pos = bundle.getInt(CSDMediaPlayer.POS_EXTRA, -1);
         switch (MediaController.getInstance(MainActivity.this).currentSourceType) {
-            case BLUETOOTH_DEVICE:
+            case Constants.BLUETOOTH_DEVICE:
 
                 if (item == null) {
                     ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText("");
@@ -407,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 break;
-            case USB_DEVICE:
+            case Constants.USB_DEVICE:
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 if (-1 != pos) {
                     currPosition = pos;
@@ -424,22 +429,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void updateStateButton(int state) {
         switch (state) {
-            case STATE_PLAY:
+            case Constants.STATE_PLAY:
                 ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_pause_normal);
                 break;
-            case STATE_PAUSE:
+            case Constants.STATE_PAUSE:
                 ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_play_normal);
                 break;
-            case STATE_RANDOM_CLOSE:
+            case Constants.STATE_RANDOM_CLOSE:
                 mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
                 break;
-            case STATE_RANDOM_OPEN:
+            case Constants.STATE_RANDOM_OPEN:
                 mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
                 break;
-            case STATE_SINGLE_REPEAT:
+            case Constants.STATE_SINGLE_REPEAT:
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
                 break;
-            case STATE_ALL_REPEAT:
+            case Constants.STATE_ALL_REPEAT:
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
                 break;
         }
@@ -447,13 +452,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        int state = STATE_PLAY;
+        int state = Constants.STATE_PLAY;
         switch (v.getId()) {
             case R.id.bt_next:
-                state = STATE_NEXT;
+                state = Constants.STATE_NEXT;
                 break;
             case R.id.bt_previous:
-                state = STATE_PREVIOUS;
+                state = Constants.STATE_PREVIOUS;
                 break;
             case R.id.bt_start:
                 break;
@@ -461,14 +466,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (playMode) {
                     case 0://列表循环
                         playMode = 1;
-                        state = STATE_SINGLE_REPEAT;
+                        state = Constants.STATE_SINGLE_REPEAT;
                         mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
                         //   MediaController.getInstance(this).setPlayerState(STATE_SINGLE_REPEAT, -1);
                         Log.i("main", "Jennifertest7=: " + playMode);
                         break;
                     case 1://单曲循环
                         playMode = 0;
-                        state = STATE_ALL_REPEAT;
+                        state = Constants.STATE_ALL_REPEAT;
                         mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
                         // MediaController.getInstance(this).setPlayerState(STATE_ALL_REPEAT, -1);
                         Log.i("main", "Jennifertest8=: " + playMode);
@@ -478,12 +483,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.random:
                 if (randomOpen == false) {
                     randomOpen = true;
-                    state = STATE_RANDOM_OPEN;
+                    state = Constants.STATE_RANDOM_OPEN;
                     mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
                     //   MediaController.getInstance(this).setPlayerState(STATE_RANDOM_OPEN, -1);
                 } else {
                     randomOpen = false;
-                    state = STATE_RANDOM_CLOSE;
+                    state = Constants.STATE_RANDOM_CLOSE;
                     // MediaController.getInstance(this).setPlayerState(STATE_RANDOM_CLOSE, -1);
                     mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
                 }

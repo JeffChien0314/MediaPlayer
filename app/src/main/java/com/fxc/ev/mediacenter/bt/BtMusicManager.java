@@ -1,4 +1,4 @@
-package com.example.fxc.bt;
+package com.fxc.ev.mediacenter.bt;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothA2dpSink;

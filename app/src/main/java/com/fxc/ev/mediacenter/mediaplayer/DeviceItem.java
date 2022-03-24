@@ -1,10 +1,8 @@
-package com.example.fxc.mediaplayer;
+package com.fxc.ev.mediacenter.mediaplayer;
 
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import static com.example.fxc.mediaplayer.Constants.USB_DEVICE;
 
 /**
  * Created by Sandra on 2022/2/10.
@@ -15,7 +13,7 @@ public class DeviceItem implements Parcelable {
     private String storagePath;//设备路径
     private String description;//设备名字
     private int resImage;//设备图片
-    private int type = USB_DEVICE;//设备类型 0:USB usb; 1:bluetooth
+    private int type = Constants.USB_DEVICE;//设备类型 0:USB usb; 1:bluetooth
     private boolean isRemovableResult;
     private BluetoothDevice bluetoothDevice;
 

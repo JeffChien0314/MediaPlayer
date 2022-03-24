@@ -1,9 +1,9 @@
-package com.example.fxc.util;
+package com.fxc.ev.mediacenter.util;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.example.fxc.service.MediaPlayerService;
+import com.fxc.ev.mediacenter.service.MediaPlayerService;
 
 public class applicationUtils {
     public static void startService(Context context) {

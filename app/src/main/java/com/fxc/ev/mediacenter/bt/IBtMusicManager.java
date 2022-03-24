@@ -1,4 +1,4 @@
-package com.example.fxc.bt;
+package com.fxc.ev.mediacenter.bt;
 
 import android.content.Context;
 import android.media.MediaMetadata;

@@ -3,7 +3,7 @@
     package="com.example.fxc.mediaplayer">
 
     <application
-        android:name="com.example.fxc.MediaPlayerApplication"
+        android:name="com.fxc.ev.mediacenter.MediaPlayerApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="com.example.fxc.MainActivity"
+            android:name="com.fxc.ev.mediacenter.MainActivity"
             android:configChanges="keyboardHidden|screenSize|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
         </activity>
 
         <receiver
-            android:name="com.example.fxc.MusicWidget"
+            android:name="com.fxc.ev.mediacenter.MusicWidget"
             android:label="Music">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -40,7 +40,7 @@ android:name="MediaPlayer.ITEMChanged"/>
         </receiver>
 
         <service
-            android:name="com.example.fxc.service.MediaPlayerService"
+            android:name="com.fxc.ev.mediacenter.service.MediaPlayerService"
             android:launchMode="singleInstance" />
 
     </application>
