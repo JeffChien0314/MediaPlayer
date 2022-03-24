@@ -38,12 +38,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
+import static com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil.ACTION_DEVICE_CHANGED;
+import static com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
 
 public class MediaPlayerService extends Service {
     private final String TAG = MediaPlayerService.class.getSimpleName();
     private CSDMediaPlayer mediaPlayer;
-    private DeviceItemUtil mDeviceItemUtil;
-    private final int UPDATE_DEVICE_LIST = 0;
+    // private DeviceItemUtil mDeviceItemUtil;
+    private final int DEVICE_ADD = 0;
     private final int UPDATE_BT_STATE = 1;
     private final int DEVICE_LOST = 2;
     public static boolean isAlive = false;
@@ -53,35 +55,58 @@ public class MediaPlayerService extends Service {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
-                case UPDATE_DEVICE_LIST:
-                    mDeviceItemUtil.getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
+                case DEVICE_ADD:
                     //同时需要更新文件列表
-                    if (MediaController.getInstance(MediaPlayerService.this).currentSourceType == Constants.USB_DEVICE) {
-                        if (null != mediaPlayer.getMediaInfo()) {
-                            if (mediaPlayer.getMediaInfo().getDeviceItem() != null && mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath() != null) {
-                                if (!mDeviceItemUtil.isDeviceExist(mediaPlayer.getMediaInfo().getDeviceItem().getStoragePath())) {
-                                    Intent intent = new Intent(DeviceItemUtil.ACTION_DEVICE_LOST);
-                                    intent.setPackage("com.example.fxc.mediaplayer");
-                                    sendBroadcast(intent);
-                                }
-                            }
-                        }
-                    }
+                    Intent intent1 = new Intent(ACTION_DEVICE_CHANGED);
+                    intent1.setPackage(getApplicationContext().getPackageName());
+                    sendBroadcast(intent1);
+                    Log.i(TAG, "handleMessage: ACTION_DEVICE_CHANGED11");
                     break;
                 case UPDATE_BT_STATE:
                     BtMusicManager.getInstance().initBtData(MediaPlayerService.this);
                     break;
                 case DEVICE_LOST:
-                    Log.i(TAG, "handleMessage: DEVICE_LOST");
-                    Intent intent = new Intent(DeviceItemUtil.ACTION_DEVICE_LOST);
-                    intent.setPackage("com.example.fxc.mediaplayer");
-                    sendBroadcast(intent);
+                    if (DeviceoOfCurrentListIsExist()) {
+                        Intent intent2 = new Intent(ACTION_DEVICE_CHANGED);
+                    intent2.setPackage(getApplicationContext().getPackageName());
+                    sendBroadcast(intent2);
+                        Log.i(TAG, "handleMessage: ACTION_DEVICE_CHANGED22");
+
+                    } else {
+                        Intent intent3 = new Intent(ACTION_DEVICE_OF_LIST_LOST);
+                        intent3.setPackage(getApplicationContext().getPackageName());
+                        sendBroadcast(intent3);
+                        Log.i(TAG, "handleMessage: not exist");
+                    }
                     break;
                 default:
                     break;
             }
         }
     };
+
+    private boolean DeviceoOfCurrentListIsExist() {
+        List<DeviceItem> externalDeviceItems = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList(MediaPlayerService.this.getApplicationContext(), true);
+        DeviceItem currentDevice = DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice();
+        if (currentDevice != null) {
+            if (externalDeviceItems != null && externalDeviceItems.size() != 0) {
+                for (int i = 0; i < externalDeviceItems.size(); i++) {
+                    if (externalDeviceItems.get(i) != null && externalDeviceItems.get(i).getStoragePath() != null) {
+                        if (externalDeviceItems.get(i).getStoragePath().equals(currentDevice.getStoragePath())) {
+                            DeviceItem currentDeviceTemp = new DeviceItem();
+                            DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(currentDeviceTemp);
+                            Log.i(TAG, "DeviceoOfCurrentListIsExist: true");
+                            return true;
+                        }
+                    }
+
+                }
+            }
+        } else {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void onCreate() {
@@ -90,7 +115,7 @@ public class MediaPlayerService extends Service {
         isAlive = true;
         registerReceiver();
         MediaBrowserConnecter.getInstance(this.getApplicationContext()).initBroswer();
-        mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
+        // mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
     }
@@ -219,15 +244,17 @@ public class MediaPlayerService extends Service {
             switch (action) {
                 case Intent.ACTION_MEDIA_EJECT:
                 case Intent.ACTION_MEDIA_UNMOUNTED:
+                    break;
                 case Intent.ACTION_MEDIA_BAD_REMOVAL:
+                    handler.sendEmptyMessage(DEVICE_LOST);
+                    break;
                 case Intent.ACTION_MEDIA_CHECKING:
                 case Intent.ACTION_MEDIA_MOUNTED:// sd卡被插入，且已经挂载
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 500);
-                    break;
                 case Intent.ACTION_MEDIA_SCANNER_STARTED:
+                    break;
                 case Intent.ACTION_MEDIA_SCANNER_FINISHED:
+                    handler.sendEmptyMessageDelayed(DEVICE_ADD, 500);
                     //这个地方可以判断可已抓取U盘内部的文件
-
                     break;
                 default:
                     break;
@@ -246,7 +273,7 @@ public class MediaPlayerService extends Service {
                 case BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothDevice.ACTION_NAME_CHANGED:
                 case BluetoothDevice.ACTION_UUID:
-                    handler.sendEmptyMessageDelayed(UPDATE_DEVICE_LIST, 100);
+                    handler.sendEmptyMessageDelayed(DEVICE_ADD, 100);
                     //  btA2dpContentStatus(intent);
                     break;
                 case BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED:

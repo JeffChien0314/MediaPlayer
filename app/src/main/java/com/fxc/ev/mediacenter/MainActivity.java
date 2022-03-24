@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
-    private final int UPDATE_PLAYER_STATE_AND_UI=0;
-    private final int UPDATE_DEVICE_LIST = 1;
+    private final int UPDATE_DEVICE_LIST = 0;
+    private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE =1;
     private final int UPDATE_MEDIAITEM = 2;
     private final int UPDATE_BT_STATE = 3;
     private Handler handler = new Handler() {
@@ -81,22 +81,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message message) {
             switch (message.what) {
                 //Sandra@20220107 add 更新播放列表
-                case UPDATE_PLAYER_STATE_AND_UI:
-                    ArrayList<MediaItem> mediaItems = new ArrayList<>();
-                    ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems);
-                    devicelistview.setVisibility(View.VISIBLE);
-                    break;
                 case UPDATE_DEVICE_LIST:
                     updateDeviceListView();
-                    if (externalDeviceItems.size() == 0) {
-                        ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mDeviceItemUtil.getCurrentDevice());
-                        //实际currentDeviceInfo内容为空，所以刷新后文件列表为空
-                    } else {
+                    devicelistview.setVisibility(View.VISIBLE);
+                    break;
+                case CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE:
+                    updateDeviceListView();
                         if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.isDeviceExist(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
                         } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
                             // mediaItems.clear();
                              ArrayList<MediaItem> mediaItems2=new ArrayList<>();
                             ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems2);
+                        if (externalDeviceItems!=null && externalDeviceItems.size()!=0){
                             Toast.makeText(getApplicationContext(),"您的设备已断开连接，您可以选择其他设备",Toast.LENGTH_LONG);
                             devicelistview.setVisibility(View.VISIBLE);
                         }
@@ -274,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             devicelistview.setVisibility(View.VISIBLE);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
+            updateDeviceListView();
         } else if (devicelistview.getVisibility() == View.VISIBLE) {
             devicelistview.setVisibility(View.GONE);
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
@@ -307,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction(DeviceItemUtil.ACTION_DEVICE_CHANGED);
         intentFilter.addAction(Constants.ACTION_STATE_CHANGED_BROADCAST);
         intentFilter.addAction(Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST);
-        intentFilter.addAction(DeviceItemUtil.ACTION_DEVICE_LOST);
+        intentFilter.addAction(DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST);
         registerReceiver(DeviceChangedReceiver, intentFilter);
 
     }
@@ -330,8 +327,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case DeviceItemUtil.ACTION_DEVICE_CHANGED:
                     handler.sendEmptyMessage(UPDATE_DEVICE_LIST);
                     break;
-                case DeviceItemUtil.ACTION_DEVICE_LOST:
-                    handler.sendEmptyMessage(UPDATE_PLAYER_STATE_AND_UI);
+                case DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST:
+                    handler.sendEmptyMessage(CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE);
                     break;
                 case Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST:
                     Message message = new Message();
@@ -363,9 +360,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             externalDeviceItems.clear();
         }
         externalDeviceItems = MediaController.getInstance(this).getDevices();
-        deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems, mDeviceItemUtil.getCurrentDevice());
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
         devicelistview.setAdapter(deviceListAdapter);
-        devicelistview.invalidateViews();
+        deviceListAdapter.notifyDataSetChanged();
+     //   devicelistview.invalidateViews();
     }
 
     /**

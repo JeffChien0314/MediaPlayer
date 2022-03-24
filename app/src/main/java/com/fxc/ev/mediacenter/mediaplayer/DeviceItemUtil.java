@@ -20,7 +20,7 @@ import java.util.List;
 
 public class DeviceItemUtil {
     public static final String ACTION_DEVICE_CHANGED = "DeviceItemUtil.deviceChanged";
-    public static final String ACTION_DEVICE_LOST = "DeviceItemUtildevice.lost";
+    public static final String ACTION_DEVICE_OF_LIST_LOST = "DeviceItemUtildevice.lost";
     private StorageManager mStorageManager;
     private List<StorageVolume> volumes;
     public DeviceItem currentDevice;

@@ -234,6 +234,7 @@ public class ContentFragment extends Fragment {
             if (mMediaInfo.getMediaItems() != null) {
                 if (mMediaInfo.getMediaItems().size() > 0) {
                     mDeviceItem = mMediaInfo.getDeviceItem();
+                    DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
                     updateMediaList2(mediaItems);
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
@@ -304,7 +305,7 @@ public class ContentFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        myTask.cancel(true);
+        if (myTask!=null) myTask.cancel(true);
         super.onDestroy();
     }
     public void whenTabSelected(String storePath){

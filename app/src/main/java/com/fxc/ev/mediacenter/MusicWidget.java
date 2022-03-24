@@ -21,6 +21,7 @@ import com.fxc.ev.mediacenter.util.applicationUtils;
 import com.fxc.ev.mediacenter.mediaplayer.Constants;
 import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
 
+import static com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
 
@@ -82,7 +83,7 @@ public class MusicWidget extends AppWidgetProvider {
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 
-        } else if (action != null && action.equals(DeviceItemUtil.ACTION_DEVICE_LOST)) { //第一次使用或当前设备失联
+        } else if (action != null && action.equals(ACTION_DEVICE_OF_LIST_LOST)) { //第一次使用或当前设备失联
 
 
         }

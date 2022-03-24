@@ -25,10 +25,10 @@ public class DeviceListAdapter extends BaseAdapter {
     public DeviceListAdapter() {
     }
 
-    public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems, DeviceItem currentDevice) {
+    public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems/*, DeviceItem currentDevice*/) {
         this.context = context;
         this.externalDeviceItems = externalDeviceItems;
-        this.mCurrentDevice = currentDevice;
+      //  this.mCurrentDevice = currentDevice;
     }
 
     @Override
