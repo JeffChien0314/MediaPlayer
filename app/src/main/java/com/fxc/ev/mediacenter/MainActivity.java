@@ -416,6 +416,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     currPosition = pos;
                     ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
                     ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                    ((ContentFragment) fragments.get(currentTab)).mediaFile_list.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //((ContentFragment) fragments.get(currentTab)).mediaFile_list.smoothScrollToPositionFromTop(currPosition,0);
+                            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setSelectionFromTop(currPosition, 0);//显示第几个item
+                        }
+                    });
                 }
 
                 break;
