@@ -411,9 +411,9 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
         mSaveChangeViewTIme = 0;
         setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-        if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
+       /* if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
             mTitleTextView.setText(gsyVideoModel.getTitle());
-        }
+        }*/
         startPlayLogic();
         return true;
     }
@@ -448,9 +448,9 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
         mSaveChangeViewTIme = 0;
         setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-        if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
+        /*if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
             mTitleTextView.setText(gsyVideoModel.getTitle());
-        }
+        }*/
         startPlayLogic();
         return true;
     }
