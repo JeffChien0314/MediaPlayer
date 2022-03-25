@@ -31,7 +31,7 @@ import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
 import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
 import com.fxc.ev.mediacenter.mediaplayer.MediaListAdapter;
 import com.example.fxc.mediaplayer.R;
-import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.util.Constants;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.lang.reflect.InvocationTargetException;

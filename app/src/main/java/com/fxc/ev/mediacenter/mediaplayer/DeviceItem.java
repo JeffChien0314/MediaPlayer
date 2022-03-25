@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fxc.ev.mediacenter.util.Constants;
+
 /**
  * Created by Sandra on 2022/2/10.
  */

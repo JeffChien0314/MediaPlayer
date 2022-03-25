@@ -37,7 +37,7 @@ import java.util.Map;
 import moe.codeest.enviews.ENDownloadView;
 import moe.codeest.enviews.ENPlayView;
 
-import static com.fxc.ev.mediacenter.mediaplayer.Constants.*;
+import static com.fxc.ev.mediacenter.util.Constants.*;
 
 /**
  * Created by Jennifer on 2022/1/17.
@@ -50,7 +50,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
 
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
-    private ImageView mPrevious, mNext, mRewind,mFwd;
+    private ImageView mPrevious, mNext, mRewind, mFwd;
     private int playMode = 0;
     private boolean randomOpen = false;
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
@@ -83,7 +83,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Log.i("CSDMediaPlayer", "CSDMediaPlayer: context=" + context);
         if (mInstance == null) {
             synchronized (CSDMediaPlayer.class) {
-                mInstance = new CSDMediaPlayer(context,true);
+                mInstance = new CSDMediaPlayer(context, false);
             }
         }
         return mInstance;
@@ -163,11 +163,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
             if (mediaInfo.getMediaItems().get(mPlayPosition) != null)
                 if (mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
                     findViewById(R.id.surface_container).setBackground(null);
-                ImageView imageView = new ImageView(getActivityContext());
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
-                mThumbImageViewLayout.removeAllViews();
-                setThumbImageView(imageView);
+                    ImageView imageView = new ImageView(getActivityContext());
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    imageView.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
+                    mThumbImageViewLayout.removeAllViews();
+                    setThumbImageView(imageView);
                 } else {
                     Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
                     Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
@@ -248,7 +248,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     @Override
     protected void hideAllWidget() {
         super.hideAllWidget();
-        setViewShowState(mPrevious,INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
         setViewShowState(mRewind, INVISIBLE);
         setViewShowState(mFwd, INVISIBLE);
@@ -373,15 +373,15 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         } else if (i == mNext.getId()) {
             playNext();
             return;
-        }else if(i==mFullscreenButton.getId()){
+        } else if (i == mFullscreenButton.getId()) {
             if (mContext instanceof Activity) {
                 startWindowFullscreen(mContext, true, true);
             }
             return;
-        }else if (i == mRewind.getId()) {
+        } else if (i == mRewind.getId()) {
             backWard();
             return;
-        }else if (i == mFwd.getId()) {
+        } else if (i == mFwd.getId()) {
             forWard();
             return;
         }
@@ -459,7 +459,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public void startPlayLogic() {
         super.startPlayLogic();
         saveData(); //保存Playing歌曲信息
-        broadCastStateChanged(ACTION_MEDIAITEM_CHANGED_BROADCAST,MEDIAITEM_CHANGED);
+        broadCastStateChanged(ACTION_MEDIAITEM_CHANGED_BROADCAST, MEDIAITEM_CHANGED);
     }
 
     @Override
@@ -484,7 +484,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 imageView.setImageResource(R.drawable.icon_play_normal);
             }
         }
-        broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST,PLAYSTATE_CHANGED);
+        broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED);
     }
 
 
@@ -503,21 +503,21 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         return mOriginUrl;
     }
 
-    private void broadCastStateChanged(String action,int extraName) {
+    private void broadCastStateChanged(String action, int extraName) {
         Intent intent = new Intent(action);
         intent.setPackage(mContext.getPackageName());
         switch (extraName) {
             case PLAYSTATE_CHANGED:
-                Log.i(TAG, "broadCastStateChanged: mCurrentState="+mCurrentState);
+                Log.i(TAG, "broadCastStateChanged: mCurrentState=" + mCurrentState);
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
-           case MEDIAITEM_CHANGED:
+            case MEDIAITEM_CHANGED:
                 mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
                 intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
                 intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
         }
-     //   Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
+        //   Log.i(TAG, "broadCastStateChanged: extraName=" + extraName);
         mContext.sendBroadcast(intent);
 
     }
@@ -584,61 +584,42 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         editor.putLong("id", mediaItem.getId());
         editor.apply();
     }
-    public void backWard(){
-        if(CSDMediaPlayer.getInstance(mContext) != null){
-            int position = (int)(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getCurrentPosition());
-            if(position > 10000){
-                position-=10000;
-            }else{
+
+    public void backWard() {
+        if (CSDMediaPlayer.getInstance(mContext) != null) {
+            int position = (int) (getGSYVideoManager().getCurrentPosition());
+            if (position > 10000) {
+                position -= 10000;
+            } else {
                 position = 0;
             }
-            CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().seekTo(position);
+            getGSYVideoManager().seekTo(position);
         }
     }
-    public void forWard(){
-        if(CSDMediaPlayer.getInstance(mContext) != null){
-            int position = (int)(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getCurrentPosition());
-            CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().seekTo(position + 10000);
+
+    public void forWard() {
+        if (CSDMediaPlayer.getInstance(mContext) != null) {
+            int position = (int) (getGSYVideoManager().getCurrentPosition());
+            getGSYVideoManager().seekTo(position + 10000);
         }
     }
+
     @Override
     protected void touchDoubleUp() {
-        Log.i("main", "Jennifertest78=: " +mHadPlay);
         if (!mHadPlay) {
             return;
-        }else{
+        } else {
             mFwd.setVisibility(VISIBLE);
             mRewind.setVisibility(VISIBLE);
         }
     }
+
     @Override
-    protected void onClickUiToggle(){
+    protected void onClickUiToggle() {
+        Log.i(TAG, "onClickUiToggle: ");
         super.onClickUiToggle();
         mFwd.setVisibility(GONE);
         mRewind.setVisibility(GONE);
     }
-    /*    protected GestureDetector gestureDetectorPlayer = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            Log.i("main", "Jennifertest78=: " );
 
-            switch (e.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    gestureDetectorPlayer.setIsLongpressEnabled(false);
-                    mFwd.setVisibility(VISIBLE);
-                    mRewind.setVisibility(VISIBLE);
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    //action
-                    break;
-                case MotionEvent.ACTION_UP:
-                    mFwd.setVisibility(GONE);
-                    mRewind.setVisibility(GONE);
-                    gestureDetectorPlayer.setIsLongpressEnabled(true);
-                    break;
-            }
-            return super.onDoubleTap(e);
-        }
-
-    });*/
 }

@@ -6,9 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,30 +32,39 @@ import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
 import com.fxc.ev.mediacenter.mediaplayer.MediaController;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 import com.fxc.ev.mediacenter.mediaplayer.CSDMediaPlayer;
-import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
 import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
 import com.fxc.ev.mediacenter.mediaplayer.DeviceListAdapter;
+import com.fxc.ev.mediacenter.mediaplayer.MediaController;
 import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
 import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
-import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
-import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
+import com.fxc.ev.mediacenter.util.BtplayerLayout;
+import com.fxc.ev.mediacenter.util.applicationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
+    private final int UPDATE_DEVICE_LIST = 1;
+    private final int UPDATE_MEDIAITEM = 2;
+    private final int UPDATE_BT_STATE = 3;
+    private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE=4;
+
     private int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer csdMediaPlayer;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
     private FrameLayout mFrameLayout;
-    private View mBtPlayerLayer;
+    private FrameLayout mbtFrameLayout;
+    private BtplayerLayout mBtPlayerLayer;
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
-
     public TabLayout getmTabLayout() {
         return mTabLayout;
     }
@@ -72,10 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
-    private final int UPDATE_DEVICE_LIST = 0;
-    private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE =1;
-    private final int UPDATE_MEDIAITEM = 2;
-    private final int UPDATE_BT_STATE = 3;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -99,12 +102,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     break;
                 case UPDATE_MEDIAITEM:
-                    // MediaItem item=new Gson().fromJson(getIntent())
                     Bundle bundle = message.getData();
                     updateMediaItem(bundle);
                     break;
                 case UPDATE_BT_STATE:
-                    updateStateButton(message.arg1);
+                    updateStateButtonImg(message.arg1);
                     break;
                 default:
                     break;
@@ -126,22 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "onPause: ");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.i(TAG, "onStop: ");
-    }
-
-    @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
-        ((MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress))).disconnectController();
+        mBtPlayerLayer.release();
         unregisterReceiver();
     }
 
@@ -154,19 +144,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
-        mBtPlayerLayer = findViewById(R.id.bt_player);
-        MediaSeekBar mediaSeekBar=(MediaSeekBar) (mBtPlayerLayer.findViewById(R.id.progress));
-        mediaSeekBar.setEnabled(false);
-        MediaBrowserConnecter.getInstance(this).setSeekBar(mediaSeekBar);
+
+        mbtFrameLayout = (FrameLayout) findViewById(R.id.bt_player0);
+        mBtPlayerLayer = new BtplayerLayout(this);
+        mbtFrameLayout.addView(mBtPlayerLayer);
+
         mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         mFrameLayout.addView(csdMediaPlayer);
-        if (MediaController.getInstance(this).currentSourceType == Constants.BLUETOOTH_DEVICE) {
+        if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             mFrameLayout.setVisibility(View.GONE);
+            mBtPlayerLayer.showControlBtn();
         } else {
-            mBtPlayerLayer.setVisibility(View.GONE);
+            mbtFrameLayout.setVisibility(View.GONE);
         }
 
         initTabData();
@@ -374,13 +366,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setPlayerLayer(int device_Type) {
         Log.i(TAG, "setPlayerLayer: device_Type=" + device_Type);
         switch (device_Type) {
-            case Constants.BLUETOOTH_DEVICE:
+            case BLUETOOTH_DEVICE:
                 mFrameLayout.setVisibility(View.GONE);
-                mBtPlayerLayer.setVisibility(View.VISIBLE);
+                mbtFrameLayout.setVisibility(View.VISIBLE);
+                mBtPlayerLayer.showControlBtn();
                 break;
             case Constants.USB_DEVICE:
                 mFrameLayout.setVisibility(View.VISIBLE);
-                mBtPlayerLayer.setVisibility(View.GONE);
+                mbtFrameLayout.setVisibility(View.GONE);
                 break;
         }
     }
@@ -394,21 +387,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MediaItem item = (MediaItem) bundle.getParcelable(Constants.MEDIAITEM_CHANGED + "");
         int pos = bundle.getInt(CSDMediaPlayer.POS_EXTRA, -1);
         switch (MediaController.getInstance(MainActivity.this).currentSourceType) {
-            case Constants.BLUETOOTH_DEVICE:
-
-                if (item == null) {
-                    ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText("");
-                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText("");
-                    mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(null);
-                } else {
-                    ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText(item.getTitle());
-                    ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText(MediaItemUtil.formatTime(item.getDuration()));
-                    if (null == item.getThumbBitmap()) return;
-                    Bitmap bm = item.getThumbBitmap();
-                    Drawable drawable = new BitmapDrawable(MainActivity.this.getResources(), bm);
-                    mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(drawable);
-                }
-
+            case BLUETOOTH_DEVICE:
+                mBtPlayerLayer.updateMediaDetail(item);
                 break;
             case Constants.USB_DEVICE:
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
@@ -432,13 +412,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 收到播放状态改变广播后更新UI
      */
-    private void updateStateButton(int state) {
+    private void updateStateButtonImg(int state) {
         switch (state) {
             case Constants.STATE_PLAY:
-                ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_pause_normal);
-                break;
             case Constants.STATE_PAUSE:
-                ((ImageView) mBtPlayerLayer.findViewById(R.id.bt_start)).setImageResource(R.drawable.icon_play_normal);
+                mBtPlayerLayer.updateStateButtonImg(state);
                 break;
             case Constants.STATE_RANDOM_CLOSE:
                 mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
@@ -459,14 +437,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int state = Constants.STATE_PLAY;
         switch (v.getId()) {
-            case R.id.bt_next:
+           /* case R.id.bt_next:
                 state = Constants.STATE_NEXT;
                 break;
             case R.id.bt_previous:
                 state = Constants.STATE_PREVIOUS;
                 break;
             case R.id.bt_start:
-                break;
+                break;*/
             case R.id.play_mode:
                 switch (playMode) {
                     case 0://列表循环

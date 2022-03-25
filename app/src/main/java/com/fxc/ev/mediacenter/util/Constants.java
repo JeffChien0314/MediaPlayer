@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.util;
 
 public class Constants {
     public static final String ACTION_STATE_CHANGED_BROADCAST = "MediaPlayer.stateChanged";
@@ -23,4 +23,6 @@ public class Constants {
     public static final int STATE_RANDOM_CLOSE = 6;
     public static final int STATE_SINGLE_REPEAT = 7;
     public static final int STATE_ALL_REPEAT = 8;
+    public static final int STATE_FORWARD = 9;
+    public static final int STATE_REWIND = 10;
 }

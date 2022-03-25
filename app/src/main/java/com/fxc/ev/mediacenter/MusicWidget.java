@@ -18,7 +18,7 @@ import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.service.MediaPlayerService;
 import com.fxc.ev.mediacenter.util.applicationUtils;
-import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.util.Constants;
 import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
 
 import static com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;

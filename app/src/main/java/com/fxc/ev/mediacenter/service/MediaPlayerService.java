@@ -32,7 +32,7 @@ import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
 import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
 import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
-import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

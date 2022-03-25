@@ -14,7 +14,7 @@ import android.util.Log;
 
 import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
 import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
-import com.fxc.ev.mediacenter.mediaplayer.Constants;
+import com.fxc.ev.mediacenter.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,10 +263,9 @@ public class MediaBrowserConnecter {
     }
 
     public void setBTDeviceState(int state, long value) {
+        if(mMediaController==null) return;
         switch (state) {
             case Constants.STATE_PLAY:
-                /*mMediaController.getTransportControls().play();
-                break;*/
             case Constants.STATE_PAUSE:
                 if (mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                 mMediaController.getTransportControls().pause();
@@ -294,6 +293,12 @@ public class MediaBrowserConnecter {
                 break;*/
             case Constants.STATE_SEEKTO://快进快退的位置
                 mMediaController.getTransportControls().seekTo(value);
+                break;
+            case Constants.STATE_REWIND://快进快退的位置
+                mMediaController.getTransportControls().rewind();
+                break;
+            case Constants.STATE_FORWARD://快进快退的位置
+                mMediaController.getTransportControls().fastForward();
                 break;
             //  mMediaController.getTransportControls().setShuffleMode();
 

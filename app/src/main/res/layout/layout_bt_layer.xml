@@ -7,85 +7,14 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_music"
     tools:context="com.fxc.ev.mediacenter.MainActivity">
-    <FrameLayout
-        android:id="@+id/mediaPlayer_csd_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    
-<FrameLayout
-        
-android:id="@+id/bt_player0"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        
-app:layout_constraintLeft_toLeftOf="parent"
-        
-app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-<!--
     <RelativeLayout
         android:id="@+id/bt_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/black"
         android:orientation="vertical">
-&lt;!&ndash;TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30px"
-            android:layout_marginTop="30px"
-            android:textColor="@android:color/white"
-            android:textSize="28px"
-        android:text="title" />
-        <TextView
-            android:id="@+id/current"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="current time00:00"
-            android:textColor="#ffffff"
-        android:layout_below="@+id/title"/>
 
-        <SeekBar
-            android:id="@+id/progress"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_below="@+id/current"
-            android:layout_weight="1.0"
-            android:background="@null"
-            android:max="100"
-            android:maxHeight="4dp"
-            android:minHeight="4dp"
-            android:paddingBottom="8dp"
-            android:paddingTop="8dp"
-            android:progressDrawable="@drawable/video_seek_progress"
-        android:thumb="@drawable/video_seek_thumb" />
-
-        <TextView
-            android:id="@+id/total"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_below="@+id/progress"
-            android:text="total:00:00"
-            android:textColor="#ffffff"
-            tools:ignore="MissingConstraints" />
-
-        <ImageView
-            android:id="@+id/fullscreen"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:paddingRight="16dp"
-            android:scaleType="center"
-            android:layout_below="@+id/total"
-            android:src="@drawable/video_enlarge"
-        tools:ignore="MissingConstraints" />&ndash;&gt;
         <LinearLayout
             android:id="@+id/layout_bottom"
             android:layout_width="match_parent"
@@ -135,14 +64,14 @@ app:layout_constraintRight_toRightOf="parent"
                 android:scaleType="center"
                 android:src="@drawable/video_enlarge" />
         </LinearLayout>
-        <ProgressBar
+       <!-- <ProgressBar
             android:id="@+id/bottom_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="1.5dp"
             android:layout_alignParentBottom="true"
             android:max="100"
-            android:progressDrawable="@drawable/video_progress" />
+            android:progressDrawable="@drawable/video_progress" />-->
 
         <ImageView
             android:id="@+id/back_tiny"
@@ -172,21 +101,20 @@ app:layout_constraintRight_toRightOf="parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30px"
                 android:layout_marginTop="30px"
-                
-android:text=""
+                android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="28px" />
         </LinearLayout>
 
 
         <ImageView
-        android:id="@+id/bt_start"
+            android:id="@+id/bt_start"
             android:layout_width="120px"
             android:layout_height="120px"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:onClick="onClick"
+
             android:src="@drawable/icon_play_normal"
             tools:ignore="MissingConstraints" />
         <ImageView
@@ -197,7 +125,7 @@ android:text=""
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/bt_start"
             android:scaleType="fitXY"
-            android:onClick="onClick"
+
             android:src="@drawable/icon_skip_back_normal"
             tools:ignore="MissingConstraints" />
         <ImageView
@@ -217,7 +145,7 @@ android:text=""
             android:layout_toRightOf="@+id/bt_start"
             android:layout_marginLeft="108px"
             android:scaleType="fitXY"
-            android:onClick="onClick"
+
             android:src="@drawable/icon_skip_fwd_normal"
             tools:ignore="MissingConstraints" />
         <ImageView
@@ -230,5 +158,5 @@ android:text=""
             android:scaleType="fitXY"
             android:src="@drawable/icon_fast_fwd_normal"
             />
-</RelativeLayout>-->
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

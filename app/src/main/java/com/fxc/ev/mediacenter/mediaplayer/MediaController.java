@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.fxc.ev.mediacenter.bt.BtMusicManager;
 import com.fxc.ev.mediacenter.bt.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.util.Constants;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
