@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.datastruct;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;

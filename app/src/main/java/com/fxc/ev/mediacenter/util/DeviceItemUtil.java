@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.util;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -7,9 +7,9 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
-import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.example.fxc.mediaplayer.R;
-import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
-package com.fxc.ev.mediacenter.util;
+package com.fxc.ev.mediacenter.bluetooth.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -12,17 +13,18 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
-import com.fxc.ev.mediacenter.bt.client.MediaBrowserConnecter;
-import com.fxc.ev.mediacenter.mediaplayer.MediaController;
-import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
-import com.fxc.ev.mediacenter.mediaplayer.MediaItemUtil;
-import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
+import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
@@ -114,6 +116,9 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
         MediaBrowserConnecter.getInstance(context).setSeekBar(mSeekbar);
         initGestureDetector(context);
         initListener(context);
+        if (mContext instanceof Activity) {
+            ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     private void initListener(Context context) {

@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import java.util.List;
 

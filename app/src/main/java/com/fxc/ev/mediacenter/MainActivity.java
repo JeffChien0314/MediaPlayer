@@ -23,23 +23,18 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fxc.ev.mediacenter.bt.client.MediaBrowserConnecter;
-import com.example.fxc.mediaplayer.*;
-import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
-import com.fxc.ev.mediacenter.mediaplayer.MediaController;
-import com.fxc.ev.mediacenter.util.applicationUtils;
-import com.fxc.ev.mediacenter.mediaplayer.CSDMediaPlayer;
+import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.datastruct.DeviceItem;
+import com.fxc.ev.mediacenter.util.DeviceItemUtil;
+import com.fxc.ev.mediacenter.adapter.DeviceListAdapter;
+import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.datastruct.MediaInfo;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.bluetooth.ui.BtplayerLayout;
 import com.fxc.ev.mediacenter.util.Constants;
-import com.fxc.ev.mediacenter.mediaplayer.DeviceItem;
-import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
-import com.fxc.ev.mediacenter.mediaplayer.DeviceListAdapter;
-import com.fxc.ev.mediacenter.mediaplayer.MediaController;
-import com.fxc.ev.mediacenter.mediaplayer.MediaInfo;
-import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
-import com.fxc.ev.mediacenter.util.BtplayerLayout;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 
 import java.util.ArrayList;
@@ -52,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int UPDATE_DEVICE_LIST = 1;
     private final int UPDATE_MEDIAITEM = 2;
     private final int UPDATE_BT_STATE = 3;
-    private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE=4;
+    private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE = 4;
 
     private int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer csdMediaPlayer;
@@ -65,10 +60,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
-    public TabLayout getmTabLayout() {
-        return mTabLayout;
-    }
-
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
@@ -93,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.isDeviceExist(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
                         } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
                             // mediaItems.clear();
-                             ArrayList<MediaItem> mediaItems2=new ArrayList<>();
+                        ArrayList<MediaItem> mediaItems2 = new ArrayList<>();
                             ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems2);
-                        if (externalDeviceItems!=null && externalDeviceItems.size()!=0){
-                            Toast.makeText(getApplicationContext(),"您的设备已断开连接，您可以选择其他设备",Toast.LENGTH_LONG);
+                        if (externalDeviceItems != null && externalDeviceItems.size() != 0) {
+                            Toast.makeText(getApplicationContext(), "您的设备已断开连接，您可以选择其他设备", Toast.LENGTH_LONG);
                             devicelistview.setVisibility(View.VISIBLE);
                         }
                     }
@@ -113,6 +104,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     };
+
+    public TabLayout getmTabLayout() {
+        return mTabLayout;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,11 +139,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
-
         mbtFrameLayout = (FrameLayout) findViewById(R.id.bt_player0);
         mBtPlayerLayer = new BtplayerLayout(this);
         mbtFrameLayout.addView(mBtPlayerLayer);
-
         mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
@@ -277,9 +270,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return currPosition;
     }
 
-    public int getCurrentTab() {
-        return currentTab;
-    }
 
     public void requestAllPower() {
         if (ContextCompat.checkSelfPermission(this,
@@ -437,14 +427,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int state = Constants.STATE_PLAY;
         switch (v.getId()) {
-           /* case R.id.bt_next:
-                state = Constants.STATE_NEXT;
-                break;
-            case R.id.bt_previous:
-                state = Constants.STATE_PREVIOUS;
-                break;
-            case R.id.bt_start:
-                break;*/
             case R.id.play_mode:
                 switch (playMode) {
                     case 0://列表循环

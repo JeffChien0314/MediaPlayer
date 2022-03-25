@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.localplayer;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,6 +20,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.datastruct.MediaInfo;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;

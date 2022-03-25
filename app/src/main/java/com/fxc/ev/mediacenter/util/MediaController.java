@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.util;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -7,9 +7,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.fxc.ev.mediacenter.bt.BtMusicManager;
-import com.fxc.ev.mediacenter.bt.ConnectBlueCallBack;
-import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
+import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.datastruct.DeviceItem;
+import com.fxc.ev.mediacenter.datastruct.MediaInfo;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -3,7 +3,7 @@ package com.fxc.ev.mediacenter;
 import android.app.Application;
 import android.os.Build;
 
-import com.fxc.ev.mediacenter.bt.BtMusicManager;
+import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 

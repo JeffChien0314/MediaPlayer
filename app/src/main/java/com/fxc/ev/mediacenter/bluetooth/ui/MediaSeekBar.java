@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.bluetooth.ui;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 /**
  * SeekBar that can be used with a {@link MediaSessionCompat} to track and seek in playing

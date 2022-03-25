@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.bt;
+package com.fxc.ev.mediacenter.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 

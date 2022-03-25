@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.datastruct;
 
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;

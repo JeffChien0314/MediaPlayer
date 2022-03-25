@@ -13,15 +13,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.fxc.ev.mediacenter.mediaplayer.MediaController;
-import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
+import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.service.MediaPlayerService;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 import com.fxc.ev.mediacenter.util.Constants;
-import com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil;
 
-import static com.fxc.ev.mediacenter.mediaplayer.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
+import static com.fxc.ev.mediacenter.util.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
 

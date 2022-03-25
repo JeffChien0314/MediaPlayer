@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.bt.client;
+package com.fxc.ev.mediacenter.bluetooth.client;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,8 +12,8 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
-import com.fxc.ev.mediacenter.mediaplayer.MediaItem;
-import com.fxc.ev.mediacenter.mediaplayer.MediaSeekBar;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.bluetooth.ui.MediaSeekBar;
 import com.fxc.ev.mediacenter.util.Constants;
 
 import java.util.ArrayList;

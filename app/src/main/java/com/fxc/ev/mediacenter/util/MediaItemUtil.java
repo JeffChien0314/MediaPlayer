@@ -1,4 +1,4 @@
-package com.fxc.ev.mediacenter.mediaplayer;
+package com.fxc.ev.mediacenter.util;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -15,6 +15,9 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.datastruct.DeviceItem;
+import com.fxc.ev.mediacenter.datastruct.MediaInfo;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.io.FileDescriptor;
