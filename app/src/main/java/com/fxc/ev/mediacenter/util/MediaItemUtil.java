@@ -38,6 +38,13 @@ public class MediaItemUtil {
     public static final int TYPE_VIDEO = 1;
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
+    public  static ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();
+    public static ArrayList<MediaItem> getAllDevicesMediaItems() {
+        return allDevicesMediaItems;
+    }
+    public static void setAllDevicesMediaItems(ArrayList<MediaItem> allDevicesMediaItems) {
+        MediaItemUtil.allDevicesMediaItems = allDevicesMediaItems;
+    }
 
     public static MediaInfo getMediaInfos(int mediaType, Context context, DeviceItem deviceItem) {
 
@@ -182,7 +189,7 @@ public class MediaItemUtil {
                     // mediaItem.setUrl(path);
                     mediaItem.setThumbBitmap(thumbBitmap);
                     mediaItem.setGsyVideoModel(gsyVideoModel);
-                    mediaItem.setStoragePath(path);
+                    mediaItem.setStoragePath(devicepath);
                     mediaItems.add(mediaItem);
                 }
             }

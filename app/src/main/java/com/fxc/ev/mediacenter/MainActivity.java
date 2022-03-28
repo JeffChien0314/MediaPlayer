@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,6 +36,7 @@ import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.bluetooth.ui.BtplayerLayout;
 import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 
 import java.util.ArrayList;
@@ -60,6 +62,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
+
+    public TabLayout getmTabLayout() {
+        return mTabLayout;
+    }
+
+    private ImageView loading;
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
@@ -69,6 +77,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
+    public ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();
+
+    public ArrayList<MediaItem> getAllDevicesMediaItems() {
+        return allDevicesMediaItems;
+    }
+
+    public void setAllDevicesMediaItems(ArrayList<MediaItem> allDevicesMediaItems) {
+        this.allDevicesMediaItems = allDevicesMediaItems;
+    }
+
+    private MyTask myTask = null;
+
+    public com.fxc.ev.mediacenter.MyTask getMyTask() {
+        return myTask;
+    }
+
+    public void setMyTask(MyTask myTask) {
+        this.myTask = myTask;
+    }
 
     private Handler handler = new Handler() {
         @Override
@@ -78,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case UPDATE_DEVICE_LIST:
                     updateDeviceListView();
                     devicelistview.setVisibility(View.VISIBLE);
+                    //   getALLMediaItems();//不加显示Loading的参数
                     break;
                 case CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE:
                     updateDeviceListView();
@@ -85,12 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
                             // mediaItems.clear();
                         ArrayList<MediaItem> mediaItems2 = new ArrayList<>();
-                            ((ContentFragment) fragments.get(currentTab)).updateMediaList2(mediaItems2);
+                            ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems2);
                         if (externalDeviceItems != null && externalDeviceItems.size() != 0) {
                             Toast.makeText(getApplicationContext(), "您的设备已断开连接，您可以选择其他设备", Toast.LENGTH_LONG);
                             devicelistview.setVisibility(View.VISIBLE);
                         }
                     }
+                    //   getALLMediaItems();//不加显示Loading的参数
                     break;
                 case UPDATE_MEDIAITEM:
                     Bundle bundle = message.getData();
@@ -105,32 +134,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    public TabLayout getmTabLayout() {
-        return mTabLayout;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate: ");
         applicationUtils.startService(this);
         initCondition();
+        registerReceiver();
         setContentView(R.layout.activity_main);
         mDeviceItemUtil = DeviceItemUtil.getInstance(this);
         initView();
-        registerReceiver();
-
+        allDevicesMediaItems.clear();
+        // getALLMediaItems();//不加显示Loading的参数
     }
-
+    
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         super.onDestroy();
+   if (myTask != null) myTask.cancel(true);
         mBtPlayerLayer.release();
         unregisterReceiver();
     }
 
     private void initView() {
+        loading = (ImageView) findViewById(R.id.loading);
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         csdMediaPlayer = CSDMediaPlayer.getInstance(this);
@@ -238,7 +266,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabSelected(TabLayout.Tab tab) {
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                ((ContentFragment) fragments.get(currentTab)).updateMediaList(currentTab, mDeviceItemUtil.getCurrentDevice());
+                if (/*allDevicesMediaItems.size() != 0*/MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
+                    ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
+                    mediaItems = ((ContentFragment) fragments.get(currentTab)).getSpecifiedMediaItems(currentTab, mDeviceItemUtil.getCurrentDevice());
+                    ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
+                } else {//单个抓取
+                    getALLMediaItems(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
+                }
             }
         });
     }
@@ -461,4 +495,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         MediaController.getInstance(this).setPlayerState(state, -1);
     }
+
+    public void getALLMediaItems(boolean ifShowLoading, DeviceItem deviceItem, int mediaType) {
+        allDevicesMediaItems.clear();
+        if (myTask != null && !myTask.isCancelled()) {
+            myTask.cancel(true);
+            myTask = null;
+        }
+
+        new MyTask(ifShowLoading, deviceItem, mediaType).execute();
+    }
+
+    /**
+     * 异步获取文件列表内容
+     */
+
+    class MyTask extends AsyncTask<String, Void, ArrayList<MediaItem>> implements com.fxc.ev.mediacenter.MyTask {
+        private boolean ifShowLoading;
+        private DeviceItem deviceItem = null;
+        private int mediaType = -1;
+
+        public MyTask(boolean ifShowLoading, DeviceItem deviceItem, int mediaType) {
+            this.ifShowLoading = ifShowLoading;
+            this.deviceItem = deviceItem;
+            this.mediaType = mediaType;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i(TAG, "onPreExecute: 抓取特定设备的文件 start" + ContentFragment.printTime());
+            if (ifShowLoading) {
+                loading.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            if (ifShowLoading) {
+                loading.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        protected void onCancelled(ArrayList<MediaItem> s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onCancelled() {// 作用：将异步任务设置为：取消状态
+            super.onCancelled();
+        }
+
+        // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果// 注：必须复写，从而自定义线程任务
+        @Override
+        protected ArrayList<MediaItem> doInBackground(String... strings) {
+            ArrayList<MediaItem> TotalmediaItems = new ArrayList<MediaItem>();
+            if (mediaType != -1 && deviceItem != null) {//抓取特定设备的文件
+                if (mediaType == 0) {
+                    TotalmediaItems = MediaItemUtil.getMusicInfos(getApplicationContext(), deviceItem.getStoragePath());
+                } else {
+                    TotalmediaItems = MediaItemUtil.getVideoInfos(getApplicationContext(), deviceItem.getStoragePath());
+                }
+                return TotalmediaItems;
+            }
+            return null;
+        }
+        // 作用：接收线程任务执行结果、将执行结果显示到UI组件// 注：必须复写，从而自定义UI操作
+        @Override
+        protected void onPostExecute(ArrayList<MediaItem> result) {
+            super.onPostExecute(result);
+            if (ifShowLoading) {
+                ((ContentFragment) fragments.get(currentTab)).updateMediaList(result);
+                ((ContentFragment) fragments.get(currentTab)).mediaItems = result;
+                loading.setVisibility(View.INVISIBLE);
+                Log.i(TAG, "onPostExecute: //抓取特定设备的文件 " + ContentFragment.printTime());
+            }
+        }
+    }
+
 }

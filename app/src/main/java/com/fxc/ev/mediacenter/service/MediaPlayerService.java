@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -22,6 +23,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.fxc.ev.mediacenter.ContentFragment;
 import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
@@ -49,7 +51,7 @@ public class MediaPlayerService extends Service {
     private final int UPDATE_BT_STATE = 1;
     private final int DEVICE_LOST = 2;
     public static boolean isAlive = false;
-
+    private MyTask myTask;
 
     private Handler handler = new Handler() {
         @Override
@@ -118,6 +120,7 @@ public class MediaPlayerService extends Service {
         // mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
         mediaPlayer = CSDMediaPlayer.getInstance(this);
         resetPlayerCondition(this.getApplicationContext());
+        getALLMediaItems();
     }
 
     /**
@@ -175,6 +178,7 @@ public class MediaPlayerService extends Service {
     public void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         saveData();
+        if (myTask!=null) myTask.cancel(true);
         mediaPlayer.release();
         mediaPlayer = null;
         unregisterReceiver();
@@ -359,6 +363,78 @@ public class MediaPlayerService extends Service {
         notification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
         service.startForeground(NOTIFICATION_ID, notification);
 
+    }
+
+    public void getALLMediaItems() {
+        // allDevicesMediaItems.clear();
+        if (myTask != null && !myTask.isCancelled()) {
+            myTask.cancel(true);
+            myTask = null;
+        }
+
+        new MyTask().execute();
+    }
+
+    /**
+     * 异步获取文件列表内容
+     */
+
+    class MyTask extends AsyncTask<String, Void, ArrayList<MediaItem>> implements com.fxc.ev.mediacenter.MyTask {
+
+        public MyTask() {
+            super();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i(TAG, "onPreExecute: 抓取所有设备的文件 start" + ContentFragment.printTime());
+            ContentFragment.printTime();
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(ArrayList<MediaItem> s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onCancelled() {// 作用：将异步任务设置为：取消状态
+            super.onCancelled();
+        }
+
+        // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果// 注：必须复写，从而自定义线程任务
+        @Override
+        protected ArrayList<MediaItem> doInBackground(String... strings) {
+            ArrayList<MediaItem> musicItems = new ArrayList<MediaItem>();
+            ArrayList<MediaItem> videoItems = new ArrayList<MediaItem>();
+            ArrayList<MediaItem> TotalmediaItems = new ArrayList<MediaItem>();
+            //抓取所有设备的文件
+            List<DeviceItem> externalDeviceItems = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList();
+            for (int i = 0; i < externalDeviceItems.size(); i++) {
+                musicItems = MediaItemUtil.getMusicInfos(getApplicationContext(), externalDeviceItems.get(i).getStoragePath());
+                for (int j = 0; j < musicItems.size(); j++) {
+                    TotalmediaItems.add(musicItems.get(j));
+                }
+                videoItems = MediaItemUtil.getVideoInfos(getApplicationContext(), externalDeviceItems.get(i).getStoragePath());
+                for (int k = 0; k < videoItems.size(); k++) {
+                    TotalmediaItems.add(videoItems.get(k));
+                }
+            }
+            Log.i(TAG, "doInBackground:抓取所有设备的文件 " + TotalmediaItems.size() + "Time：" + ContentFragment.printTime());
+            return TotalmediaItems;
+        }
+
+        // 作用：接收线程任务执行结果、将执行结果显示到UI组件// 注：必须复写，从而自定义UI操作
+        @Override
+        protected void onPostExecute(ArrayList<MediaItem> result) {
+            super.onPostExecute(result);
+            MediaItemUtil.setAllDevicesMediaItems(result);
+        }
     }
 
 }

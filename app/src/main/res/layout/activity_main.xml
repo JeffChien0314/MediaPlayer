@@ -6,7 +6,12 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_music"
     tools:context="com.fxc.ev.mediacenter.MainActivity">
-
+    <ImageView
+        android:id="@+id/loading"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="@color/style_color"
+        android:visibility="invisible"/>
     <include
         android:id="@+id/player"
         android:layout_width="match_parent"

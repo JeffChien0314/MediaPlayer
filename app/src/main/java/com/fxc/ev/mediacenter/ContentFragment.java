@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -42,6 +41,8 @@ import java.util.Date;
 import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -56,7 +57,7 @@ public class ContentFragment extends Fragment {
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private DeviceItem mDeviceItem;
-    private MyTask myTask=null;
+
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
         public void onStartConnect() {
@@ -181,48 +182,30 @@ public class ContentFragment extends Fragment {
             }
         } else {
             mDeviceItem = deviceItem;
-            if (myTask != null && !myTask.isCancelled()) {
-                myTask.cancel(true);
-                myTask = null;
+            if (MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
+                mediaItems = getSpecifiedMediaItems(mediaType, deviceItem);
+                updateMediaList(mediaItems);
+            } else {
+                updateMediaList(MediaItemUtil.getAllDevicesMediaItems());
+                ((MainActivity) getActivity()).getALLMediaItems(true, deviceItem, mediaType);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
             }
-            myTask=new MyTask();
-            Log.i(TAG, "deviceItemOnClick: "+    printTime());
-            myTask.execute(deviceItem.getStoragePath());
-
-            // mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(deviceItem, mediaType, false).getMediaItems();
-            // updateMediaList(mediaType, deviceItem);
         }
     }
 
-    public void updateMediaList(int mediaType, DeviceItem deviceItem) {
-        if (null != deviceItem) {
-            mDeviceItem = deviceItem;
-        }
-        mediaItems = MediaController.getInstance(mContext).getMeidaInfosByDevice(mDeviceItem, mediaType, false).getMediaItems();
-        listAdapter = new MediaListAdapter(mContext, mediaItems);
+    public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
+        mediaItems = mediaItemList;
+        listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;
         mediaFile_list.setAdapter(listAdapter);
         listAdapter.notifyDataSetChanged();
         if (urls != null && urls.size() != 0) {
             urls.clear();
-            for (int i = 0; i < mediaItems.size(); i++) {
-                urls.add(mediaItems.get(i).getGsyVideoModel());
+            for (int i = 0; i < mediaItemList.size(); i++) {
+                urls.add(mediaItemList.get(i).getGsyVideoModel());
             }
         }
     }
-    public void updateMediaList2(ArrayList<MediaItem>mediaItems) {
-        listAdapter = new MediaListAdapter(mContext, mediaItems);
-        if (mediaFile_list == null) return;
-        mediaFile_list.setAdapter(listAdapter);
-        listAdapter.notifyDataSetChanged();
-        Log.i(TAG, "updateMediaList2: end"+printTime());
-        if (urls != null && urls.size() != 0) {
-            urls.clear();
-            for (int i = 0; i < mediaItems.size(); i++) {
-                urls.add(mediaItems.get(i).getGsyVideoModel());
-            }
-        }
-    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -236,16 +219,16 @@ public class ContentFragment extends Fragment {
                     mDeviceItem = mMediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
-                    updateMediaList2(mediaItems);
+                    updateMediaList(mediaItems);
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                     if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
                         tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
                     }
-                        tab.select();
-                    } else {
+                    tab.select();
+                } else {
                     Log.i(TAG, "onResume: ");
-                    }
                 }
+            }
 
         }
         listAdapter = new MediaListAdapter(mContext, mediaItems);
@@ -272,8 +255,8 @@ public class ContentFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             playingAnimation(position);
-            if (mDeviceItem!=null){
-            MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
+            if (mDeviceItem != null) {
+                MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
             }
             if (MediaController.getInstance(mContext).currentSourceType == Constants.USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
@@ -286,91 +269,53 @@ public class ContentFragment extends Fragment {
 
                 //   MediaController.getInstance(mContext).setPlayerState();
             }
-            if (mDeviceItem!=null)
-            ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
+            if (mDeviceItem != null)
+                ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
         }
     };
 
     @Override
     public void onPause() {
         super.onPause();
-        if (CSDMediaPlayer.getInstance(mContext).getMediaInfo()!=null
-                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems()!=null
-                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size()!=0){//Sandra@20220315 add
-        if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(0).isIfVideo()) {
-            CSDMediaPlayer.getInstance(mContext).onVideoPause();
+        if (CSDMediaPlayer.getInstance(mContext).getMediaInfo() != null
+                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems() != null
+                && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size() != 0) {//Sandra@20220315 add
+            if (CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(0).isIfVideo()) {
+                CSDMediaPlayer.getInstance(mContext).onVideoPause();
+            }
         }
-    }
     }
 
     @Override
     public void onDestroy() {
-        if (myTask!=null) myTask.cancel(true);
         super.onDestroy();
     }
-    public void whenTabSelected(String storePath){
-        if (myTask != null && !myTask.isCancelled()) {
-            myTask.cancel(true);
-            myTask=null;
-        }
-        myTask=new MyTask();
-        ArrayList<String> storePaths=new  ArrayList<String>();
-        storePaths.add(storePath);
-        myTask.execute(storePath);
-    }
 
-    /**
-     * 异步获取文件列表内容
-     */
-     class MyTask extends AsyncTask<String, Integer, ArrayList<MediaItem>> {
-        @Override
-        protected void onPreExecute() {  // 作用：执行 线程任务前的操作
-            super.onPreExecute();
-            Log.i(TAG, "onPreExecute: "+printTime());
-        }
-        // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果// 注：必须复写，从而自定义线程任务
-        @Override
-        protected ArrayList<MediaItem> doInBackground(String... storagePath) {
-          //  MediaInfo mediaInfo=MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice(),currentTab, false);
-                     Log.i(TAG, "doInBackground start:  "+ printTime());
-
-            if (MainActivity.currentTab== MediaItemUtil.TYPE_MUSIC){
-                mediaItems= MediaItemUtil.getMusicInfos(getContext(),storagePath[0]);
-            }else {
-                mediaItems= MediaItemUtil.getVideoInfos(getContext(),storagePath[0]);
+    public ArrayList<MediaItem> getSpecifiedMediaItems(int media_Type, DeviceItem deviceInfo) {
+        ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
+        ArrayList<MediaItem> totalMediaItems = new ArrayList<>();
+        totalMediaItems =/*((MainActivity)getActivity()).getAllDevicesMediaItems()*/MediaItemUtil.getAllDevicesMediaItems();
+        String path = deviceInfo.getStoragePath();
+        if (media_Type == TYPE_MUSIC) {
+            for (int m = 0; m < totalMediaItems.size(); m++) {
+                if (!totalMediaItems.get(m).isIfVideo() && totalMediaItems.get(m).getStoragePath().equals(path)) {
+                    mediaItems.add(totalMediaItems.get(m));
+                }
             }
-
-            if (mediaItems!=null){
-                return mediaItems;
+        } else {
+            for (int n = 0; n < totalMediaItems.size(); n++) {
+                if (totalMediaItems.get(n).isIfVideo() && totalMediaItems.get(n).getStoragePath().equals(path)) {
+                    mediaItems.add(totalMediaItems.get(n));
+                }
             }
-            return null;
         }
-
-        @Override
-        protected void onProgressUpdate(Integer... progresses) {  // 作用：在主线程 显示线程任务执行的进度
-
-        }
-
-        // 作用：接收线程任务执行结果、将执行结果显示到UI组件// 注：必须复写，从而自定义UI操作
-        @Override
-        protected void onPostExecute(ArrayList<MediaItem> result) {
-     //       Log.i(TAG, "onPostExecute: "+printTime());
-            updateMediaList2(result);
-          mediaItems=result;
-        }
-
-
-        @Override
-        protected void onCancelled() {// 作用：将异步任务设置为：取消状态
-
-        }
-    }
-    public static String printTime(){
-        SimpleDateFormat formatter   =   new   SimpleDateFormat   ("yyyy年MM月dd日   HH:mm:ss:SSS");
-        Date curDate =  new Date(System.currentTimeMillis());
-        String   str   =   formatter.format(curDate);
-     return str;
+        return mediaItems;
     }
 
-
+    public static String printTime() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日   HH:mm:ss:SSS");
+        Date curDate = new Date(System.currentTimeMillis());
+        String str = formatter.format(curDate);
+        return str;
+    }
 }
