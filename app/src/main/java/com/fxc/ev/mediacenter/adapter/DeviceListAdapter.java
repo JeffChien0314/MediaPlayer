@@ -22,7 +22,7 @@ import java.util.List;
 public class DeviceListAdapter extends BaseAdapter {
     private Context context;
     private List<DeviceItem> externalDeviceItems;
-    private DeviceItem externalDeviceItem, mCurrentDevice;
+    private DeviceItem externalDeviceItem ;
 
     public DeviceListAdapter() {
     }
@@ -56,7 +56,6 @@ public class DeviceListAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.device_list, null);
             viewHolder.description = (TextView) convertView.findViewById(R.id.description);
             viewHolder.deviceImage = (ImageView) convertView.findViewById(R.id.device_icon);
-            viewHolder.connected_icon = (ImageView) convertView.findViewById(R.id.connected_icon);
             convertView.setTag(viewHolder);            //表示給View新增一個格外的資料，
         } else {
             viewHolder = (DeviceListAdapter.ViewHolder) convertView.getTag();//通過getTag的方法將資料取出來
@@ -68,13 +67,7 @@ public class DeviceListAdapter extends BaseAdapter {
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
         }
-        if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
-            viewHolder.connected_icon.setVisibility(View.VISIBLE);
-            viewHolder.description.setTextColor(Color.parseColor("#BFFFFFFF"));
-        } else {
-            viewHolder.connected_icon.setVisibility(View.GONE);
-            viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
-        }
+
         // viewHolder.deviceImage.setImageBitmap(externalDeviceItem.getThumbBitmap());
         return convertView;
     }
@@ -87,7 +80,7 @@ public class DeviceListAdapter extends BaseAdapter {
         //所有控制元件物件引用
         public ImageView deviceImage;    //設備圖片
         public TextView description;    //設備名字
-        public ImageView connected_icon;
+
        /* public TextView musicDuration;	//音樂時長
         public TextView musicArtist;	//音樂藝術家*/
     }

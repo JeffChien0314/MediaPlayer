@@ -6,7 +6,7 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="910px"
+        android:layout_height="1000px"
         android:choiceMode="singleChoice"
         android:drawSelectorOnTop="true"
         android:scrollbars="vertical"

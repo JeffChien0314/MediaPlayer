@@ -57,6 +57,7 @@ public class ContentFragment extends Fragment {
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private DeviceItem mDeviceItem;
+    private boolean isDeviceMenuOpen=true;
 
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
@@ -107,6 +108,13 @@ public class ContentFragment extends Fragment {
         this.urls = urls;
     }
 
+    public boolean isDeviceMenuOpen() {
+        return isDeviceMenuOpen;
+    }
+
+    public void setDeviceMenuOpen(boolean deviceMenuOpen) {
+        isDeviceMenuOpen = deviceMenuOpen;
+    }
     public void smoothScrollToPosition(int position) {
 
         mediaFile_list.smoothScrollToPosition(position);
@@ -239,6 +247,17 @@ public class ContentFragment extends Fragment {
         }
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
+        ViewGroup.LayoutParams params = mediaFile_list.getLayoutParams();
+        if(isDeviceMenuOpen()){
+            if (MediaController.getInstance(mContext).getDevices().size() * 90 < 990) {
+                params.height = 1000- (MediaController.getInstance(mContext).getDevices().size() * 90);
+            } else {
+                params.height = 0;
+            }
+        }else{
+            params.height = 1000;
+        }
+        mediaFile_list.setLayoutParams(params);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override

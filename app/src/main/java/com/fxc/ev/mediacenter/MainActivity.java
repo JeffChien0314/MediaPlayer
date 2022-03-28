@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i(TAG, "defaultDeviceindex" + position);
                 devicelistview.setVisibility(View.GONE);
                 ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
-                params.height = 910;
+                params.height = 1000;
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
             }
@@ -281,19 +281,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onInputSourceClick(View v) {
         if (devicelistview.getVisibility() == View.GONE) {
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
-            if (MediaController.getInstance(this).getDevices().size() * 90 < 900) {
-                params.height = 910 - (MediaController.getInstance(this).getDevices().size() * 90);
-                ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+            if (MediaController.getInstance(this).getDevices().size() * 90 < 990) {
+                params.height = 1000 - (MediaController.getInstance(this).getDevices().size() * 90);
             } else {
                 params.height = 0;
             }
+            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(true);
+            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             devicelistview.setVisibility(View.VISIBLE);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
             updateDeviceListView();
         } else if (devicelistview.getVisibility() == View.VISIBLE) {
             devicelistview.setVisibility(View.GONE);
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
-            params.height = 910;
+            params.height = 1000;
+            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(false);
             ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
         }
