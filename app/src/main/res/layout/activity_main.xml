@@ -15,8 +15,7 @@
     <include
         android:id="@+id/player"
         android:layout_width="match_parent"
-        
-android:layout_height="486px"
+        android:layout_height="486px"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +26,6 @@ android:layout_height="486px"
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/player"
@@ -108,7 +106,8 @@ android:layout_height="486px"
             android:layout_width="wrap_content"
             android:background="#03000000"
             android:orientation="vertical"
-            android:layout_height="wrap_content" />
+            android:layout_weight="1"
+            android:layout_height="0dp" />
     </LinearLayout>
 
 

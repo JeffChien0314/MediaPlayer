@@ -219,6 +219,12 @@ public class ContentFragment extends Fragment {
                     mDeviceItem = mMediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
+                    mediaFile_list.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
+                        }
+                    });
                     updateMediaList(mediaItems);
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                     if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
