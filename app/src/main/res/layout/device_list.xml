@@ -6,7 +6,8 @@
     <LinearLayout
         android:id="@+id/device_item"
         android:layout_width="1020px"
-        android:layout_height="90px"
+        
+android:layout_height="90px"
         android:layout_marginLeft="30px"
         android:gravity="center_vertical"
         android:orientation="horizontal">

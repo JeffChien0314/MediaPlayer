@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">
 FxcMediaPlayer</string>
+    <string name="paire">Pair device</string>
+    <string name="Connecting">Connecting</string>
+    <string name="Select">Select your device</string>
 </resources>

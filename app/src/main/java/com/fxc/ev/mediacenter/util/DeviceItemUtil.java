@@ -98,7 +98,15 @@ public class DeviceItemUtil {
 
         return externalDeviceItems;
     }
-
+    /*获取设备对应的Index及设备列表中对应的position*/
+    public int getDeviceIndex(DeviceItem deviceItem){
+        for (int i=0;i<externalDeviceItems.size();i++){
+            if (externalDeviceItems.get(i).getStoragePath().equals(deviceItem.getStoragePath())){
+                return i;
+            }
+        }
+        return -1;
+    }
     /**
      * 获取所有外置存储器的目录
      *

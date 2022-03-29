@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.DeviceItemUtil;
 
 import java.util.List;
 
@@ -22,8 +24,8 @@ import java.util.List;
 public class DeviceListAdapter extends BaseAdapter {
     private Context context;
     private List<DeviceItem> externalDeviceItems;
-    private DeviceItem externalDeviceItem ;
-
+    private DeviceItem externalDeviceItem, mCurrentDevice;
+    private boolean ifShowLoading=false;
     public DeviceListAdapter() {
     }
 
@@ -31,6 +33,11 @@ public class DeviceListAdapter extends BaseAdapter {
         this.context = context;
         this.externalDeviceItems = externalDeviceItems;
       //  this.mCurrentDevice = currentDevice;
+    }
+    public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems, boolean ifShowLoading) {
+        this.context = context;
+        this.externalDeviceItems = externalDeviceItems;
+        this.ifShowLoading = ifShowLoading;
     }
 
     @Override
@@ -67,8 +74,27 @@ public class DeviceListAdapter extends BaseAdapter {
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
         }
-
+        if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
+           // viewHolder.connected_icon.setVisibility(View.VISIBLE);
+            viewHolder.description.setTextColor(Color.parseColor("#BFFFFFFF"));
+        } else {
+          //  viewHolder.connected_icon.setVisibility(View.GONE);
+            viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
+        }
         // viewHolder.deviceImage.setImageBitmap(externalDeviceItem.getThumbBitmap());
+        if (CSDMediaPlayer.getInstance(context)!=null && CSDMediaPlayer.getInstance(context).getMediaInfo() !=null
+                && CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem()!=null){
+            if (position==DeviceItemUtil.getInstance(context).getDeviceIndex(CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem())){
+                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
+            }
+        }
+        if (DeviceItemUtil.getInstance(context)!=null && DeviceItemUtil.getInstance(context).currentDevice!=null){
+            if (position==DeviceItemUtil.getInstance(context).getDeviceIndex(DeviceItemUtil.getInstance(context).getCurrentDevice())){
+                if (ifShowLoading){
+                    viewHolder.deviceImage.setImageResource(R.drawable.ani_gif_loading);
+                }
+            }
+        }
         return convertView;
     }
 

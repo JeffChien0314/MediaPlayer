@@ -63,12 +63,15 @@ public class ContentFragment extends Fragment {
         @Override
         public void onStartConnect() {
             Log.i(TAG, "onStartConnect: ");
+            ((MainActivity) getActivity()).updateDeviceListView(true);
             Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onConnectSuccess(BluetoothDevice device) {
             Log.i(TAG, "onConnectSuccess: ");
+            ((MainActivity) getActivity()).updateDeviceListView(false);
+            ((MainActivity) getActivity()).connectAnimationStop(DeviceItemUtil.getInstance(getApplicationContext()).getDeviceIndex(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice()));
             Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
         }
 
@@ -191,11 +194,11 @@ public class ContentFragment extends Fragment {
         } else {
             mDeviceItem = deviceItem;
             if (MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
-                mediaItems = getSpecifiedMediaItems(mediaType, deviceItem);
+                mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
                 updateMediaList(mediaItems);
-            } else {
-                updateMediaList(MediaItemUtil.getAllDevicesMediaItems());
-                ((MainActivity) getActivity()).getALLMediaItems(true, deviceItem, mediaType);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
+            } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
+                ((MainActivity) getActivity()).updateDeviceListView(true);
+                ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
             }
         }
     }
@@ -294,8 +297,10 @@ public class ContentFragment extends Fragment {
 
                 //   MediaController.getInstance(mContext).setPlayerState();
             }
-            if (mDeviceItem != null)
+            if (mDeviceItem != null){
                 ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
+        }
+            ((MainActivity) getActivity()).updateDeviceListView(false);
         }
     };
 
@@ -316,7 +321,7 @@ public class ContentFragment extends Fragment {
         super.onDestroy();
     }
 
-    public ArrayList<MediaItem> getSpecifiedMediaItems(int media_Type, DeviceItem deviceInfo) {
+    public ArrayList<MediaItem> filterAllMediaItemsOfSpecificDevice(int media_Type, DeviceItem deviceInfo) {
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         ArrayList<MediaItem> totalMediaItems = new ArrayList<>();
         totalMediaItems =/*((MainActivity)getActivity()).getAllDevicesMediaItems()*/MediaItemUtil.getAllDevicesMediaItems();
