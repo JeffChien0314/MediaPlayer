@@ -7,7 +7,7 @@
         android:id="@+id/device_item"
         android:layout_width="1020px"
         
-android:layout_height="90px"
+android:layout_height="45px"
         android:layout_marginLeft="30px"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -24,7 +24,8 @@ android:layout_height="90px"
             android:layout_height="34px"
             android:layout_marginLeft="30px"
             android:layout_toRightOf="@+id/device_icon"
-            android:text="U盤的名字"
+            
+android:text="@string/paire"
             android:textColor="#40FFFFFF"
             android:textSize="28px" />
 

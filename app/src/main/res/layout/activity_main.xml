@@ -49,14 +49,15 @@ android:layout_height="486px"
                 app:layout_constraintTop_toBottomOf="@id/input_source_indicated" />
 
             <TextView
+                
+android:id="@+id/device_tips"
                 android:layout_width="200px"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="550px"
                 android:layout_marginTop="47px"
                 android:layout_marginLeft="15px"
                 
-android:text="@string/paire"
-                android:textColor="#80FFFFFF"
+android:textColor="#80FFFFFF"
                 android:textSize="22px" />
 
             <ImageView
@@ -84,6 +85,15 @@ android:text="@string/paire"
             android:drawSelectorOnTop="true"
             android:scrollbars="vertical"
             app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode" />
+        
+<include
+            android:id="@+id/pair_device"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/device_list"
+            android:visibility="invisible">
+
+        </include>
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"

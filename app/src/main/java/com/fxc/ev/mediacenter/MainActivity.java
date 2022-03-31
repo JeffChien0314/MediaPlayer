@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -25,6 +26,8 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fxc.mediaplayer.R;
@@ -57,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
+    protected TextView device_tips;
+    protected RelativeLayout pair_device;
+    private ImageView device_icon;
     private FrameLayout mFrameLayout;
     private FrameLayout mbtFrameLayout;
     private BtplayerLayout mBtPlayerLayer;
@@ -73,31 +79,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<Fragment> fragments;
     public static int currentTab = 0;
     private MediaInfo mMediaInfo;
-    private ListView devicelistview;
+    protected ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
     private DeviceListAdapter deviceListAdapter;
     private DeviceItemUtil mDeviceItemUtil;
     public ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();
-
-    public ArrayList<MediaItem> getAllDevicesMediaItems() {
-        return allDevicesMediaItems;
-    }
-
-    public void setAllDevicesMediaItems(ArrayList<MediaItem> allDevicesMediaItems) {
-        this.allDevicesMediaItems = allDevicesMediaItems;
-    }
-
     private AnimationDrawable ani_gif_Connecting;
     private MyTask myTask = null;
-
-    public com.fxc.ev.mediacenter.MyTask getMyTask() {
-        return myTask;
-    }
-
-    public void setMyTask(MyTask myTask) {
-        this.myTask = myTask;
-    }
-
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message message) {
@@ -166,6 +154,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
+        pair_device = (RelativeLayout) findViewById(R.id.pair_device);
+        device_icon = (ImageView) findViewById(R.id.device_icon);
+        device_icon.setBackgroundResource(R.drawable.icon_pair);
+        pair_device.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+            }
+        });
+        device_tips = (TextView) findViewById(R.id.device_tips);
+        if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() != null &&
+                DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() != 0) {//有連接的設備，
+            if (csdMediaPlayer.getMediaInfo() != null && csdMediaPlayer.getMediaInfo().getDeviceItem() == null) {//但是播放器沒有加載設備
+                device_tips.setText(R.string.Select);//提示“Select your device”
+            }
+        } else {//沒有任何設備的時候
+            device_tips.setText(R.string.paire);//提示“Pair device”
+        }
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mbtFrameLayout = (FrameLayout) findViewById(R.id.bt_player0);
         mBtPlayerLayer = new BtplayerLayout(this);
@@ -203,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
                 params.height = 1000;
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
-                mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
             }
         });
         //Sandra@20220215 add<--
@@ -285,19 +290,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(true);
             ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
-            devicelistview.setVisibility(View.VISIBLE);
-            mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
-            updateDeviceListView(false);
+            changeVisibleOfDeviceView(true);
         } else if (devicelistview.getVisibility() == View.VISIBLE) {
-            devicelistview.setVisibility(View.GONE);
             ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
             params.height = 1000;
             ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(false);
             ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
-            mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
+            changeVisibleOfDeviceView(false);
+
         }
+        updateDeviceListView(false);//確保同步實際連接狀況
     }
 
+    public void changeVisibleOfDeviceView(boolean ifopen) {
+        if (ifopen) {
+            devicelistview.setVisibility(View.VISIBLE);
+            pair_device.setVisibility(View.VISIBLE);
+            mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
+            device_tips.setVisibility(View.INVISIBLE);
+        } else {
+            devicelistview.setVisibility(View.GONE);
+            pair_device.setVisibility(View.GONE);
+            mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_press);//TODO:設置為XML的背景
+            device_tips.setVisibility(View.VISIBLE);
+        }
+    }
 
     public int getCurrPosition() {
         return currPosition;

@@ -42,7 +42,7 @@ import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
-import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
 
 /**
  * Created by Jennifer on 2022/2/08.
@@ -57,12 +57,21 @@ public class ContentFragment extends Fragment {
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private DeviceItem mDeviceItem;
-    private boolean isDeviceMenuOpen=true;
+    private boolean isDeviceMenuOpen = true;
+
+    public boolean isDeviceMenuOpen() {
+        return isDeviceMenuOpen;
+    }
+
+    public void setDeviceMenuOpen(boolean deviceMenuOpen) {
+        isDeviceMenuOpen = deviceMenuOpen;
+    }
 
     private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
         @Override
         public void onStartConnect() {
             Log.i(TAG, "onStartConnect: ");
+            ((MainActivity) getActivity()).device_tips.setText(R.string.Connecting);
             ((MainActivity) getActivity()).updateDeviceListView(true);
             Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
         }
@@ -70,6 +79,9 @@ public class ContentFragment extends Fragment {
         @Override
         public void onConnectSuccess(BluetoothDevice device) {
             Log.i(TAG, "onConnectSuccess: ");
+            ((MainActivity) getActivity()).device_tips.setText(device.getName());
+            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+            // DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(device);//TODO:設置為當前瀏覽的設備
             ((MainActivity) getActivity()).updateDeviceListView(false);
             ((MainActivity) getActivity()).connectAnimationStop(DeviceItemUtil.getInstance(getApplicationContext()).getDeviceIndex(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice()));
             Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
@@ -107,17 +119,6 @@ public class ContentFragment extends Fragment {
         return urls;
     }
 
-    public void setUrls(List<GSYVideoModel> urls) {
-        this.urls = urls;
-    }
-
-    public boolean isDeviceMenuOpen() {
-        return isDeviceMenuOpen;
-    }
-
-    public void setDeviceMenuOpen(boolean deviceMenuOpen) {
-        isDeviceMenuOpen = deviceMenuOpen;
-    }
     public void smoothScrollToPosition(int position) {
 
         mediaFile_list.smoothScrollToPosition(position);
@@ -172,6 +173,9 @@ public class ContentFragment extends Fragment {
         if (deviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
             if (deviceItem.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
+                CSDMediaPlayer.getInstance(getApplicationContext()).onVideoPause();
+                ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+                // MediaController.getInstance(getApplicationContext()).setPlayerState(state, -1);//TODO:通知XXXX變更為藍牙設備了
             } else {
                 try {
                     if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
@@ -204,6 +208,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
+        if (mediaItemList == null || mediaItemList.size() == 0) return;
         mediaItems = mediaItemList;
         listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;
@@ -223,20 +228,25 @@ public class ContentFragment extends Fragment {
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
         MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+        mMediaInfo = null;
         Log.i(TAG, "onResume: CSDMediaPlayer.mInstance.getMediaInfo();");
         if (mMediaInfo != null) {
             if (mMediaInfo.getMediaItems() != null) {
                 if (mMediaInfo.getMediaItems().size() > 0) {
+                    if (!DeviceItemUtil.getInstance(getContext()).isDeviceExist(mMediaInfo.getDeviceItem().getStoragePath())) {
+                        return;
+                    }
                     mDeviceItem = mMediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
+
+                    ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
                     mediaFile_list.post(new Runnable() {
                         @Override
                         public void run() {
                             mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
                         }
                     });
-                    updateMediaList(mediaItems);
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                     if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
                         tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
@@ -247,17 +257,41 @@ public class ContentFragment extends Fragment {
                 }
             }
 
+        } else {//player 無内容加載時去設置内容
+            if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() == null
+                    || DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() == 0) {
+                return;//無設備
+            } else {
+                mDeviceItem = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().get(0);
+            }
+
+            DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
+            if (mDeviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
+                mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
+            } else {
+                mediaItems = getMusicInfos(getApplicationContext(), mDeviceItem.getStoragePath());
+            }
+            if (mediaItems == null || mediaItems.size() == 0) return;
+            ((MainActivity) getActivity()).playMusic(0);
+            CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
         }
+        if (mDeviceItem == null) {
+            return;
+        }
+        ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
+        ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+        ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());//展示相應播放頁面，本地播放跟蓝牙播放切换时UI更新
+        ((MainActivity) getActivity()).updateDeviceListView(false);//更新設備前的圖標
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
         ViewGroup.LayoutParams params = mediaFile_list.getLayoutParams();
-        if(isDeviceMenuOpen()){
+        if (isDeviceMenuOpen()) {
             if (MediaController.getInstance(mContext).getDevices().size() * 90 < 990) {
-                params.height = 1000- (MediaController.getInstance(mContext).getDevices().size() * 90);
+                params.height = 1000 - (MediaController.getInstance(mContext).getDevices().size() * 90);
             } else {
                 params.height = 0;
             }
-        }else{
+        } else {
             params.height = 1000;
         }
         mediaFile_list.setLayoutParams(params);
@@ -288,19 +322,20 @@ public class ContentFragment extends Fragment {
             }
             if (MediaController.getInstance(mContext).currentSourceType == Constants.USB_DEVICE) {
                 ((MainActivity) getActivity()).playMusic(position);
-                DeviceItem deviceItem = DeviceItemUtil.getInstance(mContext).getDeviceByStoragePath(mediaItems.get(position).getStoragePath());
-                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, deviceItem));
-                //  ifVideo=CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().get(position).isIfVideo();
+                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
                 Log.i(TAG, "onItemClick: mediaItems" + mediaItems.size());
                 //<--Sandra@20220311 add
             } else {//设置蓝牙选中歌曲播放，还有控制Activity的UI设置
 
                 //   MediaController.getInstance(mContext).setPlayerState();
             }
-            if (mDeviceItem != null){
+            if (mDeviceItem != null) {
                 ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
-        }
+            }
+            ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
             ((MainActivity) getActivity()).updateDeviceListView(false);
+            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+
         }
     };
 
