@@ -674,7 +674,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                //mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
+                mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
                 intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
                 intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
