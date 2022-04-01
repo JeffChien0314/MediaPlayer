@@ -233,7 +233,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
             if (null == item.getThumbBitmap()) return;
             Bitmap bm = item.getThumbBitmap();
             Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
-            mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(drawable);
+            //mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(drawable);
         }
     }
 

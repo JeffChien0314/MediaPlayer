@@ -14,14 +14,18 @@ import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.util.MediaController;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -39,24 +43,34 @@ import java.util.Map;
 import moe.codeest.enviews.ENDownloadView;
 import moe.codeest.enviews.ENPlayView;
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 import static com.fxc.ev.mediacenter.util.Constants.*;
 
 /**
  * Created by Jennifer on 2022/1/17.
  */
 
-public class CSDMediaPlayer extends ListGSYVideoPlayer {
+public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickListener, View.OnTouchListener {
     private final String TAG = CSDMediaPlayer.class.getSimpleName();
     public static final String STATE_EXTRA = "state";
     public static final String POS_EXTRA = "pos";
-
+    private final int FASTFORWARD = 1;//jennifer add for 快进快退功能
+    private final int DO_NOTHING = 0;//jennifer add for 快进快退功能
+    private final int REWIND = -1;//jennifer add for 快进快退功能
+    private int USB_LAYER_DOUBLE_TAP = DO_NOTHING;
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
     private ImageView mPrevious, mNext, mRewind, mFwd;
+    private TextView mRewindTotalTime, mFwdTotalTime;//jennifer add for 快进快退功能
     private int playMode = 0;
+    private int mDoubleFwdClickCount = 0;//jennifer add for 快进快退功能
+    private int mDoubleRewindClickCount = 0;//jennifer add for 快进快退功能
     private boolean randomOpen = false;
+    private OnTouchListener mTouchListener;
+    private GestureDetector mGesture;//jennifer add for 快进快退功能
     private LinkedList<Integer> randomIndexList = new LinkedList<>();
-
+    private boolean isDoubleTouch = false;//jennifer add for 快进快退功能
     public CSDMediaPlayer(Context context) {
         super(context);
     }
@@ -99,13 +113,46 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         mNext = findViewById(R.id.bt_next);
         mRewind = findViewById(R.id.bt_rewind);
         mFwd = findViewById(R.id.bt_fwd);
-//        imageViewAudio = (ImageView) findViewById(R.id.audiocover);
+        mRewindTotalTime = findViewById(R.id.rewind_content_display);
+        mFwdTotalTime = findViewById(R.id.fwd_content_display);
         mFullscreenButton.setOnClickListener(this);
         mPrevious.setOnClickListener(this);
         mNext.setOnClickListener(this);
         mRewind.setOnClickListener(this);
         mFwd.setOnClickListener(this);
+        initGestureDetector(context);
+        //jennifer add for 快进快退功能-->
+        mTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.i(TAG, "onTouch: ");
+                if (event.getAction() == ACTION_DOWN) {
+                    //checkBtnVisble();
+                }
+                    float sx = findViewById(R.id.surface_container).getX();
+                    float cx = event.getX();
+                    int ex = findViewById(R.id.surface_container).getWidth();
+                    if (((cx - sx) / (ex - sx)) < 0.4) {
+                        USB_LAYER_DOUBLE_TAP = REWIND;
+                        mGesture.onTouchEvent(event);
+                    } else if (((cx - sx) / (ex - sx)) > 0.6) {
+                        USB_LAYER_DOUBLE_TAP = FASTFORWARD;
+                        mGesture.onTouchEvent(event);
+                    }else{
+                        mGesture.onTouchEvent(event);
+                    }
+                    if(event.getAction() == ACTION_UP){
+                        //mDoubleClickCount=0;
+                        startDismissControlViewTimer();
+                    }
+
+                return true;
+            }
+        };
+        findViewById(R.id.surface_container).setOnTouchListener(mTouchListener);
     }
+    //jennifer add for 快进快退功能<--
+
 
     /**
      * 设置播放URL
@@ -246,49 +293,98 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         }
         super.onAutoCompletion();
     }
-
+    //jennifer add for 按钮的显示的消失-->
     @Override
     protected void hideAllWidget() {
         super.hideAllWidget();
+        mDoubleFwdClickCount=0;
+        mDoubleRewindClickCount=0;
+        isDoubleTouch=false;
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
         setViewShowState(mRewind, INVISIBLE);
         setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mRewindTotalTime, INVISIBLE);
+        setViewShowState(mFwdTotalTime, INVISIBLE);
     }
 
 
     @Override
     protected void changeUiToPreparingShow() {
-        super.changeUiToPreparingShow();
         Debuger.printfLog("changeUiToPreparingShow");
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mStartButton, INVISIBLE);
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
-        setViewShowState(mRewind, INVISIBLE);
-        setViewShowState(mFwd, INVISIBLE);
-        setViewShowState(mThumbImageViewLayout, VISIBLE);
+        setViewShowState(mLoadingProgressBar, VISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, GONE);
+        if (isDoubleTouch == false) {
+            if (mLoadingProgressBar instanceof ENDownloadView) {
+                ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
+                if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
+                    ((ENDownloadView) mLoadingProgressBar).start();
+                }
+            }
+        }
     }
-
     @Override
     protected void changeUiToPlayingShow() {
-        super.changeUiToPlayingShow();
         Debuger.printfLog("changeUiToPlayingShow");
-        setViewShowState(mPrevious, VISIBLE);
-        setViewShowState(mNext, VISIBLE);
-        setViewShowState(mRewind, VISIBLE);
-        setViewShowState(mFwd, VISIBLE);
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        if(isDoubleTouch){
+            setViewShowState(mPrevious, INVISIBLE);
+            setViewShowState(mNext, INVISIBLE);
+            setViewShowState(mStartButton, INVISIBLE);
+        }else{
+            setViewShowState(mPrevious, VISIBLE);
+            setViewShowState(mNext, VISIBLE);
+            setViewShowState(mStartButton, VISIBLE);
+            if (mLoadingProgressBar instanceof ENDownloadView) {
+                ((ENDownloadView) mLoadingProgressBar).reset();
+            }
+            updateStartImage();
+        }
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
     }
 
     @Override
     protected void changeUiToPauseShow() {
-        super.changeUiToPauseShow();
         Debuger.printfLog("changeUiToPauseShow");
-        setViewShowState(mPrevious, VISIBLE);
-        setViewShowState(mNext, VISIBLE);
-        /*setViewShowState(mRewind, VISIBLE);
-        setViewShowState(mFwd, VISIBLE);*/
-    }
 
-    @Override
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        if(isDoubleTouch){
+            setViewShowState(mPrevious, INVISIBLE);
+            setViewShowState(mNext, INVISIBLE);
+            setViewShowState(mStartButton, INVISIBLE);
+        }else{
+            setViewShowState(mPrevious, VISIBLE);
+            setViewShowState(mNext, VISIBLE);
+            setViewShowState(mStartButton, VISIBLE);
+            if (mLoadingProgressBar instanceof ENDownloadView) {
+                ((ENDownloadView) mLoadingProgressBar).reset();
+            }
+            updateStartImage();
+            updatePauseCover();
+        }
+        setViewShowState(mLoadingProgressBar, INVISIBLE);
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, (mIfCurrentIsFullscreen && mNeedLockFull) ? VISIBLE : GONE);
+
+
+
+    }
+   /* @Override
     protected void changeUiToPlayingBufferingShow() {
         super.changeUiToPlayingBufferingShow();
         Debuger.printfLog("changeUiToPlayingBufferingShow");
@@ -296,16 +392,45 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         setViewShowState(mNext, INVISIBLE);
         setViewShowState(mRewind, INVISIBLE);
         setViewShowState(mFwd, INVISIBLE);
-    }
+    }*/
+   @Override
+   protected void changeUiToPlayingBufferingShow() {
+       Debuger.printfLog("changeUiToPlayingBufferingShow");
 
+       setViewShowState(mTopContainer, VISIBLE);
+       setViewShowState(mBottomContainer, VISIBLE);
+       setViewShowState(mStartButton, INVISIBLE);
+       setViewShowState(mPrevious, INVISIBLE);
+       setViewShowState(mNext, INVISIBLE);
+       setViewShowState(mThumbImageViewLayout, INVISIBLE);
+       setViewShowState(mBottomProgressBar, INVISIBLE);
+       setViewShowState(mLockScreen, GONE);
+       if (isDoubleTouch == false) {
+           setViewShowState(mLoadingProgressBar, VISIBLE);
+           if (mLoadingProgressBar instanceof ENDownloadView) {
+               ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
+               if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
+                   ((ENDownloadView) mLoadingProgressBar).start();
+               }
+           }
+       }else{
+           setViewShowState(mLoadingProgressBar, INVISIBLE);
+       }
+   }
     @Override
     protected void changeUiToCompleteShow() {
         super.changeUiToCompleteShow();
         Debuger.printfLog("changeUiToCompleteShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
-        /*setViewShowState(mRewind, VISIBLE);
-        setViewShowState(mFwd, VISIBLE);*/
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mRewindTotalTime, INVISIBLE);
+        mRewindTotalTime.setText(null);
+        setViewShowState(mFwdTotalTime, INVISIBLE);
+        mFwdTotalTime.setText(null);
+        mDoubleFwdClickCount=0;
+        mDoubleRewindClickCount=0;
     }
 
     @Override
@@ -314,9 +439,56 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         Debuger.printfLog("changeUiToError");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
-        /*setViewShowState(mRewind, VISIBLE);
-        setViewShowState(mFwd, VISIBLE);*/
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mRewindTotalTime, INVISIBLE);
+        setViewShowState(mFwdTotalTime, INVISIBLE);
     }
+    protected void changeUiToPrepareingClear() {
+        super.changeUiToPrepareingClear();
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mRewindTotalTime, INVISIBLE);
+        setViewShowState(mFwdTotalTime, INVISIBLE);
+    }
+   protected void changeUiToPlayingBufferingClear() {
+       Debuger.printfLog("changeUiToPlayingBufferingClear");
+       setViewShowState(mTopContainer, INVISIBLE);
+       setViewShowState(mBottomContainer, INVISIBLE);
+       setViewShowState(mStartButton, INVISIBLE);
+       setViewShowState(mPrevious, INVISIBLE);
+       setViewShowState(mNext, INVISIBLE);
+       setViewShowState(mPrevious, INVISIBLE);
+       setViewShowState(mNext, INVISIBLE);
+
+       setViewShowState(mThumbImageViewLayout, INVISIBLE);
+       setViewShowState(mBottomProgressBar, VISIBLE);
+       setViewShowState(mLockScreen, GONE);
+       if(isDoubleTouch==false) {
+           setViewShowState(mLoadingProgressBar, VISIBLE);
+       if (mLoadingProgressBar instanceof ENDownloadView) {
+           ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
+           if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
+               ((ENDownloadView) mLoadingProgressBar).start();
+           }
+       }
+           updateStartImage();
+       }else{
+           setViewShowState(mLoadingProgressBar, VISIBLE);
+       }
+   }
+    protected void changeUiToClear(){
+        super.changeUiToClear();
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
+        setViewShowState(mRewind, INVISIBLE);
+        setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mRewindTotalTime, INVISIBLE);
+        setViewShowState(mFwdTotalTime, INVISIBLE);
+    }
+    //jennifer add for 按钮的显示的消失<--
 
     /**
      * 开始状态视频播放，prepare时不执行  addTextureView();
@@ -380,12 +552,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 startWindowFullscreen(mContext, true, true);
             }
             return;
-        } else if (i == mRewind.getId()) {
-            backWard();
-            return;
-        } else if (i == mFwd.getId()) {
-            forWard();
-            return;
         }
     }
 
@@ -413,9 +579,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         GSYVideoModel gsyVideoModel = mUriList.get(mPlayPosition);
         mSaveChangeViewTIme = 0;
         setUp(mUriList, mCache, mPlayPosition, null, mMapHeadData, false);
-       /* if (!TextUtils.isEmpty(gsyVideoModel.getTitle())) {
-            mTitleTextView.setText(gsyVideoModel.getTitle());
-        }*/
         startPlayLogic();
         return true;
     }
@@ -499,9 +662,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     }
 
     public String getCurrentUri() {
-        /*if (MediaInfo != null && MediaInfo.getMediaItems() != null && mPlayPosition > 0 && MediaInfo.getMediaItems().size() - 1 < mPlayPosition) {
-            return MediaInfo.getMediaItems().get(mPlayPosition).getGsyVideoModel().getUrl();
-        }*/
         return mOriginUrl;
     }
 
@@ -514,7 +674,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
+                //mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
                 intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
                 intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
@@ -586,14 +746,21 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
         editor.putLong("id", mediaItem.getId());
         editor.apply();
     }
-
+    //jennifer add for 快进快退功能-->
     public void backWard() {
         if (CSDMediaPlayer.getInstance(mContext) != null) {
             int position = (int) (getGSYVideoManager().getCurrentPosition());
             if (position > 10000) {
                 position -= 10000;
+                mRewindTotalTime.setText((mDoubleRewindClickCount*10)+"秒");
+                mRewindTotalTime.setVisibility(VISIBLE);
+                mRewind.setVisibility(VISIBLE);
             } else {
                 position = 0;
+                mDoubleRewindClickCount=0;
+                mRewindTotalTime.setText(null);
+                mRewindTotalTime.setVisibility(INVISIBLE);
+                mRewind.setVisibility(INVISIBLE);
             }
             getGSYVideoManager().seekTo(position);
         }
@@ -602,26 +769,75 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer {
     public void forWard() {
         if (CSDMediaPlayer.getInstance(mContext) != null) {
             int position = (int) (getGSYVideoManager().getCurrentPosition());
-            getGSYVideoManager().seekTo(position + 10000);
+
+            if(position >= (int)getGSYVideoManager().getDuration()){
+                position = (int)getGSYVideoManager().getDuration();
+                mDoubleFwdClickCount=0;
+                mFwdTotalTime.setText(null);
+                mFwd.setVisibility(INVISIBLE);
+                mFwdTotalTime.setVisibility(INVISIBLE);
+            }else{
+                position+=10000;
+                mFwdTotalTime.setText((mDoubleFwdClickCount*10)+"秒");
+                mFwd.setVisibility(VISIBLE);
+                mFwdTotalTime.setVisibility(VISIBLE);
+            }
+            getGSYVideoManager().seekTo(position);
         }
     }
 
-    @Override
+ @Override
     protected void touchDoubleUp() {
         if (!mHadPlay) {
             return;
         } else {
-            mFwd.setVisibility(VISIBLE);
-            mRewind.setVisibility(VISIBLE);
+              switch (USB_LAYER_DOUBLE_TAP) {
+                    case REWIND:
+                        mFwd.setVisibility(INVISIBLE);
+                        mFwdTotalTime.setVisibility(INVISIBLE);
+                        backWard();
+                        break;
+                    case FASTFORWARD:
+                        mRewind.setVisibility(INVISIBLE);
+                        mRewindTotalTime.setVisibility(INVISIBLE);
+                        forWard();
+                        break;
+                }
         }
     }
-
-    @Override
-    protected void onClickUiToggle() {
-        Log.i(TAG, "onClickUiToggle: ");
-        super.onClickUiToggle();
-        mFwd.setVisibility(GONE);
-        mRewind.setVisibility(GONE);
+     private void initGestureDetector(Context context) {
+        mGesture = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                if(USB_LAYER_DOUBLE_TAP == REWIND){
+                    mDoubleRewindClickCount+=1;
+                    mDoubleFwdClickCount=0;
+                }else if(USB_LAYER_DOUBLE_TAP == FASTFORWARD){
+                    mDoubleFwdClickCount+=1;
+                    mDoubleRewindClickCount=0;
+                }
+                isDoubleTouch=true;
+                Log.i(TAG, "onDoubleTapEvent:DOUBLE_TAP= " + USB_LAYER_DOUBLE_TAP);
+                touchDoubleUp();
+                //  handler.sendEmptyMessage(HIDE_VIEW_CONTROL);
+                return super.onDoubleTapEvent(e);
+            }
+           @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                isDoubleTouch=false;
+                mDoubleRewindClickCount=0;
+                mDoubleFwdClickCount=0;
+                mFwd.setVisibility(INVISIBLE);
+                mRewind.setVisibility(INVISIBLE);
+                mFwdTotalTime.setVisibility(INVISIBLE);
+                mRewindTotalTime.setVisibility(INVISIBLE);
+                Log.i(TAG, "onSingleTapEvent:DOUBLE_TAP= " + USB_LAYER_DOUBLE_TAP);
+                if (!mChangePosition && !mChangeVolume && !mBrightness) {
+                    onClickUiToggle();
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+        });
     }
-
+    //jennifer add for 快进快退功能<--
 }

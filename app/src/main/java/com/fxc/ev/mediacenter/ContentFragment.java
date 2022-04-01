@@ -241,12 +241,14 @@ public class ContentFragment extends Fragment {
                     mediaItems = mMediaInfo.getMediaItems();
 
                     ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
+                    //jennifer add for 退出应用再进入List的更新-->
                     mediaFile_list.post(new Runnable() {
                         @Override
                         public void run() {
                             mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
                         }
                     });
+                    //jennifer add for 退出应用再进入List的更新<--
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                     if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
                         tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
@@ -284,6 +286,7 @@ public class ContentFragment extends Fragment {
         ((MainActivity) getActivity()).updateDeviceListView(false);//更新設備前的圖標
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
+        //jennifer add for 退出应用再进入list布局大小的控制-->
         ViewGroup.LayoutParams params = mediaFile_list.getLayoutParams();
         if (isDeviceMenuOpen()) {
             if (MediaController.getInstance(mContext).getDevices().size() * 90 < 990) {
@@ -295,6 +298,7 @@ public class ContentFragment extends Fragment {
             params.height = 1000;
         }
         mediaFile_list.setLayoutParams(params);
+        //jennifer add for 退出应用再进入list布局大小的控制<--
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
