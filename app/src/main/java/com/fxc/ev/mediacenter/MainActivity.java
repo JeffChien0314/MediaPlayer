@@ -1,6 +1,7 @@
 package com.fxc.ev.mediacenter;
 
 import android.Manifest;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.util.DeviceItemUtil;
@@ -46,7 +48,9 @@ import com.fxc.ev.mediacenter.util.applicationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.security.KeyStore.getApplicationContext;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
+import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
@@ -209,6 +213,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
                 params.height = 1000;
                 ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+                if (cutDownBrowseFunction) {
+                    playMusic(0);//TODO:此處需優化為LastPosition
+                    device_tips.setText(externalDeviceItems.get(position).getDescription());
+                    updateDeviceListView(false);
+                    changeVisibleOfDeviceView(false);
+                }
             }
         });
         //Sandra@20220215 add<--
@@ -616,5 +626,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+
+    protected final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
+        @Override
+        public void onStartConnect() {
+            Log.i(TAG, "onStartConnect: ");
+            device_tips.setText(R.string.Connecting);
+            updateDeviceListView(true);
+            Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onConnectSuccess(BluetoothDevice device) {
+            Log.i(TAG, "onConnectSuccess: ");
+            device_tips.setText(device.getName());
+            changeVisibleOfDeviceView(false);
+            updateDeviceListView(false);
+            connectAnimationStop(DeviceItemUtil.getInstance(getApplicationContext()).getDeviceIndex(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice()));
+            Toast.makeText(getApplicationContext(), "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        public void onConnectFail(BluetoothDevice device, String string) {
+            Log.i(TAG, "onConnectFail: ");
+            Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
+        }
+    };
 
 }

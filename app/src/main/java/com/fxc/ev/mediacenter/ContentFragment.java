@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
+import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
 
@@ -66,33 +67,6 @@ public class ContentFragment extends Fragment {
     public void setDeviceMenuOpen(boolean deviceMenuOpen) {
         isDeviceMenuOpen = deviceMenuOpen;
     }
-
-    private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
-        @Override
-        public void onStartConnect() {
-            Log.i(TAG, "onStartConnect: ");
-            ((MainActivity) getActivity()).device_tips.setText(R.string.Connecting);
-            ((MainActivity) getActivity()).updateDeviceListView(true);
-            Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onConnectSuccess(BluetoothDevice device) {
-            Log.i(TAG, "onConnectSuccess: ");
-            ((MainActivity) getActivity()).device_tips.setText(device.getName());
-            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
-            // DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(device);//TODO:設置為當前瀏覽的設備
-            ((MainActivity) getActivity()).updateDeviceListView(false);
-            ((MainActivity) getActivity()).connectAnimationStop(DeviceItemUtil.getInstance(getApplicationContext()).getDeviceIndex(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice()));
-            Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onConnectFail(BluetoothDevice device, String string) {
-            Log.i(TAG, "onConnectFail: ");
-            Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
-        }
-    };
 
 
     public ContentFragment() {
@@ -170,19 +144,31 @@ public class ContentFragment extends Fragment {
     }
 
     public void deviceItemOnClick(int mediaType, DeviceItem deviceItem) {
-        if (deviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
+        if (deviceItem.getType() == Constants.USB_DEVICE){
+                mDeviceItem = deviceItem;
+                if (MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
+                    mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
+                    updateMediaList(mediaItems);
+                } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
+                    ((MainActivity) getActivity()).updateDeviceListView(true);
+                    ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
+                }
+                if (cutDownBrowseFunction){
+                    CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
+                }
+        }else {
             if (deviceItem.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
                 CSDMediaPlayer.getInstance(getApplicationContext()).onVideoPause();
                 ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
-                // MediaController.getInstance(getApplicationContext()).setPlayerState(state, -1);//TODO:通知XXXX變更為藍牙設備了
+                // MediaController.getInstance(getApplicationContext()).setPlayerState(state, -1);
             } else {
                 try {
                     if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                         Method m = BluetoothDevice.class.getMethod("createBond");
                         m.invoke(deviceItem.getBluetoothDevice());
                     } else if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(), mConnectBlueCallBack);
+                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(),((MainActivity) getActivity()).mConnectBlueCallBack);
                     }
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
@@ -194,15 +180,6 @@ public class ContentFragment extends Fragment {
                     e.printStackTrace();
                     Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
                 }
-            }
-        } else {
-            mDeviceItem = deviceItem;
-            if (MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
-                mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
-                updateMediaList(mediaItems);
-            } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
-                ((MainActivity) getActivity()).updateDeviceListView(true);
-                ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
             }
         }
     }
@@ -228,8 +205,6 @@ public class ContentFragment extends Fragment {
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
         MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
-        mMediaInfo = null;
-        Log.i(TAG, "onResume: CSDMediaPlayer.mInstance.getMediaInfo();");
         if (mMediaInfo != null) {
             if (mMediaInfo.getMediaItems() != null) {
                 if (mMediaInfo.getMediaItems().size() > 0) {
