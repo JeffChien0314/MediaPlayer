@@ -199,9 +199,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
         MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(this).getMediaInfo();
+        //Sandra@20220402 Modify for 再次進入后的UX-->
         if (mMediaInfo != null) {
             mDeviceItemUtil.setCurrentDevice(mMediaInfo.getDeviceItem());
+            ((ContentFragment) fragments.get(currentTab)).mediaItems = mMediaInfo.getMediaItems();
+            playMusic(csdMediaPlayer.getPlayPosition());
+        } else {
+            externalDeviceItems = MediaController.getInstance(this).getDevices();
+            DeviceItem itemDefault = externalDeviceItems.get(0);
+            mDeviceItemUtil.setCurrentDevice(itemDefault);
+            ((ContentFragment) fragments.get(currentTab)).mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems();
+            CSDMediaPlayer.getInstance(this).setMediaInfo(new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, itemDefault));
+            playMusic(0);
         }
+        //<--Sandra@20220402 Modify for 再次進入后的UX
         updateDeviceListView(false);
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

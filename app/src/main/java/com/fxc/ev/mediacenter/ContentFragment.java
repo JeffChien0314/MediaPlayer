@@ -204,7 +204,16 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+      //  listAdapter = new MediaListAdapter(mContext, mediaItems);
+        updateMediaList(mediaItems);
+        mediaFile_list.post(new Runnable() {
+            @Override
+            public void run() {
+                mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
+            }
+        });
+/*        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+
         if (mMediaInfo != null) {
             if (mMediaInfo.getMediaItems() != null) {
                 if (mMediaInfo.getMediaItems().size() > 0) {
@@ -240,8 +249,11 @@ public class ContentFragment extends Fragment {
                 return;//無設備
             } else {
                 mDeviceItem = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().get(0);
+                MediaController.getInstance(getContext()).getDevices();
+                DeviceItem itemDefault=MediaController.getInstance(getContext()).getDevices().get(0);
+                DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(itemDefault);
+                CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo( MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(),itemDefault));
             }
-
             DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
             if (mDeviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
                 mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
@@ -249,8 +261,8 @@ public class ContentFragment extends Fragment {
                 mediaItems = getMusicInfos(getApplicationContext(), mDeviceItem.getStoragePath());
             }
             if (mediaItems == null || mediaItems.size() == 0) return;
-            ((MainActivity) getActivity()).playMusic(0);
             CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
+            ((MainActivity) getActivity()).playMusic(0);
         }
         if (mDeviceItem == null) {
             return;
@@ -274,6 +286,7 @@ public class ContentFragment extends Fragment {
         }
         mediaFile_list.setLayoutParams(params);
         //jennifer add for 退出应用再进入list布局大小的控制<--
+*/
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -310,10 +323,11 @@ public class ContentFragment extends Fragment {
             }
             if (mDeviceItem != null) {
                 ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
-            }
             ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
             ((MainActivity) getActivity()).updateDeviceListView(false);
             ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+            }
+
 
         }
     };
