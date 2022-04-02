@@ -17,14 +17,13 @@ android:layout_height="486px"
         layout="@layout/layout_bt_media_play_control"
         />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/player"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintTop_toBottomOf="@id/player">
 <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
         <View
             android:id="@+id/input_source_indicated"
@@ -47,17 +46,14 @@ android:layout_height="486px"
                 android:background="@drawable/icon_collapse_normal"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/input_source_indicated" />
-
             <TextView
-                
-android:id="@+id/device_tips"
-                android:layout_width="200px"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="550px"
-                android:layout_marginTop="47px"
+                android:id="@+id/device_tips"
+                android:layout_width="212px"
+                android:layout_height="34px"
+                android:layout_marginRight="580px"
+                android:layout_marginTop="43px"
                 android:layout_marginLeft="15px"
-                
-android:textColor="#80FFFFFF"
+                android:textColor="#80FFFFFF"
                 android:textSize="22px" />
 
             <ImageView
@@ -72,33 +68,47 @@ android:textColor="#80FFFFFF"
                 android:id="@+id/play_mode"
                 android:layout_width="60px"
                 android:layout_height="60px"
-                android:layout_marginLeft="60px"
+                android:layout_marginLeft="30px"
                 android:layout_marginTop="30px"
+                android:layout_marginRight="33px"
                 android:background="@drawable/icon_repeat_normal"
                 android:onClick="onClick" />
         </LinearLayout>
-        <ListView
-            android:id="@+id/input_source_list"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:choiceMode="singleChoice"
-            android:drawSelectorOnTop="true"
-            android:scrollbars="vertical"
-            app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode" />
-        
-<include
-            android:id="@+id/pair_device"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/device_list"
-            android:visibility="invisible">
-
-        </include>
+            android:id="@+id/device_related"
+            app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:orientation="vertical">
+            <ListView
+                android:id="@+id/input_source_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:choiceMode="singleChoice"
+                android:drawSelectorOnTop="true"
+                android:scrollbars="vertical"
+                app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode" />
+            <include
+                android:id="@+id/pair_device"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/device_list"
+                android:visibility="invisible">
+            </include>
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_related"
+        android:layout_marginTop="103px"
+        app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:orientation="vertical">
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="60px"
-            android:layout_marginTop="30px"
             android:layout_marginBottom="30px"
             android:layout_marginLeft="30px"
             android:layout_marginRight="30px"
@@ -115,6 +125,7 @@ android:textColor="#80FFFFFF"
             android:layout_weight="1"
             android:layout_height="0dp" />
     </LinearLayout>
+    </RelativeLayout>
 
 
 </android.support.constraint.ConstraintLayout>

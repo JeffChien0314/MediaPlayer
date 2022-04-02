@@ -137,7 +137,7 @@ public class MusicWidget extends AppWidgetProvider {
         }
 
         ComponentName componentName = new ComponentName(context, MusicWidget.class);
-        appWidgetManager.updateAppWidget(componentName, remoteViews);
+//        appWidgetManager.updateAppWidget(componentName, remoteViews);
     }
 
 

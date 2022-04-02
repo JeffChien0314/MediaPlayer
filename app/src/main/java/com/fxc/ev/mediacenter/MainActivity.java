@@ -210,9 +210,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 currentTab = mTabLayout.getSelectedTabPosition();
                 mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(position));
                 ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceItems.get(position));
-                ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+         /*       ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
                 params.height = 1000;
-                ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+                ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);*/
                 if (cutDownBrowseFunction) {
                     playMusic(0);//TODO:此處需優化為LastPosition
                     device_tips.setText(externalDeviceItems.get(position).getDescription());
@@ -292,20 +292,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onInputSourceClick(View v) {
         if (devicelistview.getVisibility() == View.GONE) {
-            ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+         /*   ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
             if (MediaController.getInstance(this).getDevices().size() * 90 < 990) {
                 params.height = 1000 - (MediaController.getInstance(this).getDevices().size() * 90);
             } else {
                 params.height = 0;
             }
-            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(true);
-            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(true);*/
+            //((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             changeVisibleOfDeviceView(true);
         } else if (devicelistview.getVisibility() == View.VISIBLE) {
-            ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
+            /*ViewGroup.LayoutParams params = ((ContentFragment) fragments.get(currentTab)).mediaFile_list.getLayoutParams();
             params.height = 1000;
-            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(false);
-            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
+            ((ContentFragment) fragments.get(currentTab)).setDeviceMenuOpen(false);*/
+            //((ContentFragment) fragments.get(currentTab)).mediaFile_list.setLayoutParams(params);
             changeVisibleOfDeviceView(false);
 
         }
