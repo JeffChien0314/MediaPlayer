@@ -13,13 +13,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.fxc.ev.mediacenter.util.DeviceItemUtil;
 import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.service.MediaPlayerService;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 import com.fxc.ev.mediacenter.util.Constants;
 
+import static android.content.ContentValues.TAG;
 import static com.fxc.ev.mediacenter.util.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PAUSE;
 import static com.shuyu.gsyvideoplayer.video.base.GSYVideoView.CURRENT_STATE_PLAYING;
@@ -79,6 +82,9 @@ public class MusicWidget extends AppWidgetProvider {
          //   int currentState = intent.getIntExtra(PLAYSTATE_CHANGED + "", -1);
             MediaItem mediaItem = intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + "");
             if (mediaItem != null) {
+                Log.i(TAG, "onReceive: mediaItem content "+mediaItem.getTitle());
+                int i= MediaItemUtil.getBitmapSize(mediaItem.getThumbBitmap())/1024;
+                Log.i(TAG, "onReceive: mediaItem.size "+i);
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 

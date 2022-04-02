@@ -609,7 +609,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 connectAnimationStop(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
                 updateDeviceListView(false);
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(result);
-                devicelistview.setVisibility(View.GONE);
+                device_tips.setText(deviceItem.getDescription());
+                changeVisibleOfDeviceView(false);
                 ((ContentFragment) fragments.get(currentTab)).mediaItems = result;
                 Log.i(TAG, "onPostExecute: //抓取特定设备的文件 " + ContentFragment.printTime());
             }

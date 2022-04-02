@@ -25,7 +25,7 @@ import android.widget.TextView;
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
-import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 import com.shuyu.gsyvideoplayer.utils.CommonUtil;
 import com.shuyu.gsyvideoplayer.utils.Debuger;
@@ -34,6 +34,7 @@ import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer;
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -674,8 +675,18 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-                mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
-                intent.putExtra(MEDIAITEM_CHANGED + "", mediaInfo.getMediaItems().get(mPlayPosition));
+               // mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
+                MediaItem mediaItemOrignal=mediaInfo.getMediaItems().get(mPlayPosition);
+                MediaItem mediaItem=new MediaItem(mediaItemOrignal.getId(),mediaItemOrignal.getTitle(),mediaItemOrignal.getAlbum(),mediaItemOrignal.getArtist(),
+                        mediaItemOrignal.getDuration(),mediaItemOrignal.getThumbBitmap(),mediaItemOrignal.getGsyVideoModel(),mediaItemOrignal.isIfVideo(),mediaItemOrignal.getStoragePath() );
+                try {
+                    mediaItem.setThumbBitmap(MediaItemUtil.cutDownBitmap(mediaItem.getThumbBitmap()));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                //Sandra@20220402 add cutDownBitmap用于缩减图片的大小，图片大于1024KB将不能正常传输，图片太小分辨率就太低
+                //所以请尝试更改方法体内部的参数，以达到即适合显又尽量降低传输大小的效果。
+                intent.putExtra(MEDIAITEM_CHANGED + "", mediaItem);
                 intent.putExtra(POS_EXTRA, mPlayPosition);
                 break;
         }

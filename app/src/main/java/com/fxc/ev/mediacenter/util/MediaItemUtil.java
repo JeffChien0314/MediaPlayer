@@ -72,9 +72,7 @@ public class MediaItemUtil {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
-            Log.i(TAG, "getMusicInfos: if " + uri);
         }
-        Log.i(TAG, "getMusicInfos: uri:" + uri);
         String selection = MediaStore.Audio.Media.DATA + " like ? ";
         String[] selectionArgs = {path + "%"};
         ContentResolver mResolver = null;
@@ -88,7 +86,6 @@ public class MediaItemUtil {
                 MediaItem mediaItem = new MediaItem();
                 Long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID));    //音樂id
                 String title = cursor.getString((cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))); // 音樂標題
-                Log.i(TAG, "getMusicInfos: title " + title);
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)); // 藝術家
                 String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));    //專輯
                 //String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
@@ -97,7 +94,7 @@ public class MediaItemUtil {
                 //long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)); // 檔案大小
                 String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)); // 檔案路徑
                 int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC)); // 是否為音樂/*1*/
-                String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
+                //String isMusicType = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));/*audio/mpeg*///是否為音樂
 
                 GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist + "-" + album);
                 Bitmap thumbBitmap = null;
@@ -128,13 +125,10 @@ public class MediaItemUtil {
     }
 
     public static ArrayList<MediaItem> getVideoInfos(Context context, String devicepath) {
-        Log.i(TAG, "getVideoInfo satart: " + printTime());
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             uri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
-            Log.i(TAG, "getVideoInfos: if " + uri);
         }
-        Log.i(TAG, "getVideoInfos: " + uri);
         String selection = MediaStore.Video.Media.DATA + " like ? ";
         String[] selectionArgs = {devicepath + "%"};
         ContentResolver mResolver = null;
@@ -150,11 +144,10 @@ public class MediaItemUtil {
                         .getColumnIndex(MediaStore.Video.Media._ID));    //視頻id
                 String title = cursor.getString((cursor
                         .getColumnIndex(MediaStore.Video.Media.TITLE))); // 視頻標題
-                Log.i(TAG, "getVideoInfos: title: "+title);
                 String artist = cursor.getString(cursor
                         .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
-                String album = cursor.getString(cursor
-                        .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
+                /*String album = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Video.Media.ALBUM)); */   //專輯
             /*String displayName = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));*/
                 //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
@@ -169,12 +162,7 @@ public class MediaItemUtil {
                 GSYVideoModel gsyVideoModel = new GSYVideoModel(String.valueOf(Uri.parse(MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/" + id)), title + "\n" + artist);
                 Bitmap thumbBitmap = null;
                 if (path != null) {
-                    try {
-                        thumbBitmap = getBitmapFormUrl(path, 90, 90, ThumbnailUtils.OPTIONS_RECYCLE_INPUT); //根据专辑路径获取到专辑封面图
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                    thumbBitmap=ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MICRO_KIND);//根据专辑路径获取到专辑封面图
                 }
                 if (mime_type != null) {
                     mediaItem.setIfVideo(true);
@@ -200,21 +188,17 @@ public class MediaItemUtil {
     }
 
     /**
-     * 获取视频的缩略图
-     * 先通过ThumbnailUtils来创建一个视频的缩略图，然后再利用ThumbnailUtils来生成指定大小的缩略图。
+     * 压缩图片大小
+     * 利用ThumbnailUtils来生成指定大小的缩略图。
      * 如果想要的缩略图的宽和高都小于MICRO_KIND，则类型要使用MICRO_KIND作为kind的值，这样会节省内存。
-     *
-     * @param videoPath 视频的路径
      * @param width     指定输出视频缩略图的宽度
      * @param height    指定输出视频缩略图的高度度
      * @param kind      参照MediaStore.Images.Thumbnails类中的常量MINI_KIND和MICRO_KIND。
      *                  其中，MINI_KIND: 512 x 384，MICRO_KIND: 96 x 96
      * @return 指定大小的视频缩略图
      */
-    public static Bitmap getBitmapFormUrl(String videoPath, int width, int height, int kind) throws FileNotFoundException {
-        Bitmap bitmap = null;
-        bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, MediaStore.Images.Thumbnails.MICRO_KIND);       // 获取视频的缩略图
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, kind);
+    public static Bitmap cutDownBitmap(Bitmap bitmap) throws FileNotFoundException {
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 90, 90/*,ThumbnailUtils.OPTIONS_RECYCLE_INPUT*/);
         return bitmap;
     }
 
@@ -336,5 +320,13 @@ public class MediaItemUtil {
         }
         return min + ":" + sec.trim().substring(0, 2);
     }
-
+    public static int getBitmapSize(Bitmap bitmap){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){    //API 19
+            return bitmap.getAllocationByteCount();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1){//API 12
+            return bitmap.getByteCount();
+        }
+        return bitmap.getRowBytes() * bitmap.getHeight();                //earlier version
+    }
 }
