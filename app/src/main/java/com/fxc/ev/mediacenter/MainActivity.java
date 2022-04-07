@@ -203,7 +203,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (mMediaInfo != null) {
             mDeviceItemUtil.setCurrentDevice(mMediaInfo.getDeviceItem());
             ((ContentFragment) fragments.get(currentTab)).mediaItems = mMediaInfo.getMediaItems();
+            if (mMediaInfo.getMediaItems()!=null &&mMediaInfo.getMediaItems().size()!=0){
+                //Fix 頁面切回時，背景音樂被切歌的問題
+            }else {
             playMusic(csdMediaPlayer.getPlayPosition());
+            }
         } else {
             externalDeviceItems = MediaController.getInstance(this).getDevices();
             DeviceItem itemDefault = externalDeviceItems.get(0);

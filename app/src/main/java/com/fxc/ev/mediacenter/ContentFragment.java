@@ -212,7 +212,7 @@ public class ContentFragment extends Fragment {
                 mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
             }
         });
-/*        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
 
         if (mMediaInfo != null) {
             if (mMediaInfo.getMediaItems() != null) {
@@ -286,7 +286,6 @@ public class ContentFragment extends Fragment {
         }
         mediaFile_list.setLayoutParams(params);
         //jennifer add for 退出应用再进入list布局大小的控制<--
-*/
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
