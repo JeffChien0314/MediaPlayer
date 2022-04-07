@@ -223,8 +223,11 @@ public class ContentFragment extends Fragment {
                     mDeviceItem = mMediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
-
+                    if (mediaItems!=null &&mediaItems.size()!=0){
+                        //Fix 頁面切回時，背景音樂被從頭播放的問題
+                    }else {
                     ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
+                    }
                     //jennifer add for 退出应用再进入List的更新-->
                     mediaFile_list.post(new Runnable() {
                         @Override
