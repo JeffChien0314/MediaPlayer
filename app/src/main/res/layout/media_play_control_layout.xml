@@ -41,7 +41,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/play_style"
-        android:src="@drawable/background_music" />
+        android:src="@drawable/img_album" />
     <TextView
         android:layout_width="420px"
         android:layout_height="46px"

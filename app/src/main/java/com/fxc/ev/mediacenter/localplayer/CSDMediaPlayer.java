@@ -334,6 +334,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     }
     @Override
     protected void changeUiToPlayingShow() {
+
         Debuger.printfLog("changeUiToPlayingShow");
 
         setViewShowState(mTopContainer, VISIBLE);
@@ -534,7 +535,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
 
     @Override
     public int getLayoutId() {
-        return R.layout.layout_media_play_control;
+        return R.layout.layout_media_play_usb;
     }
 
 

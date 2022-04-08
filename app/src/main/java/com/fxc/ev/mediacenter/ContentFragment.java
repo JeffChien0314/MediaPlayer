@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
+import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
@@ -152,12 +153,16 @@ public class ContentFragment extends Fragment {
                 } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
                     ((MainActivity) getActivity()).updateDeviceListView(true);
                     if (deviceItem!=null){
-                        ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
-                    }
+                    ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
+                }
                 }
                 if (cutDownBrowseFunction){
                     CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
                 }
+
+               /* DeviceItemUtil.getInstance(mContext).setCurrentDevice(deviceItem);
+               mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(deviceItem, 0, true).getMediaItems();
+                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, deviceItem));*/
         }else {
             if (deviceItem.getBluetoothDevice().isConnected()) {
                 //展示音乐列表，获取播放状态
@@ -228,7 +233,7 @@ public class ContentFragment extends Fragment {
                     if (mediaItems!=null &&mediaItems.size()!=0){
                         //Fix 頁面切回時，背景音樂被從頭播放的問題
                     }else {
-                    ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
+                        ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
                     }
                     //jennifer add for 退出应用再进入List的更新-->
                     mediaFile_list.post(new Runnable() {
@@ -260,7 +265,7 @@ public class ContentFragment extends Fragment {
                 CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo( MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(),itemDefault));
             }
             DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
-            if (mDeviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
+            if (mDeviceItem.getType() == BLUETOOTH_DEVICE) {
                 mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
             } else {
                 mediaItems = getMusicInfos(getApplicationContext(), mDeviceItem.getStoragePath());
@@ -275,6 +280,7 @@ public class ContentFragment extends Fragment {
         ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
         ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
         ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());//展示相應播放頁面，本地播放跟蓝牙播放切换时UI更新
+        ((MainActivity) getActivity()).setPlayerLayer(BLUETOOTH_DEVICE);//Sandra 0407臨時添加
         ((MainActivity) getActivity()).updateDeviceListView(false);//更新設備前的圖標
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);

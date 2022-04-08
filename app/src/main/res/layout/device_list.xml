@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#99000000">
 
     <LinearLayout
         android:id="@+id/device_item"
         android:layout_width="1020px"
-        
-android:layout_height="45px"
+        android:layout_height="45px"
         android:layout_marginLeft="30px"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -24,18 +24,18 @@ android:layout_height="45px"
             android:layout_height="34px"
             android:layout_marginLeft="30px"
             android:layout_toRightOf="@+id/device_icon"
-            
-android:text="@string/paire"
+            android:text="@string/paire"
             android:textColor="#40FFFFFF"
             android:textSize="28px" />
 
     </LinearLayout>
+
     <View
         android:id="@+id/device_divider"
         android:layout_width="840px"
         android:layout_height="1px"
+        android:layout_below="@+id/device_item"
         android:layout_marginLeft="120px"
-        android:background="#1AFFFFFF"
-        android:layout_below="@+id/device_item"/>
+        android:background="#1AFFFFFF" />
 </RelativeLayout>
 

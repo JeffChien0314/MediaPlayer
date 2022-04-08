@@ -48,7 +48,6 @@ import com.fxc.ev.mediacenter.util.applicationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.security.KeyStore.getApplicationContext;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 
@@ -67,9 +66,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected TextView device_tips;
     protected RelativeLayout pair_device;
     private ImageView device_icon;
-    private FrameLayout mFrameLayout;
+    private FrameLayout mUsbFrameLayout;
     private FrameLayout mbtFrameLayout;
     private BtplayerLayout mBtPlayerLayer;
+    private TextView initial_tips;
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
             }
         });
+        initial_tips =(TextView) findViewById(R.id.initial_tips);
         device_tips = (TextView) findViewById(R.id.device_tips);
        /* if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() != null &&
                 DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() != 0) {//有連接的設備，
@@ -177,16 +178,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             device_tips.setText(R.string.paire);//提示“Pair device”
         }*/
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
-        mbtFrameLayout = (FrameLayout) findViewById(R.id.bt_player0);
+        mbtFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_bt_view);
         mBtPlayerLayer = new BtplayerLayout(this);
         mbtFrameLayout.addView(mBtPlayerLayer);
-        mFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_csd_container);
+        mUsbFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_usb_view);
         if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
-        mFrameLayout.addView(csdMediaPlayer);
+        mUsbFrameLayout.addView(csdMediaPlayer);
+        MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
+        MediaController.getInstance(this).currentSourceType=Constants.BLUETOOTH_DEVICE;
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
-            mFrameLayout.setVisibility(View.GONE);
+            mUsbFrameLayout.setVisibility(View.GONE);
             mBtPlayerLayer.showControlBtn();
         } else {
             mbtFrameLayout.setVisibility(View.GONE);
@@ -206,16 +209,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (mMediaInfo.getMediaItems()!=null &&mMediaInfo.getMediaItems().size()!=0){
                 //Fix 頁面切回時，背景音樂被切歌的問題
             }else {
-            playMusic(csdMediaPlayer.getPlayPosition());
+                playMusic(csdMediaPlayer.getPlayPosition());
                 device_tips.setText(mMediaInfo.getDeviceItem().getDescription());
             }
         } else {
             externalDeviceItems = MediaController.getInstance(this).getDevices();
             if (externalDeviceItems.size()!=0){
                 /*DeviceItem itemDefault = externalDeviceItems.get(0);
-            mDeviceItemUtil.setCurrentDevice(itemDefault);
-            ((ContentFragment) fragments.get(currentTab)).mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems();
-            CSDMediaPlayer.getInstance(this).setMediaInfo(new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, itemDefault));
+                mDeviceItemUtil.setCurrentDevice(itemDefault);
+                ((ContentFragment) fragments.get(currentTab)).mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems();
+                CSDMediaPlayer.getInstance(this).setMediaInfo(new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, itemDefault));
                 playMusic(0);*/
                 device_tips.setText(R.string.Select);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
@@ -306,9 +309,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
                 } else {//单个抓取
                     if (mDeviceItemUtil.getCurrentDevice()!=null){
-                        getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
-                    }
+                    getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
                 }
+            }
             }
         });
     }
@@ -318,13 +321,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (device_tips.getText().equals(getString(R.string.paire))){
 
         }else {
-        if (devicelistview.getVisibility() == View.GONE) {
-            changeVisibleOfDeviceView(true);
-        } else if (devicelistview.getVisibility() == View.VISIBLE) {
-            changeVisibleOfDeviceView(false);
+            if (devicelistview.getVisibility() == View.GONE) {
+                changeVisibleOfDeviceView(true);
+            } else if (devicelistview.getVisibility() == View.VISIBLE) {
+                changeVisibleOfDeviceView(false);
+            }
+            updateDeviceListView(false);//確保同步實際連接狀況
         }
-        updateDeviceListView(false);//確保同步實際連接狀況
-    }
 
     }
 
@@ -460,12 +463,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.i(TAG, "setPlayerLayer: device_Type=" + device_Type);
         switch (device_Type) {
             case BLUETOOTH_DEVICE:
-                mFrameLayout.setVisibility(View.GONE);
+                mUsbFrameLayout.setVisibility(View.GONE);
                 mbtFrameLayout.setVisibility(View.VISIBLE);
                 mBtPlayerLayer.showControlBtn();
                 break;
             case Constants.USB_DEVICE:
-                mFrameLayout.setVisibility(View.VISIBLE);
+                mUsbFrameLayout.setVisibility(View.VISIBLE);
                 mbtFrameLayout.setVisibility(View.GONE);
                 break;
         }

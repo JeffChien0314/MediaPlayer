@@ -2,9 +2,6 @@ package com.fxc.ev.mediacenter.bluetooth.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -103,7 +100,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
     }
 
     private void initView(Context context) {
-        mBtPlayerLayer = inflate(context, R.layout.layout_bt_layer, this);
+        mBtPlayerLayer = inflate(context, R.layout.layout_media_play_bt, this);
         mTopLayout = findViewById(R.id.layout_top);
         mStart = findViewById(R.id.bt_start);
         mNext = findViewById(R.id.bt_next);

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black">
-
+    android:layout_height="match_parent">
+    <!--android:background="@android:color/black"-->
     <RelativeLayout
         android:id="@+id/surface_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="@drawable/portriat_playlist">
 
     </RelativeLayout>
 
@@ -22,9 +22,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:background="#000000"
-        android:scaleType="fitCenter" />
 
+        android:scaleType="fitCenter" />
+<!-- android:background="#000000"-->
     <LinearLayout
         android:id="@+id/layout_bottom"
         android:layout_width="match_parent"
