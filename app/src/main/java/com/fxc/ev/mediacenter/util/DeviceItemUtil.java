@@ -71,13 +71,13 @@ public class DeviceItemUtil {
                     boolean isRemovableResult = (boolean) isRemovable.invoke(storageVolume);//是否可移除
                     String description = storageVolume.getDescription(context);
                     DeviceItem externalDeviceItem = new DeviceItem();
-                //    if (isRemovableResult) {//Sandra@20220210 剔除内部存储
+                    if (isRemovableResult) {//Sandra@20220210 剔除内部存储
                         externalDeviceItem.setStoragePath(storagePath);
                         externalDeviceItem.setRemovableResult(true);
                         externalDeviceItem.setDescription(description);
                         externalDeviceItem.setResImage(R.drawable.icon_usb);//此處設置設備圖標icon_usb/icon_bt
                         externalDeviceItems.add(externalDeviceItem);
-               //     }
+                    }
                 }
 
             }

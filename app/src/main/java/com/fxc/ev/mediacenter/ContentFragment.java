@@ -151,7 +151,9 @@ public class ContentFragment extends Fragment {
                     updateMediaList(mediaItems);
                 } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
                     ((MainActivity) getActivity()).updateDeviceListView(true);
-                    ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
+                    if (deviceItem!=null){
+                        ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
+                    }
                 }
                 if (cutDownBrowseFunction){
                     CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
