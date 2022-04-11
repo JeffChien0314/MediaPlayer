@@ -162,7 +162,7 @@ public class ContentFragment extends Fragment {
                     CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
                 }
                 if (mediaItems.size()>0){
-                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.INVISIBLE);
+                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
                 }else {
                     ((MainActivity) getActivity()).initial_tips.setVisibility(View.VISIBLE);
                 }
@@ -198,7 +198,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
-        if (mediaItemList == null || mediaItemList.size() == 0) return;
+       if (mediaItemList==null )return;
         mediaItems = mediaItemList;
         listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;
@@ -233,7 +233,7 @@ public class ContentFragment extends Fragment {
                     if (!DeviceItemUtil.getInstance(getContext()).isDeviceExist(mMediaInfo.getDeviceItem().getStoragePath())) {
                         return;
                     }
-                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.INVISIBLE);
+                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
                     mDeviceItem = mMediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                     mediaItems = mMediaInfo.getMediaItems();
@@ -270,7 +270,7 @@ public class ContentFragment extends Fragment {
                 DeviceItem itemDefault=MediaController.getInstance(getContext()).getDevices().get(0);
                 DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(itemDefault);
                 CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo( MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(),itemDefault));
-                ((MainActivity) getActivity()).initial_tips.setVisibility(View.INVISIBLE);
+                ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
             }
             DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
             if (mDeviceItem.getType() == BLUETOOTH_DEVICE) {
@@ -367,6 +367,9 @@ public class ContentFragment extends Fragment {
     }
 
     public ArrayList<MediaItem> filterAllMediaItemsOfSpecificDevice(int media_Type, DeviceItem deviceInfo) {
+        if (deviceInfo==null || deviceInfo.getStoragePath()==null){
+            return null ;
+        }
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         ArrayList<MediaItem> totalMediaItems = new ArrayList<>();
         totalMediaItems = MediaItemUtil.allDevicesMediaItems;

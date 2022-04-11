@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
             }
         });
-        initial_tips =(TextView) findViewById(R.id.initial_tips);
+        initial_tips = (TextView) findViewById(R.id.initial_tips);
         device_tips = (TextView) findViewById(R.id.device_tips);
        /* if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() != null &&
                 DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() != 0) {//有連接的設備，
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         mUsbFrameLayout.addView(csdMediaPlayer);
         MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
-        MediaController.getInstance(this).currentSourceType=Constants.BLUETOOTH_DEVICE;
+        MediaController.getInstance(this).currentSourceType = Constants.BLUETOOTH_DEVICE;
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             mUsbFrameLayout.setVisibility(View.GONE);
             mBtPlayerLayer.showControlBtn();
@@ -206,15 +206,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (mMediaInfo != null) {
             mDeviceItemUtil.setCurrentDevice(mMediaInfo.getDeviceItem());
             ((ContentFragment) fragments.get(currentTab)).mediaItems = mMediaInfo.getMediaItems();
-            if (mMediaInfo.getMediaItems()!=null &&mMediaInfo.getMediaItems().size()!=0){
+            if (mMediaInfo.getMediaItems() != null && mMediaInfo.getMediaItems().size() != 0) {
                 //Fix 頁面切回時，背景音樂被切歌的問題
-            }else {
+            } else {
                 playMusic(csdMediaPlayer.getPlayPosition());
                 device_tips.setText(mMediaInfo.getDeviceItem().getDescription());
             }
         } else {
             externalDeviceItems = MediaController.getInstance(this).getDevices();
-            if (externalDeviceItems.size()!=0){
+            if (externalDeviceItems.size() != 0) {
                 /*DeviceItem itemDefault = externalDeviceItems.get(0);
                 mDeviceItemUtil.setCurrentDevice(itemDefault);
                 ((ContentFragment) fragments.get(currentTab)).mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems();
@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 device_tips.setText(R.string.Select);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
                 changeVisibleOfDeviceView(false);
-            }else {
+            } else {
                 device_tips.setText(R.string.paire);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
                 changeVisibleOfDeviceView(false);
@@ -237,10 +237,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 currentTab = mTabLayout.getSelectedTabPosition();
                 mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(position));
-                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceItems.get(position));
+                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, mDeviceItemUtil.getCurrentDevice());
+                updateDeviceListView(/*false*/);
                 if (cutDownBrowseFunction) {
-                    updateDeviceListView(/*false*/);
-                    changeVisibleOfDeviceView(false);
+                       changeVisibleOfDeviceView(false);
                     playMusic(0);//TODO:此處需優化為LastPosition
                 }
             }
@@ -302,19 +302,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabSelected(TabLayout.Tab tab) {
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                if ( MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
+                if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                     ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
                     mediaItems = ((ContentFragment) fragments.get(currentTab)).filterAllMediaItemsOfSpecificDevice(currentTab, mDeviceItemUtil.getCurrentDevice());
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
+                    if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
+                        initial_tips.setVisibility(View.GONE);
+                    } else {
+                        initial_tips.setVisibility(View.VISIBLE);
+                    }
                 } else {//单个抓取
-                    if (mDeviceItemUtil.getCurrentDevice()!=null){
-                    getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
-                }
-            }
-                if (((ContentFragment) fragments.get(currentTab)).mediaItems.size()>0){
-                 initial_tips.setVisibility(View.INVISIBLE);
-                }else {
-                 initial_tips.setVisibility(View.VISIBLE);
+                    if (mDeviceItemUtil.getCurrentDevice() != null) {
+                        getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
+                    }
                 }
             }
         });
@@ -322,9 +322,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void onInputSourceClick(View v) {
-        if (device_tips.getText().equals(getString(R.string.paire))){
+        if (device_tips.getText().equals(getString(R.string.paire))) {
 
-        }else {
+        } else {
             if (devicelistview.getVisibility() == View.GONE) {
                 changeVisibleOfDeviceView(true);
             } else if (devicelistview.getVisibility() == View.VISIBLE) {
@@ -425,7 +425,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             externalDeviceItems.clear();
         }
         externalDeviceItems = MediaController.getInstance(this).getDevices();
-            deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
+        if (mDeviceItemUtil.getCurrentDevice() != null) {//Sandra@20220411 add 正在使用的设备显示在首位
+            externalDeviceItems.remove(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
+            externalDeviceItems.add(0, mDeviceItemUtil.getCurrentDevice());
+        }
+        deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
         devicelistview.setAdapter(deviceListAdapter);
         deviceListAdapter.notifyDataSetChanged();
         //   devicelistview.invalidateViews();
@@ -434,19 +438,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /*连接过程中/读取文件过程中的动画开始执行*/
     public void connectAnimationStart(/*int position*/) {
         ImageView Connecting_icon = mInputSourceButton;
-            Connecting_icon.setVisibility(View.VISIBLE);
-            Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
-            ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
-            ani_gif_Connecting.start();
-        }
+        Connecting_icon.setVisibility(View.VISIBLE);
+        Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
+        ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
+        ani_gif_Connecting.start();
+    }
 
     /*连接过程中/读取文件过程中的动画停止*/
     public void connectAnimationStop(/*int position*/) {
         ImageView Connecting_icon = mInputSourceButton;
-            Connecting_icon.setVisibility(View.VISIBLE);
-            Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
-            ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
-            ani_gif_Connecting.stop();
+        Connecting_icon.setVisibility(View.VISIBLE);
+        Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
+        ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
+        ani_gif_Connecting.stop();
         mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
     }
 
@@ -576,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void deviceTipsClick(View view) {
-        if (device_tips.getText().equals(getString(R.string.paire))){
+        if (device_tips.getText().equals(getString(R.string.paire))) {
             startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
         }
     }
@@ -639,11 +643,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onPostExecute(result);
             if (ifShowLoading) {
                 connectAnimationStop(/*mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice())*/);
-              //  updateDeviceListView(/*false*/);
+                //  updateDeviceListView(/*false*/);
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(result);
                 device_tips.setText(deviceItem.getDescription());
                 changeVisibleOfDeviceView(false);
                 ((ContentFragment) fragments.get(currentTab)).mediaItems = result;
+                if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
+                    initial_tips.setVisibility(View.GONE);
+                } else {
+                    initial_tips.setVisibility(View.VISIBLE);
+                }
                 Log.i(TAG, "onPostExecute: //抓取特定设备的文件 " + ContentFragment.printTime());
             }
         }

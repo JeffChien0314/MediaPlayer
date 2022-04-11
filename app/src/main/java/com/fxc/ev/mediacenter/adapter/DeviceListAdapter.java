@@ -25,20 +25,20 @@ public class DeviceListAdapter extends BaseAdapter {
     private Context context;
     private List<DeviceItem> externalDeviceItems;
     private DeviceItem externalDeviceItem, mCurrentDevice;
-    private boolean ifShowLoading=false;
+   /* private boolean ifShowLoading=false;
     public DeviceListAdapter() {
-    }
+    }*/
 
     public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems/*, DeviceItem currentDevice*/) {
         this.context = context;
         this.externalDeviceItems = externalDeviceItems;
       //  this.mCurrentDevice = currentDevice;
     }
-    public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems, boolean ifShowLoading) {
+   /* public DeviceListAdapter(Context context, List<DeviceItem> externalDeviceItems, boolean ifShowLoading) {
         this.context = context;
         this.externalDeviceItems = externalDeviceItems;
         this.ifShowLoading = ifShowLoading;
-    }
+    }*/
 
     @Override
     public int getCount() {
@@ -88,13 +88,13 @@ public class DeviceListAdapter extends BaseAdapter {
                 viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
             }
         }
-        if (DeviceItemUtil.getInstance(context)!=null && DeviceItemUtil.getInstance(context).currentDevice!=null){
+      /*  if (DeviceItemUtil.getInstance(context)!=null && DeviceItemUtil.getInstance(context).currentDevice!=null){
             if (position==DeviceItemUtil.getInstance(context).getDeviceIndex(DeviceItemUtil.getInstance(context).getCurrentDevice())){
                 if (ifShowLoading){
                     viewHolder.deviceImage.setImageResource(R.drawable.ani_gif_loading);
                 }
             }
-        }
+        }*/
         return convertView;
     }
 

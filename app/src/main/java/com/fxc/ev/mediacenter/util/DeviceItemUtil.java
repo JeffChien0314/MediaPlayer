@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * Created by Sandra on 2022/2/18.
  */
@@ -95,16 +96,18 @@ public class DeviceItemUtil {
             }
         }
         if (needNotify) broadCastDeviceChanged();
-
         return externalDeviceItems;
     }
     /*获取设备对应的Index及设备列表中对应的position*/
     public int getDeviceIndex(DeviceItem deviceItem){
-        for (int i=0;i<externalDeviceItems.size();i++){
-            if (externalDeviceItems.get(i).getStoragePath().equals(deviceItem.getStoragePath())){
-                return i;
+        if (externalDeviceItems.size()>0){
+            for (int i=0;i<externalDeviceItems.size();i++){
+                if (externalDeviceItems.get(i).getStoragePath().equals(deviceItem.getStoragePath())){
+                    return i;
+                }
             }
         }
+
         return -1;
     }
     /**

@@ -39,13 +39,6 @@ public class MediaItemUtil {
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
     public  static ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();
-    public static ArrayList<MediaItem> getAllDevicesMediaItems() {
-        return allDevicesMediaItems;
-    }
-    public static void setAllDevicesMediaItems(ArrayList<MediaItem> allDevicesMediaItems) {
-        MediaItemUtil.allDevicesMediaItems = allDevicesMediaItems;
-    }
-
     public static MediaInfo getMediaInfos(int mediaType, Context context, DeviceItem deviceItem) {
 
         MediaInfo mediaInfo = new MediaInfo();
