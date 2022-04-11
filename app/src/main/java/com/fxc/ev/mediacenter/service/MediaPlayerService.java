@@ -433,7 +433,7 @@ public class MediaPlayerService extends Service {
         @Override
         protected void onPostExecute(ArrayList<MediaItem> result) {
             super.onPostExecute(result);
-            MediaItemUtil.setAllDevicesMediaItems(result);
+            MediaItemUtil.allDevicesMediaItems =result;
         }
     }
 

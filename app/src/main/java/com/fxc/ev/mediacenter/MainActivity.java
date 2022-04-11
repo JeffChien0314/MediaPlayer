@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FrameLayout mUsbFrameLayout;
     private FrameLayout mbtFrameLayout;
     private BtplayerLayout mBtPlayerLayer;
-    private TextView initial_tips;
+    public TextView initial_tips;
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
@@ -96,12 +96,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (message.what) {
                 //Sandra@20220107 add 更新播放列表
                 case UPDATE_DEVICE_LIST:
-                    updateDeviceListView(false);
+                    updateDeviceListView(/*false*/);
                     devicelistview.setVisibility(View.VISIBLE);
                     //   getALLMediaItemsOfSpecificDevice();//不加显示Loading的参数
                     break;
                 case CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE:
-                    updateDeviceListView(false);
+                    updateDeviceListView(/*false*/);
                     if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.isDeviceExist(mDeviceItemUtil.getCurrentDevice().getStoragePath())) {//currentDeviceInfo即当前文件列表对应的设备，设备还在，无需更新文件列表
                     } else {//currentDeviceInfo即当前文件列表对应的设备，设备已移除，需更新文件列表
                         // mediaItems.clear();
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
         //<--Sandra@20220402 Modify for 再次進入后的UX
-        updateDeviceListView(false);
+        updateDeviceListView(/*false*/);
         //根據選擇的設備刷新音視頻列表
         devicelistview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -239,8 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(position));
                 ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, externalDeviceItems.get(position));
                 if (cutDownBrowseFunction) {
-                    device_tips.setText(externalDeviceItems.get(position).getDescription());
-                    updateDeviceListView(false);
+                    updateDeviceListView(/*false*/);
                     changeVisibleOfDeviceView(false);
                     playMusic(0);//TODO:此處需優化為LastPosition
                 }
@@ -303,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onTabSelected(TabLayout.Tab tab) {
                 super.onTabSelected(tab);
                 currentTab = tab.getPosition();
-                if (/*allDevicesMediaItems.size() != 0*/MediaItemUtil.getAllDevicesMediaItems().size() != 0) {//搜索全部执行完毕，可以去筛选
+                if ( MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                     ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
                     mediaItems = ((ContentFragment) fragments.get(currentTab)).filterAllMediaItemsOfSpecificDevice(currentTab, mDeviceItemUtil.getCurrentDevice());
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
@@ -312,6 +311,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
                 }
             }
+                if (((ContentFragment) fragments.get(currentTab)).mediaItems.size()>0){
+                 initial_tips.setVisibility(View.INVISIBLE);
+                }else {
+                 initial_tips.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
@@ -326,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else if (devicelistview.getVisibility() == View.VISIBLE) {
                 changeVisibleOfDeviceView(false);
             }
-            updateDeviceListView(false);//確保同步實際連接狀況
+            updateDeviceListView(/*false*/);//確保同步實際連接狀況
         }
 
     }
@@ -416,42 +420,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 更新设备列表
      */
-    public void updateDeviceListView(boolean ifShowLoading) {
+    public void updateDeviceListView(/*boolean ifShowLoading*/) {
         if (externalDeviceItems != null && externalDeviceItems.size() > 0) {
             externalDeviceItems.clear();
         }
         externalDeviceItems = MediaController.getInstance(this).getDevices();
-        if (ifShowLoading) {
-            deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems, true);
-            connectAnimationStart(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
-        } else {
             deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
-        }
         devicelistview.setAdapter(deviceListAdapter);
         deviceListAdapter.notifyDataSetChanged();
         //   devicelistview.invalidateViews();
     }
 
     /*连接过程中/读取文件过程中的动画开始执行*/
-    public void connectAnimationStart(int position) {
-        if (position >= devicelistview.getFirstVisiblePosition() && position <= devicelistview.getLastVisiblePosition()) {//范围内可见
-            ImageView Connecting_icon = devicelistview.getChildAt(position - devicelistview.getFirstVisiblePosition()).findViewById(R.id.device_icon);
+    public void connectAnimationStart(/*int position*/) {
+        ImageView Connecting_icon = mInputSourceButton;
             Connecting_icon.setVisibility(View.VISIBLE);
             Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
             ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
             ani_gif_Connecting.start();
         }
-    }
 
     /*连接过程中/读取文件过程中的动画停止*/
-    public void connectAnimationStop(int position) {
-        if (position >= devicelistview.getFirstVisiblePosition() && position <= devicelistview.getLastVisiblePosition()) {//范围内可见
-            ImageView Connecting_icon = devicelistview.getChildAt(position - devicelistview.getFirstVisiblePosition()).findViewById(R.id.device_icon);
+    public void connectAnimationStop(/*int position*/) {
+        ImageView Connecting_icon = mInputSourceButton;
             Connecting_icon.setVisibility(View.VISIBLE);
             Connecting_icon.setBackgroundResource(R.drawable.ani_gif_loading);
             ani_gif_Connecting = (AnimationDrawable) Connecting_icon.getBackground();
             ani_gif_Connecting.stop();
-        }
+        mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
     }
 
     /**
@@ -569,6 +565,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void getALLMediaItemsOfSpecificDevice(boolean ifShowLoading, DeviceItem deviceItem, int mediaType) {
+        connectAnimationStart();
         allDevicesMediaItems.clear();
         if (myTask != null && !myTask.isCancelled()) {
             myTask.cancel(true);
@@ -603,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPreExecute() {
             super.onPreExecute();
             Log.i(TAG, "onPreExecute: 抓取特定设备的文件 start" + ContentFragment.printTime());
-
+            device_tips.setText(R.string.Connecting);
         }
 
         @Override
@@ -641,8 +638,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPostExecute(ArrayList<MediaItem> result) {
             super.onPostExecute(result);
             if (ifShowLoading) {
-                connectAnimationStop(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
-                updateDeviceListView(false);
+                connectAnimationStop(/*mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice())*/);
+              //  updateDeviceListView(/*false*/);
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(result);
                 device_tips.setText(deviceItem.getDescription());
                 changeVisibleOfDeviceView(false);
@@ -656,8 +653,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onStartConnect() {
             Log.i(TAG, "onStartConnect: ");
+            connectAnimationStart();//Sandra@20220408 add
             device_tips.setText(R.string.Connecting);
-            updateDeviceListView(true);
             Toast.makeText(getApplicationContext(), "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
         }
 
@@ -665,9 +662,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onConnectSuccess(BluetoothDevice device) {
             Log.i(TAG, "onConnectSuccess: ");
             device_tips.setText(device.getName());
-            changeVisibleOfDeviceView(false);
-            updateDeviceListView(false);
-            connectAnimationStop(DeviceItemUtil.getInstance(getApplicationContext()).getDeviceIndex(DeviceItemUtil.getInstance(getApplicationContext()).getCurrentDevice()));
+            updateDeviceListView(/*false*/);
+            connectAnimationStop();//Sandra@20220408 add
             Toast.makeText(getApplicationContext(), "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
 
         }
@@ -675,6 +671,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onConnectFail(BluetoothDevice device, String string) {
             Log.i(TAG, "onConnectFail: ");
+            device_tips.setText(R.string.fail);
+            connectAnimationStop();//Sandra@20220408 add
             Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
         }
     };

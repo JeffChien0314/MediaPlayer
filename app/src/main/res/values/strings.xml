@@ -3,6 +3,8 @@
 FxcMediaPlayer</string>
     <string name="paire">Pair device</string>
     <string name="Connecting">Connecting</string>
+    <string 
+name="fail">Connect Fail</string>
     <string name="Select">Select your device</string>
     <string name="initial_tips">Playlist Not Found</string>
 </resources>
