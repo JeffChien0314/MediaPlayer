@@ -2,6 +2,7 @@ package com.fxc.ev.mediacenter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
@@ -24,7 +26,10 @@ public class CustomViews extends RelativeLayout {
     //private View mView;
     private LinearLayout mView;
     private View player;
+    public TextView initialTips;
+    private ViewPager mViewPager;
     private boolean isDragUp=true;
+
     String TAG = CustomViews.class.getSimpleName();
 
     public CustomViews(Context context) {
@@ -114,11 +119,11 @@ public class CustomViews extends RelativeLayout {
                 player.setLayoutParams(layoutParams2);*/
                 return getHeight() - child.getHeight();
             }
-            if(dy < 0){
+           /* if(dy < 0){
                 Log.i(TAG, "onTouchEvent12: "+dy);
                 layoutParams2.height = 486;
             }
-            player.setLayoutParams(layoutParams2);
+            player.setLayoutParams(layoutParams2);*/
             return top;
         }
 
@@ -136,14 +141,14 @@ public class CustomViews extends RelativeLayout {
                 case ViewDragHelper.STATE_IDLE:  // view没有被拖拽或者 正在进行fling/snap
                     RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) player.getLayoutParams();// view没有被拖拽或者 正在进行fling/snap
                     if(isDragUp) {
+
                         layoutParams2.height = 1440;
                         isDragUp=false;
                     }else{
-                        //layoutParams2.height = 486;
+                      layoutParams2.height = 486;
                         isDragUp=true;
                     }
                     player.setLayoutParams(layoutParams2);
-                    player.requestLayout();
                     break;
                 case ViewDragHelper.STATE_SETTLING: // fling完毕后被放置到一个位置
                     break;
@@ -175,7 +180,7 @@ public class CustomViews extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mView = (LinearLayout) findViewById(R.id.input_source_related);
-        player=findViewById(R.id.player);
+        player=(View)findViewById(R.id.player);
         Log.i(TAG, "onTouchEvent1: "+mView);
     }
 
