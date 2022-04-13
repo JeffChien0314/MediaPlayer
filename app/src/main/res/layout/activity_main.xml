@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fxc.ev.mediacenter.CustomViews xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,32 +11,35 @@
         android:id="@+id/player"
         layout="@layout/layout_media_play_container"
         android:layout_width="match_parent"
-        android:layout_height="486px"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="486px" />
 
     <LinearLayout
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/player"
+        android:layout_below="@id/player"
         tools:ignore="MissingConstraints">
         <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/input_source_indicated"
+        android:background="#99000000"
+        android:layout_below="@id/player">
         <View
-            android:id="@+id/input_source_indicated"
+
             android:layout_width="108px"
             android:layout_height="6px"
             android:layout_marginLeft="486px"
             android:layout_marginTop="10px"
             android:background="#40FFFFFF" />
-
+    </LinearLayout>
         <LinearLayout
             android:id="@+id/input_source_click_button_and_play_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/input_source_indicated"
             android:background="@drawable/fxc_input_source_bg">
 
             <ImageView
@@ -44,21 +47,16 @@
                 android:layout_width="60px"
                 android:layout_height="60px"
                 android:layout_marginLeft="30px"
-                android:layout_marginTop="30px"
-                android:background="@drawable/icon_input_source_normal"
                 android:onClick="onInputSourceClick"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/input_source_indicated" />
-
+                android:background="@drawable/icon_collapse_normal"
+                />
             <TextView
                 android:id="@+id/device_tips"
-                android:layout_width="200px"
-                android:layout_height="wrap_content"
+                android:layout_width="212px"
+                android:layout_height="34px"
+                android:layout_marginRight="580px"
+                android:layout_marginTop="13px"
                 android:layout_marginLeft="15px"
-                android:layout_marginRight="550px"
-                android:layout_marginTop="47px"
-                android:onClick="deviceTipsClick"
-                android:text="@string/paire"
                 android:textColor="#80FFFFFF"
                 android:textSize="22px" />
 
@@ -66,7 +64,6 @@
                 android:id="@+id/random"
                 android:layout_width="60px"
                 android:layout_height="60px"
-                android:layout_marginTop="30px"
                 android:background="@drawable/icon_shuffle_normal"
                 android:onClick="onClick" />
 
@@ -74,8 +71,8 @@
                 android:id="@+id/play_mode"
                 android:layout_width="60px"
                 android:layout_height="60px"
-                android:layout_marginLeft="60px"
-                android:layout_marginTop="30px"
+                android:layout_marginLeft="30px"
+                android:layout_marginRight="33px"
                 android:background="@drawable/icon_repeat_normal"
                 android:onClick="onClick" />
         </LinearLayout>
@@ -88,7 +85,7 @@
             android:drawSelectorOnTop="true"
             android:scrollbars="vertical"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/input_source_click_button_and_play_mode" />
+            android:layout_below="@id/input_source_click_button_and_play_mode" />
 
         <include
             android:id="@+id/pair_device"
@@ -135,4 +132,4 @@
             android:orientation="vertical" />
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</com.fxc.ev.mediacenter.CustomViews>
