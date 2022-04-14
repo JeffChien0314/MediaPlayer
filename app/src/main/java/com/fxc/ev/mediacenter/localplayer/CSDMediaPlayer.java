@@ -91,7 +91,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             return CommonUtil.getActivityContext(getContext());
     }
 
-
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -130,22 +129,22 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 if (event.getAction() == ACTION_DOWN) {
                     //checkBtnVisble();
                 }
-                    float sx = findViewById(R.id.surface_container).getX();
-                    float cx = event.getX();
-                    int ex = findViewById(R.id.surface_container).getWidth();
-                    if (((cx - sx) / (ex - sx)) < 0.4) {
-                        USB_LAYER_DOUBLE_TAP = REWIND;
-                        mGesture.onTouchEvent(event);
-                    } else if (((cx - sx) / (ex - sx)) > 0.6) {
-                        USB_LAYER_DOUBLE_TAP = FASTFORWARD;
-                        mGesture.onTouchEvent(event);
-                    }else{
-                        mGesture.onTouchEvent(event);
-                    }
-                    if(event.getAction() == ACTION_UP){
-                        //mDoubleClickCount=0;
-                        startDismissControlViewTimer();
-                    }
+                float sx = findViewById(R.id.surface_container).getX();
+                float cx = event.getX();
+                int ex = findViewById(R.id.surface_container).getWidth();
+                if (((cx - sx) / (ex - sx)) < 0.4) {
+                    USB_LAYER_DOUBLE_TAP = REWIND;
+                    mGesture.onTouchEvent(event);
+                } else if (((cx - sx) / (ex - sx)) > 0.6) {
+                    USB_LAYER_DOUBLE_TAP = FASTFORWARD;
+                    mGesture.onTouchEvent(event);
+                }else{
+                    mGesture.onTouchEvent(event);
+                }
+                if(event.getAction() == ACTION_UP){
+                    //mDoubleClickCount=0;
+                    startDismissControlViewTimer();
+                }
 
                 return true;
             }
@@ -199,7 +198,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
      * @return
      */
     protected boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath, Map<String, String> mapHeadData, boolean changeState) {
-      if (url==null || url.size()==0){return false;}
         mUriList = url;
         mPlayPosition = position;
         mMapHeadData = mapHeadData;
@@ -314,7 +312,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     @Override
     protected void changeUiToPreparingShow() {
         Debuger.printfLog("changeUiToPreparingShow");
-
         setViewShowState(mTopContainer, VISIBLE);
         setViewShowState(mBottomContainer, VISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
@@ -387,45 +384,46 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
 
 
     }
-   /* @Override
+    /* @Override
+     protected void changeUiToPlayingBufferingShow() {
+         super.changeUiToPlayingBufferingShow();
+         Debuger.printfLog("changeUiToPlayingBufferingShow");
+         setViewShowState(mPrevious, INVISIBLE);
+         setViewShowState(mNext, INVISIBLE);
+         setViewShowState(mRewind, INVISIBLE);
+         setViewShowState(mFwd, INVISIBLE);
+     }*/
+    @Override
     protected void changeUiToPlayingBufferingShow() {
-        super.changeUiToPlayingBufferingShow();
         Debuger.printfLog("changeUiToPlayingBufferingShow");
+
+        setViewShowState(mTopContainer, VISIBLE);
+        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mStartButton, INVISIBLE);
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
-        setViewShowState(mRewind, INVISIBLE);
-        setViewShowState(mFwd, INVISIBLE);
-    }*/
-   @Override
-   protected void changeUiToPlayingBufferingShow() {
-       Debuger.printfLog("changeUiToPlayingBufferingShow");
-
-       setViewShowState(mTopContainer, VISIBLE);
-       setViewShowState(mBottomContainer, VISIBLE);
-       setViewShowState(mStartButton, INVISIBLE);
-       setViewShowState(mPrevious, INVISIBLE);
-       setViewShowState(mNext, INVISIBLE);
-       setViewShowState(mThumbImageViewLayout, INVISIBLE);
-       setViewShowState(mBottomProgressBar, INVISIBLE);
-       setViewShowState(mLockScreen, GONE);
-       if (isDoubleTouch == false) {
-           setViewShowState(mLoadingProgressBar, VISIBLE);
-           if (mLoadingProgressBar instanceof ENDownloadView) {
-               ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
-               if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
-                   ((ENDownloadView) mLoadingProgressBar).start();
-               }
-           }
-       }else{
-           setViewShowState(mLoadingProgressBar, INVISIBLE);
-       }
-   }
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mLockScreen, GONE);
+        if (isDoubleTouch == false) {
+            setViewShowState(mLoadingProgressBar, VISIBLE);
+            if (mLoadingProgressBar instanceof ENDownloadView) {
+                ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
+                if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
+                    ((ENDownloadView) mLoadingProgressBar).start();
+                }
+            }
+        }else{
+            setViewShowState(mLoadingProgressBar, INVISIBLE);
+        }
+    }
     @Override
     protected void changeUiToCompleteShow() {
         super.changeUiToCompleteShow();
         Debuger.printfLog("changeUiToCompleteShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        setViewShowState(mStartButton, VISIBLE);
         setViewShowState(mRewind, INVISIBLE);
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
@@ -456,32 +454,30 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
     }
-   protected void changeUiToPlayingBufferingClear() {
-       Debuger.printfLog("changeUiToPlayingBufferingClear");
-       setViewShowState(mTopContainer, INVISIBLE);
-       setViewShowState(mBottomContainer, INVISIBLE);
-       setViewShowState(mStartButton, INVISIBLE);
-       setViewShowState(mPrevious, INVISIBLE);
-       setViewShowState(mNext, INVISIBLE);
-       setViewShowState(mPrevious, INVISIBLE);
-       setViewShowState(mNext, INVISIBLE);
+    protected void changeUiToPlayingBufferingClear() {
+        Debuger.printfLog("changeUiToPlayingBufferingClear");
+        setViewShowState(mTopContainer, INVISIBLE);
+        setViewShowState(mBottomContainer, INVISIBLE);
+        setViewShowState(mStartButton, INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);
+        setViewShowState(mNext, INVISIBLE);
 
-       setViewShowState(mThumbImageViewLayout, INVISIBLE);
-       setViewShowState(mBottomProgressBar, VISIBLE);
-       setViewShowState(mLockScreen, GONE);
-       if(isDoubleTouch==false) {
-           setViewShowState(mLoadingProgressBar, VISIBLE);
-       if (mLoadingProgressBar instanceof ENDownloadView) {
-           ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
-           if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
-               ((ENDownloadView) mLoadingProgressBar).start();
-           }
-       }
-           updateStartImage();
-       }else{
-           setViewShowState(mLoadingProgressBar, VISIBLE);
-       }
-   }
+        setViewShowState(mThumbImageViewLayout, INVISIBLE);
+        setViewShowState(mBottomProgressBar, VISIBLE);
+        setViewShowState(mLockScreen, GONE);
+        if(isDoubleTouch==false) {
+            setViewShowState(mLoadingProgressBar, VISIBLE);
+            if (mLoadingProgressBar instanceof ENDownloadView) {
+                ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
+                if (enDownloadView.getCurrentState() == ENDownloadView.STATE_PRE) {
+                    ((ENDownloadView) mLoadingProgressBar).start();
+                }
+            }
+            updateStartImage();
+        }else{
+            setViewShowState(mLoadingProgressBar, VISIBLE);
+        }
+    }
     protected void changeUiToClear(){
         super.changeUiToClear();
         setViewShowState(mPrevious, INVISIBLE);
@@ -532,6 +528,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         super.changeUiToNormal();
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+
     }
 
     @Override
@@ -677,8 +674,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 intent.putExtra(PLAYSTATE_CHANGED + "", mCurrentState);
                 break;
             case MEDIAITEM_CHANGED:
-               // mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
-                if (mediaInfo.getMediaItems().size()==0)return;
+                // mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
                 MediaItem mediaItemOrignal=mediaInfo.getMediaItems().get(mPlayPosition);
                 MediaItem mediaItem=new MediaItem(mediaItemOrignal.getId(),mediaItemOrignal.getTitle(),mediaItemOrignal.getAlbum(),mediaItemOrignal.getArtist(),
                         mediaItemOrignal.getDuration(),mediaItemOrignal.getThumbBitmap(),mediaItemOrignal.getGsyVideoModel(),mediaItemOrignal.isIfVideo(),mediaItemOrignal.getStoragePath() );
@@ -746,7 +742,6 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         }
         SharedPreferences sharedPreferences = getActivityContext().getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE); //私有数据
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
-        if (mediaInfo.getMediaItems().size()==0)return;
         MediaItem mediaItem = mediaInfo.getMediaItems().get(mPlayPosition);
         if (mediaItem.isIfVideo()) {
             editor.putInt("currentTab", 1);
@@ -801,26 +796,26 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         }
     }
 
- @Override
+    @Override
     protected void touchDoubleUp() {
         if (!mHadPlay) {
             return;
         } else {
-              switch (USB_LAYER_DOUBLE_TAP) {
-                    case REWIND:
-                        mFwd.setVisibility(INVISIBLE);
-                        mFwdTotalTime.setVisibility(INVISIBLE);
-                        backWard();
-                        break;
-                    case FASTFORWARD:
-                        mRewind.setVisibility(INVISIBLE);
-                        mRewindTotalTime.setVisibility(INVISIBLE);
-                        forWard();
-                        break;
-                }
+            switch (USB_LAYER_DOUBLE_TAP) {
+                case REWIND:
+                    mFwd.setVisibility(INVISIBLE);
+                    mFwdTotalTime.setVisibility(INVISIBLE);
+                    backWard();
+                    break;
+                case FASTFORWARD:
+                    mRewind.setVisibility(INVISIBLE);
+                    mRewindTotalTime.setVisibility(INVISIBLE);
+                    forWard();
+                    break;
+            }
         }
     }
-     private void initGestureDetector(Context context) {
+    private void initGestureDetector(Context context) {
         mGesture = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTapEvent(MotionEvent e) {
@@ -837,7 +832,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 //  handler.sendEmptyMessage(HIDE_VIEW_CONTROL);
                 return super.onDoubleTapEvent(e);
             }
-           @Override
+            @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 isDoubleTouch=false;
                 mDoubleRewindClickCount=0;

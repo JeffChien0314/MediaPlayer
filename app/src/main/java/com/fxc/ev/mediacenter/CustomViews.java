@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
+import com.shuyu.gsyvideoplayer.utils.Debuger;
 
 import static android.security.KeyStore.getApplicationContext;
 
@@ -25,10 +26,10 @@ public class CustomViews extends RelativeLayout {
     private ViewDragHelper mDragHelper;
     //private View mView;
     private LinearLayout mView;
+    //private LinearLayout mView;
     private View player;
-    public TextView initialTips;
-    private ViewPager mViewPager;
     private boolean isDragUp=true;
+    private boolean isDraging=false;
 
     String TAG = CustomViews.class.getSimpleName();
 
@@ -56,7 +57,9 @@ public class CustomViews extends RelativeLayout {
         /*mListLinearLayout =(LinearLayout) findViewById(R.id.list_related);
         Log.i(TAG, "onTouchEvent1: "+mListLinearLayout);*/
         mDragHelper = ViewDragHelper.create(this, 1.0f, new ViewDragCallback());
+
     }
+
 
     private class ViewDragCallback extends ViewDragHelper.Callback {
         /**
@@ -105,25 +108,20 @@ public class CustomViews extends RelativeLayout {
          */
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
-            Log.i(TAG, "onTouchEvent11: "+dy);
+            Log.i(TAG, "onTouchEvent11: "+player.getHeight());
+            isDraging=true;
             RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) player.getLayoutParams();
-            // 两个if主要是为了让viewViewGroup里
+            if(player.getHeight() >=486) {
+                layoutParams2.height = player.getHeight() + dy;
+                player.setLayoutParams(layoutParams2);
+            }
             if (getPaddingTop() > top) {
                 return getPaddingTop();
             }
             if (getHeight() - child.getHeight() < top) {
-                /*if(dy > 0){
-                    Log.i(TAG, "onTouchEvent12: "+dy);
-                    layoutParams2.height = 1440;
-                }
-                player.setLayoutParams(layoutParams2);*/
+                Log.i(TAG, "onTouchEvent12: "+(getHeight() - child.getHeight()));
                 return getHeight() - child.getHeight();
             }
-           /* if(dy < 0){
-                Log.i(TAG, "onTouchEvent12: "+dy);
-                layoutParams2.height = 486;
-            }
-            player.setLayoutParams(layoutParams2);*/
             return top;
         }
 
@@ -136,19 +134,20 @@ public class CustomViews extends RelativeLayout {
         public void onViewDragStateChanged(int state) {
             switch (state) {
                 case ViewDragHelper.STATE_DRAGGING:  // 正在被拖动
-                    Log.i(TAG, "onTouchEvent9: "+isDragUp);
                     break;
                 case ViewDragHelper.STATE_IDLE:  // view没有被拖拽或者 正在进行fling/snap
                     RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) player.getLayoutParams();// view没有被拖拽或者 正在进行fling/snap
-                    if(isDragUp) {
-
-                        layoutParams2.height = 1440;
-                        isDragUp=false;
-                    }else{
-                      layoutParams2.height = 486;
-                        isDragUp=true;
+                    if(isDraging) {
+                        if (isDragUp) {
+                            layoutParams2.height = 1440;
+                            isDragUp = false;
+                        } else {
+                            layoutParams2.height = 486;
+                            isDragUp = true;
+                        }
+                        isDraging=false;
+                        player.setLayoutParams(layoutParams2);
                     }
-                    player.setLayoutParams(layoutParams2);
                     break;
                 case ViewDragHelper.STATE_SETTLING: // fling完毕后被放置到一个位置
                     break;
@@ -157,9 +156,9 @@ public class CustomViews extends RelativeLayout {
         }
         @Override
         public void onViewPositionChanged(@NonNull View changedView, int left, int top, int dx, int dy) {
-            Log.i(TAG, "onTouchEvent10: "+dy);
             invalidate();
         }
+
     }
 
     @Override
@@ -170,10 +169,6 @@ public class CustomViews extends RelativeLayout {
                 mDragHelper.cancel(); // 相当于调用 processTouchEvent收到ACTION_CANCEL
                 break;
         }
-        /**
-         * 检查是否可以拦截touch事件
-         * 如果onInterceptTouchEvent可以return true 则这里return true
-         */
         return mDragHelper.shouldInterceptTouchEvent(ev);
     }
     @Override
@@ -181,20 +176,11 @@ public class CustomViews extends RelativeLayout {
         super.onFinishInflate();
         mView = (LinearLayout) findViewById(R.id.input_source_related);
         player=(View)findViewById(R.id.player);
-        Log.i(TAG, "onTouchEvent1: "+mView);
     }
 
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.i(TAG, "onTouchEvent: "+event);
-
-       // mListLinearLayout.setVisibility(GONE);
-
-        /**
-         * 处理拦截到的事件
-         * 这个方法会在返回前分发事件
-         */
         mDragHelper.processTouchEvent(event);
         return true;
     }
