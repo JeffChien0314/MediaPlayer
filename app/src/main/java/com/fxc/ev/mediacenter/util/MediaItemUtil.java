@@ -279,7 +279,7 @@ public class MediaItemUtil {
     }
 
     @SuppressLint("ResourceType")
-    private static Bitmap getDefaultArtwork(Context context) {
+    public static Bitmap getDefaultArtwork(Context context) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inPreferredConfig = Bitmap.Config.RGB_565;
         return BitmapFactory.decodeStream(

@@ -83,8 +83,6 @@ public class MusicWidget extends AppWidgetProvider {
             MediaItem mediaItem = intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + "");
             if (mediaItem != null) {
                 Log.i(TAG, "onReceive: mediaItem content "+mediaItem.getTitle());
-                int i= MediaItemUtil.getBitmapSize(mediaItem.getThumbBitmap())/1024;
-                Log.i(TAG, "onReceive: mediaItem.size "+i);
                 pushUpdate(context, AppWidgetManager.getInstance(context), mediaItem, null);
             }
 

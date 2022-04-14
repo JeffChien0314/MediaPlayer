@@ -34,6 +34,7 @@ public class MediaSeekBar extends AppCompatSeekBar {
             super.handleMessage(msg);
             switch (msg.what) {
                 case REGULAR_UPDATE:
+                    if(null==mMediaController) break;
                     try {
                         final int progress = mMediaController.getPlaybackState() != null
                                 ? (int) mMediaController.getPlaybackState().getPosition()
@@ -46,6 +47,7 @@ public class MediaSeekBar extends AppCompatSeekBar {
                     sendMsg(REGULAR_UPDATE, 1000);
                     break;
                 case INIT_UPDATE:
+                    if(null==mMediaController) break;
                     metadataCompat = mMediaController.getMetadata();
                     if (null != mMediaController.getMetadata()) {
                         setMax((int) mMediaController.getMetadata().getLong(MediaMetadataCompat.METADATA_KEY_DURATION));

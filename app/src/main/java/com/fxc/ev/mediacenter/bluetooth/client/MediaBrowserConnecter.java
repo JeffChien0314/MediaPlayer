@@ -12,9 +12,10 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
-import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.bluetooth.ui.MediaSeekBar;
+import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,6 +168,8 @@ public class MediaBrowserConnecter {
                             metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST),
                             metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
                             metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON), null, false, null);
+                    if (null == item.getThumbBitmap())
+                        item.setThumbBitmap(MediaItemUtil.getDefaultArtwork(mContext));
                     currentBtItem = item;
                     broadCastStateChanged(Constants.ACTION_MEDIAITEM_CHANGED_BROADCAST, Constants.MEDIAITEM_CHANGED, -1);
                 }
@@ -182,14 +185,14 @@ public class MediaBrowserConnecter {
                     // super.onRepeatModeChanged(repeatMode);
                     //  int value = remapDefine(REPEATMODE_CHANGED, repeatMode);
 
-                    broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.REPEATMODE_CHANGED, repeatMode));
+               //     broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.REPEATMODE_CHANGED, repeatMode));
                 }
 
                 @Override
                 public void onShuffleModeChanged(int shuffleMode) {
                     //  super.onShuffleModeChanged(shuffleMode);
                     //  int value = remapDefine(SHUFFLEMODE_CHANGED, shuffleMode);
-                    broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.SHUFFLEMODE_CHANGED, shuffleMode));
+               //     broadCastStateChanged(Constants.ACTION_STATE_CHANGED_BROADCAST, Constants.PLAYSTATE_CHANGED, remapDefine(Constants.SHUFFLEMODE_CHANGED, shuffleMode));
                 }
             };
 
@@ -263,7 +266,7 @@ public class MediaBrowserConnecter {
     }
 
     public void setBTDeviceState(int state, long value) {
-        if(mMediaController==null) return;
+        if (mMediaController == null) return;
         switch (state) {
             case Constants.STATE_PLAY:
             case Constants.STATE_PAUSE:

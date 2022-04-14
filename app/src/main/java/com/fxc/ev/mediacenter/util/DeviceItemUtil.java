@@ -7,8 +7,8 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
-import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 
 import java.lang.reflect.Method;
@@ -89,20 +89,30 @@ public class DeviceItemUtil {
         if (BtMusicManager.getInstance().isEnabled()) {
             for (BluetoothDevice device : BtMusicManager.getInstance().getBondedDevices()) {
                 DeviceItem info = new DeviceItem();
+                Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.getName()= " + device.getName());
+                Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.isConnected()= " + device.isConnected());
+                try {
+                    Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.isInSilenceMode()= " + device.isInSilenceMode());
+                    info.setDescription(device.getName() + (device.isConnected() && !device.isInSilenceMode() ? "(已连接)" : ""));
+                } catch (Exception e) {
                 info.setDescription(device.getName() + (device.isConnected() ? "(已连接)" : ""));
+                }
+
                 info.setBluetoothDevice(device);
                 info.setType(Constants.BLUETOOTH_DEVICE);
+                info.setStoragePath(" ");
                 externalDeviceItems.add(info);
             }
         }
         if (needNotify) broadCastDeviceChanged();
         return externalDeviceItems;
     }
+
     /*获取设备对应的Index及设备列表中对应的position*/
-    public int getDeviceIndex(DeviceItem deviceItem){
-        if (externalDeviceItems.size()>0){
-            for (int i=0;i<externalDeviceItems.size();i++){
-                if (externalDeviceItems.get(i).getStoragePath().equals(deviceItem.getStoragePath())){
+    public int getDeviceIndex(DeviceItem deviceItem) {
+        if (externalDeviceItems.size() > 0) {
+            for (int i = 0; i < externalDeviceItems.size(); i++) {
+                if (externalDeviceItems.get(i).getStoragePath().equals(deviceItem.getStoragePath())) {
                     return i;
                 }
             }
@@ -110,6 +120,7 @@ public class DeviceItemUtil {
 
         return -1;
     }
+
     /**
      * 获取所有外置存储器的目录
      *
