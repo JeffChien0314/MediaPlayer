@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 /**
@@ -119,12 +120,13 @@ public class MediaSeekBar extends AppCompatSeekBar {
         sendMsg(INIT_UPDATE, 0);
     }
 
-    public void disconnectController() {
+    public void disconnectController(Context context) {
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mControllerCallback);
             mControllerCallback = null;
             mMediaController = null;
         }
+        MediaBrowserConnecter.getInstance(context).release();
     }
 
     private class ControllerCallback

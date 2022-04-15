@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
@@ -133,5 +134,9 @@ public class MediaController {
 
     public void setCurrentSourceType(int device_type) {
         currentSourceType = device_type;
+    }
+
+    public boolean isBtAudioActive() {
+        return MediaBrowserConnecter.getInstance(mContext).isBtAudioActive();
     }
 }

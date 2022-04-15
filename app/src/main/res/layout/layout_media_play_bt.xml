@@ -125,7 +125,7 @@
             android:layout_marginLeft="240px"
             android:layout_toLeftOf="@+id/bt_start"
             android:scaleType="fitXY"
-
+            android:visibility="invisible"
             android:src="@drawable/icon_skip_back_normal"
             tools:ignore="MissingConstraints" />
 
@@ -137,6 +137,8 @@
             android:layout_marginRight="108px"
             android:layout_toLeftOf="@+id/bt_previous"
             android:scaleType="fitXY"
+            
+android:visibility="invisible"
             android:src="@drawable/icon_rewind_normal" />
 
         <ImageView
@@ -159,6 +161,8 @@
             android:layout_marginLeft="108px"
             android:layout_toRightOf="@+id/bt_next"
             android:scaleType="fitXY"
+            
+android:visibility="invisible"
             android:src="@drawable/icon_fast_fwd_normal" />
     </RelativeLayout>
     </RelativeLayout>

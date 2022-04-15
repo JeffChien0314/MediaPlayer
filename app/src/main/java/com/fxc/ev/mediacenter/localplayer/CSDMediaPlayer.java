@@ -91,6 +91,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             return CommonUtil.getActivityContext(getContext());
     }
 
+
     public CSDMediaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -198,6 +199,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
      * @return
      */
     protected boolean setUp(List<GSYVideoModel> url, boolean cacheWithPlay, int position, File cachePath, Map<String, String> mapHeadData, boolean changeState) {
+      if (url==null || url.size()==0){return false;}
         mUriList = url;
         mPlayPosition = position;
         mMapHeadData = mapHeadData;
@@ -312,6 +314,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     @Override
     protected void changeUiToPreparingShow() {
         Debuger.printfLog("changeUiToPreparingShow");
+
         setViewShowState(mTopContainer, VISIBLE);
         setViewShowState(mBottomContainer, VISIBLE);
         setViewShowState(mStartButton, INVISIBLE);
@@ -675,6 +678,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 break;
             case MEDIAITEM_CHANGED:
                 // mediaInfo.getMediaItems().get(mPlayPosition).setThumbBitmap(null);
+                if (mediaInfo.getMediaItems().size()==0)return;
                 MediaItem mediaItemOrignal=mediaInfo.getMediaItems().get(mPlayPosition);
                 MediaItem mediaItem=new MediaItem(mediaItemOrignal.getId(),mediaItemOrignal.getTitle(),mediaItemOrignal.getAlbum(),mediaItemOrignal.getArtist(),
                         mediaItemOrignal.getDuration(),mediaItemOrignal.getThumbBitmap(),mediaItemOrignal.getGsyVideoModel(),mediaItemOrignal.isIfVideo(),mediaItemOrignal.getStoragePath() );
@@ -742,6 +746,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         }
         SharedPreferences sharedPreferences = getActivityContext().getSharedPreferences("SavePlayingStatus", Context.MODE_PRIVATE); //私有数据
         SharedPreferences.Editor editor = sharedPreferences.edit();//获取编辑器
+        if (mediaInfo.getMediaItems().size()==0)return;
         MediaItem mediaItem = mediaInfo.getMediaItems().get(mPlayPosition);
         if (mediaItem.isIfVideo()) {
             editor.putInt("currentTab", 1);

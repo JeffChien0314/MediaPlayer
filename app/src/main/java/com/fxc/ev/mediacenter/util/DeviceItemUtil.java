@@ -91,12 +91,9 @@ public class DeviceItemUtil {
                 DeviceItem info = new DeviceItem();
                 Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.getName()= " + device.getName());
                 Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.isConnected()= " + device.isConnected());
-                try {
-                    Log.i("DeviceItemUtil", "getExternalDeviceInfoList:device.isInSilenceMode()= " + device.isInSilenceMode());
-                    info.setDescription(device.getName() + (device.isConnected() && !device.isInSilenceMode() ? "(已连接)" : ""));
-                } catch (Exception e) {
-                info.setDescription(device.getName() + (device.isConnected() ? "(已连接)" : ""));
-                }
+                Log.i("DeviceItemUtil", "getExternalDeviceInfoList:BtMusicManager.getInstance().isA2dpActiveDevice(device)=" + BtMusicManager.getInstance().isA2dpActiveDevice(device));
+
+                info.setDescription(device.getName() + (device.isConnected() && BtMusicManager.getInstance().isA2dpActiveDevice(device)? "(Media已连接)" : ""));
 
                 info.setBluetoothDevice(device);
                 info.setType(Constants.BLUETOOTH_DEVICE);

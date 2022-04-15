@@ -70,8 +70,8 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
                     mPrevious.setVisibility(INVISIBLE);
                     mNext.setVisibility(INVISIBLE);
                     mTopLayout.setVisibility(INVISIBLE);
-                    mFastforward.setVisibility(INVISIBLE);
-                    mRewind.setVisibility(INVISIBLE);
+                //    mFastforward.setVisibility(INVISIBLE);
+              //      mRewind.setVisibility(INVISIBLE);
                     break;
                 case SHOW_VIEW_CONTROL:
                     showControlBtn();
@@ -105,13 +105,13 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
         mStart = findViewById(R.id.bt_start);
         mNext = findViewById(R.id.bt_next);
         mPrevious = findViewById(R.id.bt_previous);
-        mFastforward = findViewById(R.id.bt_fwd);
-        mRewind = findViewById(R.id.bt_rewind);
+       // mFastforward = findViewById(R.id.bt_fwd);
+       // mRewind = findViewById(R.id.bt_rewind);
         mSeekbar = (MediaSeekBar) findViewById(R.id.progress);
         mSeekbar.setEnabled(false);
 
         MediaBrowserConnecter.getInstance(context).setSeekBar(mSeekbar);
-        initGestureDetector(context);
+     //   initGestureDetector(context);
         initListener(context);
         if (mContext instanceof Activity) {
             ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -131,7 +131,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
                 if (event.getAction() == ACTION_DOWN) {
                     checkBtnVisble();
                 }
-                if (MediaController.getInstance(context).currentSourceType == BLUETOOTH_DEVICE) {
+                /*if (MediaController.getInstance(context).currentSourceType == BLUETOOTH_DEVICE) {
                     float sx = mBtPlayerLayer.getX();
                     float cx = event.getX();
                     int ex = mBtPlayerLayer.getWidth();
@@ -143,7 +143,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
                         BT_LAYER_DOUBLE_TAP = FASTFORWARD;
                         mGesture.onTouchEvent(event);
                     }
-                }
+                }*/
 
                 return true;
             }
@@ -235,7 +235,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
     }
 
     public void release() {
-        ((MediaSeekBar) findViewById(R.id.progress)).disconnectController();
+        ((MediaSeekBar) findViewById(R.id.progress)).disconnectController(mContext);
     }
 
     @Override

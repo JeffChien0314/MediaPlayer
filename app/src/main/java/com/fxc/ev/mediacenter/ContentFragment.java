@@ -19,18 +19,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.adapter.MediaListAdapter;
 import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
-import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
-import com.fxc.ev.mediacenter.util.DeviceItemUtil;
-import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
-import com.fxc.ev.mediacenter.util.MediaItemUtil;
-import com.fxc.ev.mediacenter.adapter.MediaListAdapter;
-import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.DeviceItemUtil;
+import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -87,137 +87,11 @@ public class ContentFragment extends Fragment {
         return view;
     }
 
-    public List<GSYVideoModel> getUrls() {
-        for (int i = 0; i < mediaItems.size(); i++) {
-            urls.add(mediaItems.get(i).getGsyVideoModel());
-        }
-        return urls;
-    }
-
-    public void smoothScrollToPosition(int position) {
-
-        mediaFile_list.smoothScrollToPosition(position);
-        mediaFile_list.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                Log.i(TAG, "onScrollStateChanged: ");
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                Log.i(TAG, "onScroll: ");
-            }
-        });
-
-    }
-
-    public void playingAnimation(int position) {
-        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {//范围内可见
-            ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
-            playing_icon.setVisibility(View.VISIBLE);
-            playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
-            ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
-            ani_gif_playing.start();
-            TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
-            totaltime.setVisibility(View.GONE);
-        }
-    }
-
-    public void resetAnimation(int lastPosition) {
-        try {
-            if (lastPosition >= mediaFile_list.getFirstVisiblePosition() && lastPosition <= mediaFile_list.getLastVisiblePosition()) {
-                ImageView playing_icon = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
-                playing_icon.setVisibility(View.GONE);
-                playing_icon.setAnimation(null);
-                TextView totaltime = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
-                totaltime.setVisibility(View.VISIBLE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean isVisiable(int position) {
-        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
-            return true;
-        }
-        return false;
-    }
-
-    public void deviceItemOnClick(int mediaType, DeviceItem deviceItem) {
-        if (deviceItem.getType() == Constants.USB_DEVICE){
-                mDeviceItem = deviceItem;
-                if ( MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
-                    mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
-                    updateMediaList(mediaItems);
-                    ((MainActivity) getActivity()).device_tips.setText(deviceItem.getDescription());
-                } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
-                    ((MainActivity) getActivity()).updateDeviceListView(/*true*/);
-                    if (deviceItem!=null){
-                    ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
-                    updateMediaList(mediaItems);
-                }
-                }
-                if (cutDownBrowseFunction){
-                    CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
-                }
-                if (mediaItems.size()>0){
-                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
-                }else {
-                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.VISIBLE);
-                }
-               /* DeviceItemUtil.getInstance(mContext).setCurrentDevice(deviceItem);
-               mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(deviceItem, 0, true).getMediaItems();
-                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, deviceItem));*/
-        }else {
-            if (deviceItem.getBluetoothDevice().isConnected()) {
-
-                CSDMediaPlayer.getInstance(getApplicationContext()).onVideoPause();
-                ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
-                // MediaController.getInstance(getApplicationContext()).setPlayerState(state, -1);
-            } else {
-                try {
-                    if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
-                        Method m = BluetoothDevice.class.getMethod("createBond");
-                        m.invoke(deviceItem.getBluetoothDevice());
-                    } else if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(),((MainActivity) getActivity()).mConnectBlueCallBack);
-                    }
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
-    public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
-       if (mediaItemList==null )return;
-        mediaItems = mediaItemList;
-        listAdapter = new MediaListAdapter(mContext, mediaItemList);
-        if (mediaFile_list == null) return;
-        mediaFile_list.setAdapter(listAdapter);
-        listAdapter.notifyDataSetChanged();
-        if (urls != null && urls.size() != 0) {
-            urls.clear();
-            for (int i = 0; i < mediaItemList.size(); i++) {
-                urls.add(mediaItemList.get(i).getGsyVideoModel());
-            }
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
-      //  listAdapter = new MediaListAdapter(mContext, mediaItems);
         updateMediaList(mediaItems);
         mediaFile_list.post(new Runnable() {
             @Override
@@ -225,21 +99,24 @@ public class ContentFragment extends Fragment {
                 mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
             }
         });
-        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
 
-        if (mMediaInfo != null) {
-            if (mMediaInfo.getMediaItems() != null) {
-                if (mMediaInfo.getMediaItems().size() > 0) {
-                    if (!DeviceItemUtil.getInstance(getContext()).isDeviceExist(mMediaInfo.getDeviceItem().getStoragePath())) {
+        if (BLUETOOTH_DEVICE == MediaController.getInstance(mContext).currentSourceType) {
+            mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
+        } else {
+            MediaInfo mediaInfo = CSDMediaPlayer.getInstance(mContext).getMediaInfo();
+            if (mediaInfo != null) {
+                if (mediaInfo.getMediaItems() != null) {
+                    if (mediaInfo.getMediaItems().size() > 0) {
+                        if (!DeviceItemUtil.getInstance(getContext()).isDeviceExist(mediaInfo.getDeviceItem().getStoragePath())) {
                         return;
                     }
                     ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
-                    mDeviceItem = mMediaInfo.getDeviceItem();
+                        mDeviceItem = mediaInfo.getDeviceItem();
                     DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
-                    mediaItems = mMediaInfo.getMediaItems();
-                    if (mediaItems!=null &&mediaItems.size()!=0){
+                        mediaItems = mediaInfo.getMediaItems();
+                        if (mediaItems != null && mediaItems.size() != 0) {
                         //Fix 頁面切回時，背景音樂被從頭播放的問題
-                    }else {
+                        } else {
                         ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
                     }
                     //jennifer add for 退出应用再进入List的更新-->
@@ -251,7 +128,7 @@ public class ContentFragment extends Fragment {
                     });
                     //jennifer add for 退出应用再进入List的更新<--
                     TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
-                    if (mMediaInfo.getMediaItems().get(0).isIfVideo()) {
+                        if (mediaInfo.getMediaItems().get(0).isIfVideo()) {
                         tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
                     }
                     tab.select();
@@ -267,21 +144,20 @@ public class ContentFragment extends Fragment {
             } else {
                 mDeviceItem = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().get(0);
                 MediaController.getInstance(getContext()).getDevices();
-                DeviceItem itemDefault=MediaController.getInstance(getContext()).getDevices().get(0);
+                    DeviceItem itemDefault = MediaController.getInstance(getContext()).getDevices().get(0);
                 DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(itemDefault);
-                CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo( MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(),itemDefault));
+                    CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo(MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(), itemDefault));
                 ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
             }
             DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
-            if (mDeviceItem.getType() == BLUETOOTH_DEVICE) {
-                mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
-            } else {
                 mediaItems = getMusicInfos(getApplicationContext(), mDeviceItem.getStoragePath());
-            }
             if (mediaItems == null || mediaItems.size() == 0) return;
             CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
             ((MainActivity) getActivity()).playMusic(0);
         }
+
+        }
+
         if (mDeviceItem == null) {
             return;
         }
@@ -339,7 +215,7 @@ public class ContentFragment extends Fragment {
                 //   MediaController.getInstance(mContext).setPlayerState();
             }
             if (mDeviceItem != null) {
-                ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
+                //  ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
             ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
             ((MainActivity) getActivity()).updateDeviceListView(/*false*/);
             ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
@@ -366,9 +242,141 @@ public class ContentFragment extends Fragment {
         super.onDestroy();
     }
 
+
+    public List<GSYVideoModel> getUrls() {
+        for (int i = 0; i < mediaItems.size(); i++) {
+            urls.add(mediaItems.get(i).getGsyVideoModel());
+        }
+        return urls;
+    }
+
+    public void smoothScrollToPosition(int position) {
+        mediaFile_list.smoothScrollToPosition(position);
+        mediaFile_list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                Log.i(TAG, "onScrollStateChanged: ");
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                Log.i(TAG, "onScroll: ");
+            }
+        });
+
+    }
+
+    public void playingAnimation(int position) {
+        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {//范围内可见
+            ImageView playing_icon = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
+            playing_icon.setVisibility(View.VISIBLE);
+            playing_icon.setBackgroundResource(R.drawable.ani_gif_playing);
+            ani_gif_playing = (AnimationDrawable) playing_icon.getBackground();
+            ani_gif_playing.start();
+            TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
+            totaltime.setVisibility(View.GONE);
+        }
+    }
+
+    public void resetAnimation(int lastPosition) {
+        try {
+            if (lastPosition >= mediaFile_list.getFirstVisiblePosition() && lastPosition <= mediaFile_list.getLastVisiblePosition()) {
+                ImageView playing_icon = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playing_icon);
+                playing_icon.setVisibility(View.GONE);
+                playing_icon.setAnimation(null);
+                TextView totaltime = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
+                totaltime.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isVisiable(int position) {
+        if (position >= mediaFile_list.getFirstVisiblePosition() && position <= mediaFile_list.getLastVisiblePosition()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void deviceItemOnClick(int mediaType, DeviceItem deviceItem, ConnectBlueCallBack connectBlueCallBack) {
+
+        if (deviceItem.getType() == Constants.USB_DEVICE) {
+            if (MediaController.getInstance(mContext).isBtAudioActive()) {
+                MediaController.getInstance(getApplicationContext()).setPlayerState(Constants.STATE_PAUSE, -1);
+            }
+            MediaController.getInstance(mContext).setCurrentSourceType(deviceItem.getType());
+            mDeviceItem = deviceItem;
+            if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
+                mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
+                updateMediaList(mediaItems);
+                ((MainActivity) getActivity()).device_tips.setText(deviceItem.getDescription());
+            } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
+                ((MainActivity) getActivity()).updateDeviceListView(/*true*/);
+                if (deviceItem != null) {
+                    ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
+                    updateMediaList(mediaItems);
+                }
+            }
+            if (cutDownBrowseFunction) {
+                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
+            }
+
+
+            if (mediaItems.size() > 0) {
+                ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
+            } else {
+                ((MainActivity) getActivity()).initial_tips.setVisibility(View.VISIBLE);
+            }
+
+        } else {
+            MediaController.getInstance(mContext).setCurrentSourceType(BLUETOOTH_DEVICE);
+            CSDMediaPlayer.getInstance(getApplicationContext()).onVideoPause();
+            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+            MediaController.getInstance(getApplicationContext()).setPlayerState(Constants.STATE_PLAY, -1);
+            if (deviceItem.getBluetoothDevice().isConnected() && BtMusicManager.getInstance().isA2dpActiveDevice(deviceItem.getBluetoothDevice())) {
+
+            } else {
+                try {
+                    if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
+                        Method m = BluetoothDevice.class.getMethod("createBond");
+                        m.invoke(deviceItem.getBluetoothDevice());
+                    } else if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
+                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(), connectBlueCallBack);
+                    }
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
+        if (mediaItemList == null) return;
+        mediaItems = mediaItemList;
+        listAdapter = new MediaListAdapter(mContext, mediaItemList);
+        if (mediaFile_list == null) return;
+        mediaFile_list.setAdapter(listAdapter);
+        listAdapter.notifyDataSetChanged();
+        if (urls != null && urls.size() != 0) {
+            urls.clear();
+            for (int i = 0; i < mediaItemList.size(); i++) {
+                urls.add(mediaItemList.get(i).getGsyVideoModel());
+            }
+        }
+    }
+
+
     public ArrayList<MediaItem> filterAllMediaItemsOfSpecificDevice(int media_Type, DeviceItem deviceInfo) {
-        if (deviceInfo==null || deviceInfo.getStoragePath()==null){
-            return null ;
+        if (deviceInfo == null || deviceInfo.getStoragePath() == null) {
+            return null;
         }
         ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
         ArrayList<MediaItem> totalMediaItems = new ArrayList<>();

@@ -94,6 +94,13 @@ public class MediaBrowserConnecter {
         }
     }
 
+    public void release() {
+        mMediaBrowser.disconnect();
+        mConnectionCallback = null;
+        mConnectionCallback = null;
+        mMediaBrowser = null;
+    }
+
     private class MediaBrowserConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
         // Happens as a result of onStart().
         @Override
@@ -263,6 +270,18 @@ public class MediaBrowserConnecter {
                 return SHUFFLE_MODE_NONE;
         }
         return -1;
+    }
+
+    public boolean isBtAudioActive() {
+        try {
+            if (null != mMediaController && mMediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     public void setBTDeviceState(int state, long value) {

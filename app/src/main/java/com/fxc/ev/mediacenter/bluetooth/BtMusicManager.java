@@ -15,7 +15,6 @@ import android.media.session.PlaybackState;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.lang.reflect.Method;
 import java.util.Set;
 
 //import android.bluetooth.BluetoothA2dpSink;
@@ -29,6 +28,7 @@ import java.util.Set;
 public class BtMusicManager implements IBtMusicManager {
     private static final String TAG = "BtMusicManager";
     private static volatile BtMusicManager sInstance;
+    public static final int A2DP_ACTIVE=2;
     private final int AVRCP_CONTROLLER = 12;
     private final int A2DP_SINK = 11;
     //蓝牙开关状态，搜索蓝牙，配对蓝牙等
@@ -536,19 +536,39 @@ public class BtMusicManager implements IBtMusicManager {
         new ConnectBlueTask(callBack).execute(device);
     }
 
+    public boolean isA2dpActiveDevice(BluetoothDevice device) {
+        if(null!=mBluetoothA2dpSink){
+            Log.i(TAG, "isA2dpActiveDevice: mBluetoothA2dpSink.getConnectionState(device)"+mBluetoothA2dpSink.getConnectionState(device));
+            return A2DP_ACTIVE==mBluetoothA2dpSink.getConnectionState(device);
+        }
+        return false;
+    }
+
+
     public void a2dpSinkConnect(BluetoothDevice device, ConnectBlueCallBack callBack) {
         //  setPriority(device, 100); //设置priority
         callBack.onStartConnect();
-        try {
+        for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
+            mBluetoothA2dpSink.disconnect(device1);
+        }
+        if (mBluetoothA2dpSink.connect(device)) {
+            callBack.onConnectSuccess(device);
+        } else {
+            callBack.onConnectFail(device, "bluetooth device connected fail");
+        }
+        /*try {
+            mBluetoothA2dpSink.connect(device);
             //通过反射获取BluetoothA2dp中connect方法（hide的），进行连接。
             Method connectMethod = BluetoothA2dpSink.class.getMethod("connect",
                     BluetoothDevice.class);
+           // for ()
+            mBluetoothA2dpSink.getConnectedDevices();
             connectMethod.invoke(mBluetoothA2dpSink, device);
             callBack.onConnectSuccess(device);
         } catch (Exception e) {
             e.printStackTrace();
             callBack.onConnectFail(device, "bluetooth device connected fail");
-        }
+        }*/
     }
 
     public void stopSource() {

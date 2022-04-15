@@ -32,16 +32,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fxc.mediaplayer.R;
-import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
-import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
-import com.fxc.ev.mediacenter.datastruct.DeviceItem;
-import com.fxc.ev.mediacenter.util.DeviceItemUtil;
 import com.fxc.ev.mediacenter.adapter.DeviceListAdapter;
-import com.fxc.ev.mediacenter.util.MediaController;
+import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
+import com.fxc.ev.mediacenter.bluetooth.ui.BtplayerLayout;
+import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
-import com.fxc.ev.mediacenter.bluetooth.ui.BtplayerLayout;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.Constants;
+import com.fxc.ev.mediacenter.util.DeviceItemUtil;
+import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 
@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
+import static com.fxc.ev.mediacenter.util.Constants.USB_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -187,12 +188,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         mUsbFrameLayout.addView(csdMediaPlayer);
         MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
-        MediaController.getInstance(this).currentSourceType = Constants.BLUETOOTH_DEVICE;
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             mUsbFrameLayout.setVisibility(View.GONE);
             mBtPlayerLayer.showControlBtn();
         } else {
-            mbtFrameLayout.setVisibility(View.GONE);
+            mBtPlayerLayer.setVisibility(View.GONE);
         }
 
         initTabData();
@@ -201,25 +201,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Sandra@20220215 add-->
         //創建設備列表獲取顯示存儲設備信息
         devicelistview = (ListView) findViewById(R.id.input_source_list);
-        MediaInfo mMediaInfo = CSDMediaPlayer.getInstance(this).getMediaInfo();
+        MediaInfo mediaInfo = CSDMediaPlayer.getInstance(this).getMediaInfo();
         //Sandra@20220402 Modify for 再次進入后的UX-->
-        if (mMediaInfo != null) {
-            mDeviceItemUtil.setCurrentDevice(mMediaInfo.getDeviceItem());
-            ((ContentFragment) fragments.get(currentTab)).mediaItems = mMediaInfo.getMediaItems();
-            if (mMediaInfo.getMediaItems() != null && mMediaInfo.getMediaItems().size() != 0) {
+        if (mediaInfo != null) {
+            mDeviceItemUtil.setCurrentDevice(mediaInfo.getDeviceItem());
+            ((ContentFragment) fragments.get(currentTab)).mediaItems = mediaInfo.getMediaItems();
+            if (mediaInfo.getMediaItems() != null && mediaInfo.getMediaItems().size() != 0) {
                 //Fix 頁面切回時，背景音樂被切歌的問題
             } else {
-                playMusic(csdMediaPlayer.getPlayPosition());
-                device_tips.setText(mMediaInfo.getDeviceItem().getDescription());
+                if (BLUETOOTH_DEVICE == MediaController.getInstance(this).currentSourceType) {
+
+                } else {
+                    playMusic(csdMediaPlayer.getPlayPosition());
+                    device_tips.setText(mediaInfo.getDeviceItem().getDescription());
+                }
+
             }
         } else {
             externalDeviceItems = MediaController.getInstance(this).getDevices();
             if (externalDeviceItems.size() != 0) {
-                /*DeviceItem itemDefault = externalDeviceItems.get(0);
-                mDeviceItemUtil.setCurrentDevice(itemDefault);
-                ((ContentFragment) fragments.get(currentTab)).mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems();
-                CSDMediaPlayer.getInstance(this).setMediaInfo(new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, itemDefault));
-                playMusic(0);*/
                 device_tips.setText(R.string.Select);
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_input_source_normal);
                 changeVisibleOfDeviceView(false);
@@ -237,10 +237,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 currentTab = mTabLayout.getSelectedTabPosition();
                 mDeviceItemUtil.setCurrentDevice(externalDeviceItems.get(position));
-                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, mDeviceItemUtil.getCurrentDevice());
+                setPlayerLayer(externalDeviceItems.get(position).getType());
+                ((ContentFragment) fragments.get(currentTab)).deviceItemOnClick(currentTab, mDeviceItemUtil.getCurrentDevice(), mConnectBlueCallBack);
                 updateDeviceListView(/*false*/);
-                if (cutDownBrowseFunction) {
-                       changeVisibleOfDeviceView(false);
+                if (cutDownBrowseFunction && MediaController.getInstance(MainActivity.this).currentSourceType == USB_DEVICE) {
+                    changeVisibleOfDeviceView(false);
                     playMusic(0);//TODO:此處需優化為LastPosition
                 }
             }
@@ -306,11 +307,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
                     mediaItems = ((ContentFragment) fragments.get(currentTab)).filterAllMediaItemsOfSpecificDevice(currentTab, mDeviceItemUtil.getCurrentDevice());
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
-                    if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
-                        initial_tips.setVisibility(View.GONE);
-                    } else {
-                        initial_tips.setVisibility(View.VISIBLE);
-                    }
+                    initial_tips.setVisibility(((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0 ? View.GONE : View.VISIBLE);
                 } else {//单个抓取
                     if (mDeviceItemUtil.getCurrentDevice() != null) {
                         getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
@@ -323,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onInputSourceClick(View v) {
         if (device_tips.getText().equals(getString(R.string.paire))) {
-
+            startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
         } else {
             if (devicelistview.getVisibility() == View.GONE) {
                 changeVisibleOfDeviceView(true);
@@ -425,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             externalDeviceItems.clear();
         }
         externalDeviceItems = MediaController.getInstance(this).getDevices();
-        if (mDeviceItemUtil.getCurrentDevice() != null) {//Sandra@20220411 add 正在使用的设备显示在首位
+        if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.getCurrentDevice().getType() != BLUETOOTH_DEVICE) {//Sandra@20220411 add 正在使用的设备显示在首位
             externalDeviceItems.remove(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
             externalDeviceItems.add(0, mDeviceItemUtil.getCurrentDevice());
         }
