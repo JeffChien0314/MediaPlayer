@@ -28,7 +28,7 @@ import java.util.Set;
 public class BtMusicManager implements IBtMusicManager {
     private static final String TAG = "BtMusicManager";
     private static volatile BtMusicManager sInstance;
-    public static final int A2DP_ACTIVE=2;
+    public static final int A2DP_ACTIVE = 2;
     private final int AVRCP_CONTROLLER = 12;
     private final int A2DP_SINK = 11;
     //蓝牙开关状态，搜索蓝牙，配对蓝牙等
@@ -537,16 +537,17 @@ public class BtMusicManager implements IBtMusicManager {
     }
 
     public boolean isA2dpActiveDevice(BluetoothDevice device) {
-        if(null!=mBluetoothA2dpSink){
-            Log.i(TAG, "isA2dpActiveDevice: mBluetoothA2dpSink.getConnectionState(device)"+mBluetoothA2dpSink.getConnectionState(device));
-            return A2DP_ACTIVE==mBluetoothA2dpSink.getConnectionState(device);
+        if (null != mBluetoothA2dpSink) {
+            Log.i(TAG, "isA2dpActiveDevice: mBluetoothA2dpSink.getConnectionState(device)" + mBluetoothA2dpSink.getConnectionState(device));
+            return A2DP_ACTIVE == mBluetoothA2dpSink.getConnectionState(device);
         }
         return false;
     }
 
-
-    public void a2dpSinkConnect(BluetoothDevice device, ConnectBlueCallBack callBack) {
+    public void setA2dpSinkConnect(BluetoothDevice device, boolean connect, ConnectBlueCallBack callBack) {
         //  setPriority(device, 100); //设置priority
+
+        if (connect) {
         callBack.onStartConnect();
         for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
             mBluetoothA2dpSink.disconnect(device1);
@@ -556,6 +557,12 @@ public class BtMusicManager implements IBtMusicManager {
         } else {
             callBack.onConnectFail(device, "bluetooth device connected fail");
         }
+        } else {
+            for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
+                mBluetoothA2dpSink.disconnect(device1);
+            }
+        }
+
         /*try {
             mBluetoothA2dpSink.connect(device);
             //通过反射获取BluetoothA2dp中connect方法（hide的），进行连接。

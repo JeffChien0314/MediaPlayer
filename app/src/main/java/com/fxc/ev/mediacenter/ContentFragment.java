@@ -93,13 +93,21 @@ public class ContentFragment extends Fragment {
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
         updateMediaList(mediaItems);
-        mediaFile_list.post(new Runnable() {
+        mediaFile_list.setOnItemClickListener(onItemClickListener);
+        mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
-            public void run() {
-                mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
+                for (int i = 0; i < mediaItems.size(); i++) {
+                    if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
+                        playingAnimation((((MainActivity) getActivity()).getCurrPosition()));
+                    } else {
+                        resetAnimation(i);
+                    }
+                }
+
             }
         });
-
         if (BLUETOOTH_DEVICE == MediaController.getInstance(mContext).currentSourceType) {
             mediaItems = MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(mDeviceItem, 0, true).getMediaItems();
         } else {
@@ -180,22 +188,8 @@ public class ContentFragment extends Fragment {
         }
         mediaFile_list.setLayoutParams(params);
         //jennifer add for 退出应用再进入list布局大小的控制<--
-        mediaFile_list.setOnItemClickListener(onItemClickListener);
-        mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
-                for (int i = 0; i < mediaItems.size(); i++) {
-                    if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
-                        playingAnimation((((MainActivity) getActivity()).getCurrPosition()));
-                    } else {
-                        resetAnimation(i);
-                    }
-                }
 
             }
-        });
-    }
 
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
@@ -300,12 +294,9 @@ public class ContentFragment extends Fragment {
     }
 
     public void deviceItemOnClick(int mediaType, DeviceItem deviceItem, ConnectBlueCallBack connectBlueCallBack) {
-
+        MediaController.getInstance(mContext).setCurrentSourceType(deviceItem.getType());
         if (deviceItem.getType() == Constants.USB_DEVICE) {
-            if (MediaController.getInstance(mContext).isBtAudioActive()) {
-                MediaController.getInstance(getApplicationContext()).setPlayerState(Constants.STATE_PAUSE, -1);
-            }
-            MediaController.getInstance(mContext).setCurrentSourceType(deviceItem.getType());
+            BtMusicManager.getInstance().setA2dpSinkConnect(null, false, connectBlueCallBack);
             mDeviceItem = deviceItem;
             if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                 mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
@@ -330,19 +321,20 @@ public class ContentFragment extends Fragment {
             }
 
         } else {
-            MediaController.getInstance(mContext).setCurrentSourceType(BLUETOOTH_DEVICE);
-            CSDMediaPlayer.getInstance(getApplicationContext()).onVideoPause();
+
+            //  MediaController.getInstance(mContext).setCurrentSourceType(BLUETOOTH_DEVICE);
+            CSDMediaPlayer.getInstance(getApplicationContext()).release();
             ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
             MediaController.getInstance(getApplicationContext()).setPlayerState(Constants.STATE_PLAY, -1);
-            if (deviceItem.getBluetoothDevice().isConnected() && BtMusicManager.getInstance().isA2dpActiveDevice(deviceItem.getBluetoothDevice())) {
 
+            if (deviceItem.getBluetoothDevice().isConnected() && BtMusicManager.getInstance().isA2dpActiveDevice(deviceItem.getBluetoothDevice())) {
             } else {
                 try {
                     if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                         Method m = BluetoothDevice.class.getMethod("createBond");
                         m.invoke(deviceItem.getBluetoothDevice());
                     } else if (deviceItem.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceItem.getBluetoothDevice(), connectBlueCallBack);
+                        BtMusicManager.getInstance().setA2dpSinkConnect(deviceItem.getBluetoothDevice(), true, connectBlueCallBack);
                     }
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
@@ -404,4 +396,6 @@ public class ContentFragment extends Fragment {
         String str = formatter.format(curDate);
         return str;
     }
+
+
 }

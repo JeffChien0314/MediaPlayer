@@ -7,7 +7,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
 import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
@@ -15,8 +14,6 @@ import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,26 +26,6 @@ public class MediaController {
     private static Context mContext;
     public int currentSourceType = Constants.BLUETOOTH_DEVICE;
 
-    private final ConnectBlueCallBack mConnectBlueCallBack = new ConnectBlueCallBack() {
-        @Override
-        public void onStartConnect() {
-            Log.i(TAG, "onStartConnect: ");
-            Toast.makeText(mContext, "start to connect the buletooth device", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onConnectSuccess(BluetoothDevice device) {
-            Log.i(TAG, "onConnectSuccess: ");
-            Toast.makeText(mContext, "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
-            //connect成功去更新设备列表
-        }
-
-        @Override
-        public void onConnectFail(BluetoothDevice device, String string) {
-            Log.i(TAG, "onConnectFail: ");
-            Toast.makeText(mContext, "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
-        }
-    };
 
     private MediaController(Context context) {
         mContext = context.getApplicationContext();
@@ -77,34 +54,10 @@ public class MediaController {
         }
         if (needPlay) currentSourceType = deviceInfo.getType();
         if (deviceInfo.getType() == Constants.BLUETOOTH_DEVICE) {
-            if (deviceInfo.getBluetoothDevice().isConnected()) {
-                //展示音乐列表，获取播放状态
                 ArrayList<MediaItem> items = new ArrayList<>();
                 MediaInfo mediaInfo = new MediaInfo(items, deviceInfo);
                 return mediaInfo;
             } else {
-                try {
-                    if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_NONE) {
-                        Method m = BluetoothDevice.class.getMethod("createBond");
-                        m.invoke(deviceInfo.getBluetoothDevice());
-                    } else if (deviceInfo.getBluetoothDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-                        BtMusicManager.getInstance().a2dpSinkConnect(deviceInfo.getBluetoothDevice(), mConnectBlueCallBack);//首次连接播放状态无需改变
-                    }
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "The bluetooth device  is unable to connect...", Toast.LENGTH_SHORT).show();
-                }
-                ArrayList<MediaItem> items = new ArrayList<>();
-                MediaInfo mediaInfo = new MediaInfo(items, deviceInfo);
-                return mediaInfo;
-            }
-        } else {
             return MediaItemUtil.getMediaInfos(media_Type, mContext, deviceInfo);
         }
 

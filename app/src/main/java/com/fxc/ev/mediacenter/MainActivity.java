@@ -681,6 +681,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             connectAnimationStop();//Sandra@20220408 add
             Toast.makeText(getApplicationContext(), "The bluetooth device  is unable to connect", Toast.LENGTH_SHORT).show();
         }
+
+        @Override
+        public void onDisConnectSuccess(BluetoothDevice device) {
+             Toast.makeText(getApplicationContext(), "Bluetooth device disconnect successfully", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onDisConnectFail(BluetoothDevice device, String string) {
+            Toast.makeText(getApplicationContext(), "Bluetooth device disconnect fail", Toast.LENGTH_SHORT).show();
+
+        }
     };
 
 }

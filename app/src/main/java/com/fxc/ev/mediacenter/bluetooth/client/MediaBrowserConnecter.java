@@ -294,7 +294,6 @@ public class MediaBrowserConnecter {
                 } else {
                     mMediaController.getTransportControls().play();
                 }
-
                 break;
             case Constants.STATE_SINGLE_REPEAT:
             case Constants.STATE_ALL_REPEAT:

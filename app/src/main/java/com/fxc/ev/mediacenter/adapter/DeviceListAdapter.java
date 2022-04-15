@@ -10,10 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
+import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.Constants;
-import com.fxc.ev.mediacenter.util.DeviceItemUtil;
+import com.fxc.ev.mediacenter.util.MediaController;
 
 import java.util.List;
 
@@ -70,31 +71,30 @@ public class DeviceListAdapter extends BaseAdapter {
         externalDeviceItem = externalDeviceItems.get(position);
         viewHolder.description.setText(externalDeviceItem.getDescription());//設備名稱
         if (externalDeviceItem.getType() == Constants.BLUETOOTH_DEVICE) {
+            if (Constants.BLUETOOTH_DEVICE == MediaController.getInstance(context).currentSourceType
+                    && BtMusicManager.getInstance().isA2dpActiveDevice(externalDeviceItem.getBluetoothDevice())) {
+                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);
+            } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
+            }
+
+        } else {
+            if (Constants.USB_DEVICE == MediaController.getInstance(context).currentSourceType
+                    && CSDMediaPlayer.getInstance(context) != null
+                    && CSDMediaPlayer.getInstance(context).getMediaInfo() != null
+                    && CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem() != null
+                    && externalDeviceItem.getStoragePath().equals(CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem().getStoragePath())) {
+                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
         }
+        }
         if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
-           // viewHolder.connected_icon.setVisibility(View.VISIBLE);
             viewHolder.description.setTextColor(Color.parseColor("#BFFFFFFF"));
         } else {
           //  viewHolder.connected_icon.setVisibility(View.GONE);
             viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
         }
-        // viewHolder.deviceImage.setImageBitmap(externalDeviceItem.getThumbBitmap());
-        if (CSDMediaPlayer.getInstance(context)!=null && CSDMediaPlayer.getInstance(context).getMediaInfo() !=null
-                && CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem()!=null){
-            if (position==DeviceItemUtil.getInstance(context).getDeviceIndex(CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem())){
-                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
-            }
-        }
-      /*  if (DeviceItemUtil.getInstance(context)!=null && DeviceItemUtil.getInstance(context).currentDevice!=null){
-            if (position==DeviceItemUtil.getInstance(context).getDeviceIndex(DeviceItemUtil.getInstance(context).getCurrentDevice())){
-                if (ifShowLoading){
-                    viewHolder.deviceImage.setImageResource(R.drawable.ani_gif_loading);
-                }
-            }
-        }*/
         return convertView;
     }
 

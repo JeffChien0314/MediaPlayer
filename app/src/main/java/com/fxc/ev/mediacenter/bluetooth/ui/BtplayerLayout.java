@@ -2,6 +2,9 @@ package com.fxc.ev.mediacenter.bluetooth.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -24,7 +27,6 @@ import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import static android.view.MotionEvent.ACTION_DOWN;
-import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.STATE_FORWARD;
 import static com.fxc.ev.mediacenter.util.Constants.STATE_REWIND;
 
