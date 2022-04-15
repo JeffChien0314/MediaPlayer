@@ -6,6 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fxc.ev.mediacenter.MainActivity">
+    <RelativeLayout
+        android:id="@+id/surface_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="@drawable/portriat_playlist">
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/bt_player"

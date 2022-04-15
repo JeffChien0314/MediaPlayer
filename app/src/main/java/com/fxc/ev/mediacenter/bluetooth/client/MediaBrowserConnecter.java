@@ -174,7 +174,7 @@ public class MediaBrowserConnecter {
                             metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
                             metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST),
                             metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
-                            metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON), null, false, null);
+                            metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART), null, false, null);
                     if (null == item.getThumbBitmap())
                         item.setThumbBitmap(MediaItemUtil.getDefaultArtwork(mContext));
                     currentBtItem = item;
