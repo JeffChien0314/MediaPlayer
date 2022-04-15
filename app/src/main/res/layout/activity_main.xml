@@ -21,85 +21,79 @@
         android:layout_below="@id/player"
         >
         <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/input_source_indicated"
-        android:background="#99000000"
-        android:layout_below="@id/player">
-        <View
-
-            android:layout_width="108px"
-            android:layout_height="6px"
-            android:layout_marginLeft="486px"
-            android:layout_marginTop="10px"
-            android:background="#40FFFFFF" />
-    </LinearLayout>
         <LinearLayout
-            android:id="@+id/input_source_click_button_and_play_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:background="@drawable/fxc_input_source_bg"
-            android:layout_below="@id/input_source_indicated"
-            >
+            android:layout_below="@id/player">
+            <View
+                android:id="@+id/input_source_indicated"
+                android:layout_width="108px"
+                android:layout_height="6px"
+                android:layout_marginLeft="486px"
+                android:layout_marginTop="10px"
+                android:background="#40FFFFFF" />
 
-            <ImageView
-                android:id="@+id/input_source_click_button"
-                android:layout_width="60px"
-                android:layout_height="60px"
-                android:layout_marginLeft="30px"
-                android:onClick="onInputSourceClick"
-                android:background="@drawable/icon_collapse_normal"
-                />
-            <TextView
-                android:id="@+id/device_tips"
-                android:layout_width="212px"
-                android:layout_height="34px"
-                android:layout_marginRight="580px"
-                android:layout_marginTop="13px"
-                android:layout_marginLeft="15px"
-                android:textColor="#80FFFFFF"
-                android:textSize="22px" />
+            <LinearLayout
+                android:id="@+id/input_source_click_button_and_play_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/input_source_indicated"
+                >
 
-            <ImageView
-                android:id="@+id/random"
-                android:layout_width="60px"
-                android:layout_height="60px"
-                android:background="@drawable/icon_shuffle_normal"
-                android:onClick="onClick" />
+                <ImageView
+                    android:id="@+id/input_source_click_button"
+                    android:layout_width="60px"
+                    android:layout_height="60px"
+                    android:layout_marginLeft="30px"
+                    android:onClick="onInputSourceClick"
+                    android:background="@drawable/icon_collapse_normal"
+                    />
+                <TextView
+                    android:id="@+id/device_tips"
+                    android:layout_width="212px"
+                    android:layout_height="34px"
+                    android:layout_marginRight="580px"
+                    android:layout_marginTop="13px"
+                    android:layout_marginLeft="15px"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="22px" />
 
-            <ImageView
-                android:id="@+id/play_mode"
-                android:layout_width="60px"
-                android:layout_height="60px"
-                android:layout_marginLeft="30px"
-                android:layout_marginRight="33px"
-                android:background="@drawable/icon_repeat_normal"
-                android:onClick="onClick" />
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/random"
+                    android:layout_width="60px"
+                    android:layout_height="60px"
+                    android:background="@drawable/icon_shuffle_normal"
+                    android:onClick="onClick" />
 
-        <ListView
-            android:id="@+id/input_source_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:choiceMode="singleChoice"
-            android:drawSelectorOnTop="true"
-            android:scrollbars="vertical"
-            android:visibility="gone"
-            android:layout_below="@id/input_source_click_button_and_play_mode" />
+                <ImageView
+                    android:id="@+id/play_mode"
+                    android:layout_width="60px"
+                    android:layout_height="60px"
+                    android:layout_marginLeft="30px"
+                    android:layout_marginRight="33px"
+                    android:background="@drawable/icon_repeat_normal"
+                    android:onClick="onClick" />
+            </LinearLayout>
 
-        <include
-            android:id="@+id/pair_device"
-            layout="@layout/device_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible">
+            <ListView
+                android:id="@+id/input_source_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:choiceMode="singleChoice"
+                android:drawSelectorOnTop="true"
+                android:scrollbars="vertical"
+                android:visibility="gone"
+                android:layout_below="@id/input_source_click_button_and_play_mode" />
 
-        </include>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#99000000">
+            <include
+                android:id="@+id/pair_device"
+                layout="@layout/device_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible">
+            </include>
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
@@ -131,7 +125,6 @@
             android:layout_weight="1"
             android:background="#03000000"
             android:orientation="vertical" />
-
     </LinearLayout>
 
 </com.fxc.ev.mediacenter.CustomViews>
