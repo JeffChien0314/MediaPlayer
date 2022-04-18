@@ -169,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
             }
         });
-        initial_tips = (TextView) findViewById(R.id.initial_tips);
         device_tips = (TextView) findViewById(R.id.device_tips);
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mbtFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_bt_view);
@@ -303,7 +302,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
                     mediaItems = ((ContentFragment) fragments.get(currentTab)).filterAllMediaItemsOfSpecificDevice(currentTab, mDeviceItemUtil.getCurrentDevice());
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
-                    initial_tips.setVisibility(((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0 ? View.GONE : View.VISIBLE);
                 } else {//单个抓取
                     if (mDeviceItemUtil.getCurrentDevice() != null) {
                         getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
@@ -356,7 +354,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRelativeUIdisable() {
-        initial_tips.setVisibility(View.VISIBLE);
         mRandomButton.setEnabled(false);
         mPlayModeButton.setEnabled(false);
         mTabLayout.setEnabled(false);
@@ -371,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRelativeUIenable() {
-        initial_tips.setVisibility(View.GONE);
         mRandomButton.setEnabled(true);
         mPlayModeButton.setEnabled(true);
         mTabLayout.setEnabled(true);
@@ -726,11 +722,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 device_tips.setText(deviceItem.getDescription());
                 changeVisibleOfDeviceView(false);
                 ((ContentFragment) fragments.get(currentTab)).mediaItems = result;
-                if (((ContentFragment) fragments.get(currentTab)).mediaItems.size() > 0) {
-                    initial_tips.setVisibility(View.GONE);
-                } else {
-                    initial_tips.setVisibility(View.VISIBLE);
-                }
                 Log.i(TAG, "onPostExecute: //抓取特定设备的文件 " + ContentFragment.printTime());
             }
         }

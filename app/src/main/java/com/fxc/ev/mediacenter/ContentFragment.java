@@ -55,6 +55,7 @@ public class ContentFragment extends Fragment {
     public MediaListAdapter listAdapter;
     private View view;
     private Context mContext;
+    private TextView initial_tips;
     public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
@@ -92,6 +93,7 @@ public class ContentFragment extends Fragment {
         super.onResume();
         //音視頻列表
         mediaFile_list = (ListView) view.findViewById(R.id.list);
+        initial_tips = (TextView) view.findViewById(R.id.initial_tips);
         updateMediaList(mediaItems);
         mediaFile_list.setOnItemClickListener(onItemClickListener);
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -116,53 +118,51 @@ public class ContentFragment extends Fragment {
                 if (mediaInfo.getMediaItems() != null) {
                     if (mediaInfo.getMediaItems().size() > 0) {
                         if (!DeviceItemUtil.getInstance(getContext()).isDeviceExist(mediaInfo.getDeviceItem().getStoragePath())) {
-                        return;
-                    }
-                    ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
+                            return;
+                        }
                         mDeviceItem = mediaInfo.getDeviceItem();
-                    DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
+                        DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                         mediaItems = mediaInfo.getMediaItems();
                         if (mediaItems != null && mediaItems.size() != 0) {
-                        //Fix 頁面切回時，背景音樂被從頭播放的問題
+                            //Fix 頁面切回時，背景音樂被從頭播放的問題
                         } else {
-                        ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
-                    }
-                    //jennifer add for 退出应用再进入List的更新-->
-                    mediaFile_list.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
+                            ((MainActivity) getActivity()).playMusic(CSDMediaPlayer.getInstance(mContext).getPlayPosition());//position為上次播放歌曲對應的目前位置
                         }
-                    });
-                    //jennifer add for 退出应用再进入List的更新<--
-                    TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
+                        //jennifer add for 退出应用再进入List的更新-->
+                        mediaFile_list.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaFile_list.setSelectionFromTop(CSDMediaPlayer.getInstance(mContext).getGSYVideoManager().getPlayPosition(), 0);//显示第几个item
+                            }
+                        });
+                        //jennifer add for 退出应用再进入List的更新<--
+                        TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                         if (mediaInfo.getMediaItems().get(0).isIfVideo()) {
-                        tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
+                            tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
+                        }
+                        tab.select();
+                    } else {
+                        Log.i(TAG, "onResume: ");
                     }
-                    tab.select();
-                } else {
-                    Log.i(TAG, "onResume: ");
                 }
-            }
 
-        } else {//player 無内容加載時去設置内容
-            if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() == null
-                    || DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() == 0) {
-                return;//無設備
-            } else {
-                mDeviceItem = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().get(0);
-                MediaController.getInstance(getContext()).getDevices();
+            } else {//player 無内容加載時去設置内容
+                if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() == null
+                        || DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() == 0) {
+                    return;//無設備
+                } else {
+                    mDeviceItem = DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().get(0);
+                    MediaController.getInstance(getContext()).getDevices();
                     DeviceItem itemDefault = MediaController.getInstance(getContext()).getDevices().get(0);
-                DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(itemDefault);
+                    DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(itemDefault);
                     CSDMediaPlayer.getInstance(getApplicationContext()).setMediaInfo(new MediaInfo(MediaController.getInstance(getApplicationContext()).getMeidaInfosByDevice(itemDefault, 0, true).getMediaItems(), itemDefault));
-                ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
-            }
-            DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
+                }
+                DeviceItemUtil.getInstance(getApplicationContext()).setCurrentDevice(mDeviceItem);//Sandra@20220324 add
                 mediaItems = getMusicInfos(getApplicationContext(), mDeviceItem.getStoragePath());
-            if (mediaItems == null || mediaItems.size() == 0) return;
-            CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
-            ((MainActivity) getActivity()).playMusic(0);
-        }
+                if (mediaItems == null || mediaItems.size() == 0) return;
+                CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
+                ((MainActivity) getActivity()).playMusic(0);
+            }
 
         }
 
@@ -189,7 +189,7 @@ public class ContentFragment extends Fragment {
         mediaFile_list.setLayoutParams(params);
         //jennifer add for 退出应用再进入list布局大小的控制<--
 
-            }
+    }
 
     ListView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
 
@@ -210,9 +210,9 @@ public class ContentFragment extends Fragment {
             }
             if (mDeviceItem != null) {
                 //  ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
-            ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
-            ((MainActivity) getActivity()).updateDeviceListView(/*false*/);
-            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+                ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
+                ((MainActivity) getActivity()).updateDeviceListView(/*false*/);
+                ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
             }
 
 
@@ -294,7 +294,7 @@ public class ContentFragment extends Fragment {
     }
 
     public void deviceItemOnClick(int mediaType, DeviceItem deviceItem, ConnectBlueCallBack connectBlueCallBack) {
-        if(BLUETOOTH_DEVICE==MediaController.getInstance(mContext).currentSourceType){
+        if (BLUETOOTH_DEVICE == MediaController.getInstance(mContext).currentSourceType) {
             BtMusicManager.getInstance().setA2dpSinkConnect(null, false, connectBlueCallBack);
         }
         MediaController.getInstance(mContext).setCurrentSourceType(deviceItem.getType());
@@ -314,16 +314,7 @@ public class ContentFragment extends Fragment {
             if (cutDownBrowseFunction) {
                 CSDMediaPlayer.getInstance(mContext).setMediaInfo(new MediaInfo(mediaItems, mDeviceItem));
             }
-
-
-            if (mediaItems.size() > 0) {
-                ((MainActivity) getActivity()).initial_tips.setVisibility(View.GONE);
-            } else {
-                ((MainActivity) getActivity()).initial_tips.setVisibility(View.VISIBLE);
-            }
-
         } else {
-
             //  MediaController.getInstance(mContext).setCurrentSourceType(BLUETOOTH_DEVICE);
             CSDMediaPlayer.getInstance(getApplicationContext()).release();
             ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
@@ -354,6 +345,11 @@ public class ContentFragment extends Fragment {
 
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
         if (mediaItemList == null) return;
+        if (mediaItemList.size() == 0) {
+            initial_tips.setVisibility(View.VISIBLE);
+        } else {
+            initial_tips.setVisibility(View.GONE);
+        }
         mediaItems = mediaItemList;
         listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;

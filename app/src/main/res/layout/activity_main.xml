@@ -17,16 +17,16 @@
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_below="@id/player"
-        >
+        android:orientation="vertical">
         <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_below="@id/player"
             android:background="@drawable/fxc_input_source_bg"
-            android:layout_below="@id/player">
+            android:orientation="vertical">
+
             <View
                 android:id="@+id/input_source_indicated"
                 android:layout_width="108px"
@@ -39,28 +39,27 @@
                 android:id="@+id/input_source_click_button_and_play_mode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/input_source_indicated"
-                >
+                android:layout_below="@id/input_source_indicated">
 
                 <ImageView
                     android:id="@+id/input_source_click_button"
                     android:layout_width="60px"
                     android:layout_height="60px"
                     android:layout_marginLeft="30px"
-                    android:onClick="onInputSourceClick"
                     android:background="@drawable/icon_collapse_normal"
-                    />
+                    android:onClick="onInputSourceClick" />
+
                 <TextView
                     android:id="@+id/device_tips"
-                    
-android:layout_width="wrap_content"
+
+                    android:layout_width="wrap_content"
                     android:layout_height="34px"
 
                     android:layout_marginLeft="15px"
                     android:layout_marginRight="580px"
                     android:layout_marginTop="13px"
-                    
-android:maxWidth="800px"
+
+                    android:maxWidth="800px"
                     android:onClick="onInputSourceClick"
 
                     android:textColor="#80FFFFFF"
@@ -70,8 +69,8 @@ android:maxWidth="800px"
                     android:id="@+id/random"
                     android:layout_width="60px"
                     android:layout_height="60px"
-                    
-android:background="@drawable/random_bg"
+
+                    android:background="@drawable/random_bg"
                     android:onClick="onClick" />
 
                 <ImageView
@@ -80,8 +79,8 @@ android:background="@drawable/random_bg"
                     android:layout_height="60px"
                     android:layout_marginLeft="30px"
                     android:layout_marginRight="33px"
-                    
-android:background="@drawable/playmode_bg"
+
+                    android:background="@drawable/playmode_bg"
                     android:onClick="onClick" />
             </LinearLayout>
 
@@ -89,19 +88,19 @@ android:background="@drawable/playmode_bg"
                 android:id="@+id/input_source_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/input_source_click_button_and_play_mode"
                 android:choiceMode="singleChoice"
                 android:drawSelectorOnTop="true"
                 android:scrollbars="vertical"
-                android:visibility="gone"
-                android:layout_below="@id/input_source_click_button_and_play_mode" />
+                android:visibility="gone" />
 
             <include
                 android:id="@+id/pair_device"
                 layout="@layout/device_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible">
-            </include>
+                android:visibility="invisible"></include>
+
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
@@ -110,22 +109,10 @@ android:background="@drawable/playmode_bg"
                 android:layout_marginLeft="30px"
                 android:layout_marginRight="30px"
                 android:layout_marginTop="30px"
-                
-android:layout_weight="1"
-                app:tabMode="fixed"
-               />
+
+                android:layout_weight="1"
+                app:tabMode="fixed" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/initial_tips"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginTop="120dp"
-            android:background="#03000000"
-            android:text="@string/initial_tips"
-            android:textColor="#40ffffff" />
-
         <android.support.v4.view.ViewPager
             android:id="@+id/vp_view"
             android:layout_width="wrap_content"
