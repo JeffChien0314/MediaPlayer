@@ -5,4 +5,14 @@
     <color name="colorAccent">#FF4081</color>
     <color name="title">#ffffffff</color>
     <color name="artist">#80FFFFFF</color>
+    <!--Sandra@20220415add tab disable 参数-->
+    <color name="tab_disable_text_color">#40FFFFFF</color>
+    <color name="tab_disable_unselect_bg">#00FFFFFF</color>
+    <color name="tab_disable_selected_bg">#1AFFFFFF</color>
+
+    <!--Sandra@20220415 add tab enable 参数-->
+    <color name="tab_enable_unselect_bg">#00FFFFFF</color>
+    <color name="tab_enable_selected_bg">#40FFFFFF</color>
+    <color name="tab_enable_unselect_text_color">#BFFFFFff</color>
+    <color name="tab_enable_selected_text_color">#FFFFFF</color>
 </resources>

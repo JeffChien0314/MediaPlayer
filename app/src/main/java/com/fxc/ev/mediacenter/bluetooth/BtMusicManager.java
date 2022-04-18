@@ -129,7 +129,7 @@ public class BtMusicManager implements IBtMusicManager {
             //   Toast.makeText(mContext, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy, Toast.LENGTH_LONG).show();
             Log.i(TAG, "onServiceConnected: profile=" + profile + ",BluetoothProfile=" + proxy);
             switch (profile) {
-                case /*BluetoothProfile.A2DP_SINK*/A2DP_SINK:
+                case /*BluetoothProfile.A2DP_SINK*/ A2DP_SINK:
                     mBluetoothA2dpSink = (BluetoothA2dpSink) proxy;
                     Log.e(TAG, "onServiceConnected: mBluetoothA2dpSink=" + mBluetoothA2dpSink);
 /*
@@ -213,7 +213,7 @@ public class BtMusicManager implements IBtMusicManager {
     @Override
     public void initBtData(Context context) {
         if (mContext == null)
-        mContext = context;
+            mContext = context;
         initConnectDevice();
         //  registerBtReceiver(context);
         if (!isEnabled()) return;
@@ -244,7 +244,7 @@ public class BtMusicManager implements IBtMusicManager {
         /*if (isEnabled() && mBondedDevices == null) {
             mBondedDevices = mBluetoothAdapter.getBondedDevices();
         }*/
-            mBondedDevices = mBluetoothAdapter.getBondedDevices();
+        mBondedDevices = mBluetoothAdapter.getBondedDevices();
         return mBondedDevices;
     }
 
@@ -546,17 +546,17 @@ public class BtMusicManager implements IBtMusicManager {
 
     public void setA2dpSinkConnect(BluetoothDevice device, boolean connect, ConnectBlueCallBack callBack) {
         //  setPriority(device, 100); //设置priority
-
+        if (null == mBluetoothA2dpSink) return;
         if (connect) {
-        callBack.onStartConnect();
-        for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
-            mBluetoothA2dpSink.disconnect(device1);
-        }
-        if (mBluetoothA2dpSink.connect(device)) {
-            callBack.onConnectSuccess(device);
-        } else {
-            callBack.onConnectFail(device, "bluetooth device connected fail");
-        }
+            callBack.onStartConnect();
+            for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
+                mBluetoothA2dpSink.disconnect(device1);
+            }
+            if (mBluetoothA2dpSink.connect(device)) {
+                callBack.onConnectSuccess(device);
+            } else {
+                callBack.onConnectFail(device, "bluetooth device connected fail");
+            }
         } else {
             for (BluetoothDevice device1 : mBluetoothA2dpSink.getConnectedDevices()) {
                 mBluetoothA2dpSink.disconnect(device1);

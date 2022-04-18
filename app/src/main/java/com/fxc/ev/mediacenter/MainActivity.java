@@ -21,6 +21,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -170,14 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         initial_tips = (TextView) findViewById(R.id.initial_tips);
         device_tips = (TextView) findViewById(R.id.device_tips);
-       /* if (DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList() != null &&
-                DeviceItemUtil.getInstance(getApplicationContext()).getExternalDeviceInfoList().size() != 0) {//有連接的設備，
-            if (csdMediaPlayer.getMediaInfo() != null && csdMediaPlayer.getMediaInfo().getDeviceItem() == null) {//但是播放器沒有加載設備
-                device_tips.setText(R.string.Select);//提示“Select your device”
-            }
-        } else {//沒有任何設備的時候
-            device_tips.setText(R.string.paire);//提示“Pair device”
-        }*/
         csdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mbtFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_bt_view);
         mBtPlayerLayer = new BtplayerLayout(this);
@@ -298,6 +291,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mTabLayout.setupWithViewPager(mViewPager);//将TabLayout和ViewPager关联起来。
         mTabLayout.setTabsFromPagerAdapter(mAdapter);//给Tabs设置适配器
+        for (int i = 0; i < listTitles.size(); i++) {
+            mTabLayout.getTabAt(i).setCustomView(getTabView(i));//添加tab自定义视图
+        }
         mTabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -313,10 +309,81 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
                     }
                 }
+                changeTabSelect(tab);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                super.onTabUnselected(tab);
+                changeTabUnSelect(tab);
             }
         });
     }
 
+    public View getTabView(int position) {
+        View tabView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.tab_custom_layour, null);
+        TextView txt_title = (TextView) tabView.findViewById(R.id.tab_title);
+        txt_title.setText(listTitles.get(position));
+        return tabView;
+    }
+
+    private void changeTabSelect(TabLayout.Tab tab) {
+        View view = tab.getCustomView();
+        TextView txt_title = (TextView) view.findViewById(R.id.tab_title);
+        if (mTabLayout.isEnabled()) {
+            txt_title.setBackgroundResource(R.drawable.tab_enable_background);
+            int text_color = ContextCompat.getColor(getApplicationContext(), R.color.tab_enable_selected_text_color);
+            txt_title.setTextColor(text_color);
+        } else {
+            txt_title.setBackgroundResource(R.drawable.tab_disable_background);
+            int text_color = ContextCompat.getColor(getApplicationContext(), R.color.tab_disable_text_color);
+            txt_title.setTextColor(text_color);
+        }
+    }
+
+    private void changeTabUnSelect(TabLayout.Tab tab) {
+        View view = tab.getCustomView();
+        TextView txt_title = (TextView) view.findViewById(R.id.tab_title);
+        if (mTabLayout.isEnabled()) {
+            txt_title.setBackgroundResource(R.drawable.tab_enable_background);
+            int text_color = ContextCompat.getColor(getApplicationContext(), R.color.tab_enable_unselect_text_color);
+            txt_title.setTextColor(text_color);
+        } else {
+            txt_title.setBackgroundResource(R.drawable.tab_disable_background);
+            int text_color = ContextCompat.getColor(getApplicationContext(), R.color.tab_disable_text_color);
+            txt_title.setTextColor(text_color);
+        }
+    }
+
+    private void setRelativeUIdisable() {
+        initial_tips.setVisibility(View.VISIBLE);
+        mRandomButton.setEnabled(false);
+        mPlayModeButton.setEnabled(false);
+        mTabLayout.setEnabled(false);
+        mTabLayout.setClickable(false);
+        for (int i = 0; i < listTitles.size(); i++) {
+            if (i == currentTab) {
+                changeTabSelect(mTabLayout.getTabAt(currentTab));
+            } else {
+                changeTabUnSelect(mTabLayout.getTabAt(i));
+            }
+        }
+    }
+
+    private void setRelativeUIenable() {
+        initial_tips.setVisibility(View.GONE);
+        mRandomButton.setEnabled(true);
+        mPlayModeButton.setEnabled(true);
+        mTabLayout.setEnabled(true);
+        mTabLayout.setClickable(true);
+        for (int i = 0; i < listTitles.size(); i++) {
+            if (i == currentTab) {
+                changeTabSelect(mTabLayout.getTabAt(currentTab));
+            } else {
+                changeTabUnSelect(mTabLayout.getTabAt(i));
+            }
+        }
+    }
 
     public void onInputSourceClick(View v) {
         if (device_tips.getText().equals(getString(R.string.paire))) {
@@ -422,9 +489,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             externalDeviceItems.clear();
         }
         externalDeviceItems = MediaController.getInstance(this).getDevices();
-        if (mDeviceItemUtil.getCurrentDevice() != null && mDeviceItemUtil.getCurrentDevice().getType() != BLUETOOTH_DEVICE) {//Sandra@20220411 add 正在使用的设备显示在首位
+        if (externalDeviceItems.size() > 0) {
+            if (externalDeviceItems.size() > 1) {
+                if (mDeviceItemUtil.getCurrentDevice() != null) {//Sandra@20220411 add 正在使用的设备显示在首位
             externalDeviceItems.remove(mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice()));
             externalDeviceItems.add(0, mDeviceItemUtil.getCurrentDevice());
+        }
+            }
+            setRelativeUIenable();
+            if (mDeviceItemUtil.getCurrentDevice() != null) {
+                device_tips.setText(mDeviceItemUtil.getCurrentDevice().getDescription());
+            } else {
+                device_tips.setText(R.string.Select);
+            }
+        } else {
+            Log.i(TAG, "updateDeviceListView: setRelativeUIdisable");
+            setRelativeUIdisable();
+            device_tips.setText(R.string.paire);
         }
         deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
         devicelistview.setAdapter(deviceListAdapter);

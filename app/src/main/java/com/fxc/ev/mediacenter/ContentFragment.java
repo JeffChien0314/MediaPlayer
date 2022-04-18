@@ -294,9 +294,11 @@ public class ContentFragment extends Fragment {
     }
 
     public void deviceItemOnClick(int mediaType, DeviceItem deviceItem, ConnectBlueCallBack connectBlueCallBack) {
+        if(BLUETOOTH_DEVICE==MediaController.getInstance(mContext).currentSourceType){
+            BtMusicManager.getInstance().setA2dpSinkConnect(null, false, connectBlueCallBack);
+        }
         MediaController.getInstance(mContext).setCurrentSourceType(deviceItem.getType());
         if (deviceItem.getType() == Constants.USB_DEVICE) {
-            BtMusicManager.getInstance().setA2dpSinkConnect(null, false, connectBlueCallBack);
             mDeviceItem = deviceItem;
             if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                 mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
