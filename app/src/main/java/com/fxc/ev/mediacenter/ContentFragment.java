@@ -346,8 +346,13 @@ public class ContentFragment extends Fragment {
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
         if (mediaItemList == null) return;
         if (mediaItemList.size() == 0) {
+            ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
+            ((MainActivity) getActivity()). mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
+            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(false);
             initial_tips.setVisibility(View.VISIBLE);
         } else {
+            ((MainActivity) getActivity()). mRandomButton.setEnabled(true);
+            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(true);
             initial_tips.setVisibility(View.GONE);
         }
         mediaItems = mediaItemList;

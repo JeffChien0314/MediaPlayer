@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FrameLayout mUsbFrameLayout;
     private FrameLayout mbtFrameLayout;
     private BtplayerLayout mBtPlayerLayer;
-    public TextView initial_tips;
     private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
@@ -354,8 +353,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRelativeUIdisable() {
-        mRandomButton.setEnabled(false);
-        mPlayModeButton.setEnabled(false);
         mTabLayout.setEnabled(false);
         mTabLayout.setClickable(false);
         for (int i = 0; i < listTitles.size(); i++) {
@@ -368,8 +365,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRelativeUIenable() {
-        mRandomButton.setEnabled(true);
-        mPlayModeButton.setEnabled(true);
         mTabLayout.setEnabled(true);
         mTabLayout.setClickable(true);
         for (int i = 0; i < listTitles.size(); i++) {
@@ -399,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (ifopen) {
             devicelistview.setVisibility(View.VISIBLE);
             pair_device.setVisibility(View.VISIBLE);
-            mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_normal);
+            mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_active);
             device_tips.setVisibility(View.INVISIBLE);
         } else {
             devicelistview.setVisibility(View.GONE);

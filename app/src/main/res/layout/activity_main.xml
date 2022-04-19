@@ -46,22 +46,18 @@
                     android:layout_width="60px"
                     android:layout_height="60px"
                     android:layout_marginLeft="30px"
-                    android:background="@drawable/icon_collapse_normal"
+                    android:background="@drawable/icon_input_source_bg"
                     android:onClick="onInputSourceClick" />
 
                 <TextView
                     android:id="@+id/device_tips"
-
                     android:layout_width="wrap_content"
                     android:layout_height="34px"
-
                     android:layout_marginLeft="15px"
                     android:layout_marginRight="580px"
                     android:layout_marginTop="13px"
-
                     android:maxWidth="800px"
                     android:onClick="onInputSourceClick"
-
                     android:textColor="#80FFFFFF"
                     android:textSize="22px" />
 
@@ -69,7 +65,6 @@
                     android:id="@+id/random"
                     android:layout_width="60px"
                     android:layout_height="60px"
-
                     android:background="@drawable/random_bg"
                     android:onClick="onClick" />
 
@@ -79,7 +74,6 @@
                     android:layout_height="60px"
                     android:layout_marginLeft="30px"
                     android:layout_marginRight="33px"
-
                     android:background="@drawable/playmode_bg"
                     android:onClick="onClick" />
             </LinearLayout>
@@ -109,10 +103,10 @@
                 android:layout_marginLeft="30px"
                 android:layout_marginRight="30px"
                 android:layout_marginTop="30px"
-
                 android:layout_weight="1"
                 app:tabMode="fixed" />
         </LinearLayout>
+
         <android.support.v4.view.ViewPager
             android:id="@+id/vp_view"
             android:layout_width="wrap_content"
