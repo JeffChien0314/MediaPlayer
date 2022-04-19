@@ -62,7 +62,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     private int USB_LAYER_DOUBLE_TAP = DO_NOTHING;
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
-    private ImageView mPrevious, mNext, mRewind, mFwd;
+    private TextView mNot_Playing;//Sandra@20220419 add according to UI SPEC
+    private ImageView mStart,mPrevious, mNext, mRewind, mFwd;
     private TextView mRewindTotalTime, mFwdTotalTime;//jennifer add for 快进快退功能
     private int playMode = 0;
     private int mDoubleFwdClickCount = 0;//jennifer add for 快进快退功能
@@ -110,10 +111,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     @Override
     public void init(Context context) {
         super.init(context);
+        mNot_Playing =findViewById(R.id.Not_Playing);
         mPrevious = findViewById(R.id.bt_previous);
         mNext = findViewById(R.id.bt_next);
         mRewind = findViewById(R.id.bt_rewind);
         mFwd = findViewById(R.id.bt_fwd);
+        mStart = findViewById(R.id.start);
         mRewindTotalTime = findViewById(R.id.rewind_content_display);
         mFwdTotalTime = findViewById(R.id.fwd_content_display);
         mFullscreenButton.setOnClickListener(this);
@@ -151,6 +154,22 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             }
         };
         findViewById(R.id.surface_container).setOnTouchListener(mTouchListener);
+        //Sandra@20220419 add according to UI SPEC-->
+        if (getMediaInfo()!=null &&
+               getMediaInfo().getMediaItems()!=null && getMediaInfo().getMediaItems().size()!=0){
+            mPrevious.setEnabled(true);
+            mNext.setEnabled(true);
+            mStart.setEnabled(true);
+            mNot_Playing.setText("");
+        }else {
+            Log.i(TAG, "init: Not_Playing");
+            mNot_Playing.setText(R.string.Not_Playing);
+            mNot_Playing.setVisibility(VISIBLE);
+            mPrevious.setEnabled(false);
+            mNext.setEnabled(false);
+            mStart.setEnabled(false);
+        }
+        //<--Sandra@20220419 add according to UI SPEC
     }
     //jennifer add for 快进快退功能<--
 
@@ -308,6 +327,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
+        setViewShowState(mNot_Playing, INVISIBLE);
+
     }
 
 
@@ -324,6 +345,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mThumbImageViewLayout, INVISIBLE);
         setViewShowState(mBottomProgressBar, INVISIBLE);
         setViewShowState(mLockScreen, GONE);
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
         if (isDoubleTouch == false) {
             if (mLoadingProgressBar instanceof ENDownloadView) {
                 ENDownloadView enDownloadView = (ENDownloadView) mLoadingProgressBar;
@@ -344,10 +366,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             setViewShowState(mPrevious, INVISIBLE);
             setViewShowState(mNext, INVISIBLE);
             setViewShowState(mStartButton, INVISIBLE);
+            setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
         }else{
             setViewShowState(mPrevious, VISIBLE);
             setViewShowState(mNext, VISIBLE);
             setViewShowState(mStartButton, VISIBLE);
+            setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419
             if (mLoadingProgressBar instanceof ENDownloadView) {
                 ((ENDownloadView) mLoadingProgressBar).reset();
             }
@@ -369,10 +393,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             setViewShowState(mPrevious, INVISIBLE);
             setViewShowState(mNext, INVISIBLE);
             setViewShowState(mStartButton, INVISIBLE);
+            setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
         }else{
             setViewShowState(mPrevious, VISIBLE);
             setViewShowState(mNext, VISIBLE);
             setViewShowState(mStartButton, VISIBLE);
+            setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419
             if (mLoadingProgressBar instanceof ENDownloadView) {
                 ((ENDownloadView) mLoadingProgressBar).reset();
             }
@@ -395,6 +421,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
          setViewShowState(mNext, INVISIBLE);
          setViewShowState(mRewind, INVISIBLE);
          setViewShowState(mFwd, INVISIBLE);
+          setViewShowState(mNot_Playing, INVISIBLE);
      }*/
     @Override
     protected void changeUiToPlayingBufferingShow() {
@@ -407,6 +434,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mNext, INVISIBLE);
         setViewShowState(mThumbImageViewLayout, INVISIBLE);
         setViewShowState(mBottomProgressBar, INVISIBLE);
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
         setViewShowState(mLockScreen, GONE);
         if (isDoubleTouch == false) {
             setViewShowState(mLoadingProgressBar, VISIBLE);
@@ -426,6 +454,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         Debuger.printfLog("changeUiToCompleteShow");
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419
         setViewShowState(mStartButton, VISIBLE);
         setViewShowState(mRewind, INVISIBLE);
         setViewShowState(mFwd, INVISIBLE);
@@ -447,6 +476,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
+        setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419 add
     }
     protected void changeUiToPrepareingClear() {
         super.changeUiToPrepareingClear();
@@ -456,6 +486,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419 add
     }
     protected void changeUiToPlayingBufferingClear() {
         Debuger.printfLog("changeUiToPlayingBufferingClear");
@@ -464,7 +495,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mStartButton, INVISIBLE);
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
-
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419 add
         setViewShowState(mThumbImageViewLayout, INVISIBLE);
         setViewShowState(mBottomProgressBar, VISIBLE);
         setViewShowState(mLockScreen, GONE);
@@ -489,6 +520,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419 add
     }
     //jennifer add for 按钮的显示的消失<--
 
@@ -531,6 +563,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         super.changeUiToNormal();
         setViewShowState(mPrevious, VISIBLE);
         setViewShowState(mNext, VISIBLE);
+        setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419 add
 
     }
 
@@ -645,11 +678,13 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         } else if (mStartButton instanceof ImageView) {
             ImageView imageView = (ImageView) mStartButton;
             if (mCurrentState == CURRENT_STATE_PLAYING) {
-                imageView.setImageResource(R.drawable.icon_pause_normal);
+               // imageView.setImageResource(R.drawable.icon_pause_normal);
+                imageView.setImageResource(R.drawable.icon_pause_bg);//Sandra@20220419 add
             } else if (mCurrentState == CURRENT_STATE_ERROR) {
                 imageView.setImageResource(R.drawable.video_click_error_selector);
             } else {
-                imageView.setImageResource(R.drawable.icon_play_normal);
+              //  imageView.setImageResource(R.drawable.icon_play_normal);
+                imageView.setImageResource(R.drawable.icon_play_bg);//Sandra@20220419 add
             }
         }
         broadCastStateChanged(ACTION_STATE_CHANGED_BROADCAST, PLAYSTATE_CHANGED);

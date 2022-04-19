@@ -753,6 +753,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             device_tips.setText(device.getName());
             updateDeviceListView(/*false*/);
             connectAnimationStop();//Sandra@20220408 add
+            mBtPlayerLayer.changeBtnEnable();//Sandra@20220419 add
             Toast.makeText(getApplicationContext(), "Bluetooth device connect successfully", Toast.LENGTH_SHORT).show();
 
         }

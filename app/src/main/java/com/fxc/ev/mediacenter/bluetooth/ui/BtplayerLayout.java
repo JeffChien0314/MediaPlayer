@@ -46,6 +46,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
 
     private GestureDetector mGesture;
     private View mBtPlayerLayer;
+    private TextView mNot_Playing;
     private MediaSeekBar mSeekbar;
     private ImageView mStart;
     private ImageView mNext;
@@ -68,17 +69,19 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
                     mRewind.setVisibility(INVISIBLE);
                     break;*/
                 case HIDE_VIEW:
+                    mNot_Playing.setVisibility(INVISIBLE);
                     mStart.setVisibility(INVISIBLE);
                     mPrevious.setVisibility(INVISIBLE);
                     mNext.setVisibility(INVISIBLE);
                     mTopLayout.setVisibility(INVISIBLE);
-                //    mFastforward.setVisibility(INVISIBLE);
-              //      mRewind.setVisibility(INVISIBLE);
+                    //    mFastforward.setVisibility(INVISIBLE);
+                    //      mRewind.setVisibility(INVISIBLE);
                     break;
                 case SHOW_VIEW_CONTROL:
                     showControlBtn();
                     break;
                 case HIDE_VIEW_CONTROL:
+                    mNot_Playing.setVisibility(INVISIBLE);
                     mStart.setVisibility(INVISIBLE);
                     mNext.setVisibility(INVISIBLE);
                     mPrevious.setVisibility(INVISIBLE);
@@ -103,23 +106,39 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
 
     private void initView(Context context) {
         mBtPlayerLayer = inflate(context, R.layout.layout_media_play_bt, this);
+        mNot_Playing = findViewById(R.id.Not_Playing);
         mTopLayout = findViewById(R.id.layout_top);
         mStart = findViewById(R.id.bt_start);
         mNext = findViewById(R.id.bt_next);
         mPrevious = findViewById(R.id.bt_previous);
-       // mFastforward = findViewById(R.id.bt_fwd);
-       // mRewind = findViewById(R.id.bt_rewind);
+        // mFastforward = findViewById(R.id.bt_fwd);
+        // mRewind = findViewById(R.id.bt_rewind);
         mSeekbar = (MediaSeekBar) findViewById(R.id.progress);
         mSeekbar.setEnabled(false);
 
         MediaBrowserConnecter.getInstance(context).setSeekBar(mSeekbar);
-     //   initGestureDetector(context);
+        //   initGestureDetector(context);
         initListener(context);
         if (mContext instanceof Activity) {
             ((Activity) mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        changeBtndisable();
     }
 
+    //Sandra@20220419 add according to UI SPEC-->
+    public void changeBtndisable() {
+        mStart.setEnabled(false);
+        mNext.setEnabled(false);
+        mPrevious.setEnabled(false);
+        mNot_Playing.setText(R.string.Not_Playing);
+    }
+    public void changeBtnEnable() {
+        mStart.setEnabled(true);
+        mNext.setEnabled(true);
+        mPrevious.setEnabled(true);
+        mNot_Playing.setText("");
+    }
+    //<--Sandra@20220419 add according to UI SPEC
     private void initListener(Context context) {
         mNext.setOnClickListener(this);
         mPrevious.setOnClickListener(this);
@@ -192,10 +211,12 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
     public void updateStateButtonImg(int state) {
         switch (state) {
             case Constants.STATE_PLAY:
-                mStart.setImageResource(R.drawable.icon_pause_normal);
+                //  mStart.setImageResource(R.drawable.icon_pause_normal);
+                mStart.setBackgroundResource(R.drawable.icon_pause_bg);//Sandra@20220419 add
                 break;
             case Constants.STATE_PAUSE:
-                mStart.setImageResource(R.drawable.icon_play_normal);
+                //  mStart.setImageResource(R.drawable.icon_play_normal);
+                mStart.setImageResource(R.drawable.icon_play_bg);//Sandra@20220419 add
                 break;
         }
     }
@@ -205,6 +226,7 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
      */
     public void showControlBtn() {
         Log.i(TAG, "showControlBtn: ");
+        mNot_Playing.setVisibility(VISIBLE);
         mStart.setVisibility(VISIBLE);
         mNext.setVisibility(VISIBLE);
         mPrevious.setVisibility(VISIBLE);
@@ -225,14 +247,14 @@ public class BtplayerLayout extends RelativeLayout implements View.OnClickListen
         if (item == null) {
             ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText("");
             ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText("");
-            mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(null);
+            mBtPlayerLayer.findViewById(R.id.thumb).setBackground(null);//Sandra@20220419 modify
         } else {
             ((TextView) mBtPlayerLayer.findViewById(R.id.title)).setText(item.getTitle());
             ((TextView) mBtPlayerLayer.findViewById(R.id.total)).setText(MediaItemUtil.formatTime(item.getDuration()));
-           if (null == item.getThumbBitmap()) return;
+            if (null == item.getThumbBitmap()) return;
             Bitmap bm = item.getThumbBitmap();
             Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
-            mBtPlayerLayer.findViewById(R.id.surface_container).setBackground(drawable);
+            mBtPlayerLayer.findViewById(R.id.thumb).setBackground(drawable);//Sandra@20220419 modify
         }
     }
 

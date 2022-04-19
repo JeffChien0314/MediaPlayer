@@ -3,6 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!--android:background="@android:color/black"-->
+    <TextView
+        android:id="@+id/Not_Playing"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/player_surface"
+        android:gravity="left|top"
+        android:paddingLeft="30dp"
+        android:paddingTop="43dp"
+        android:textSize="28sp"
+        android:textColor="@color/tab_disable_text_color"
+        android:visibility="invisible"></TextView>
     <RelativeLayout
         android:id="@+id/surface_container"
         android:layout_width="match_parent"
@@ -136,7 +147,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/icon_play_normal"/>
+            android:src="@drawable/icon_play_bg"/>
         <ImageView
             android:id="@+id/bt_previous"
             android:layout_width="120px"
@@ -146,7 +157,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/start"
             android:scaleType="fitXY"
-            android:src="@drawable/icon_skip_back_normal" />
+            android:src="@drawable/icon_skip_back_bg" />
         <ImageView
             android:id="@+id/bt_rewind"
             android:layout_width="120px"
@@ -177,7 +188,7 @@
             android:layout_marginLeft="120px"
             android:layout_marginRight="240px"
             android:scaleType="fitXY"
-            android:src="@drawable/icon_skip_fwd_normal" />
+            android:src="@drawable/icon_skip_fwd_bg" />
         <ImageView
             android:id="@+id/bt_fwd"
             android:layout_width="120px"

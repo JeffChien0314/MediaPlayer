@@ -287,6 +287,7 @@ public class MediaPlayerService extends Service {
                     break;
 
                 case BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED:
+                    //TODO:1.disconnect 情况下，蓝牙页面控制播放的按钮需要disable
                     Log.e(TAG, "mBtReceiver，BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED");
                     break;
                /* case BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED: //A2DP连接状态改变

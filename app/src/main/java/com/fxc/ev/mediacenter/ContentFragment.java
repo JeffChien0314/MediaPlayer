@@ -345,16 +345,7 @@ public class ContentFragment extends Fragment {
 
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
         if (mediaItemList == null) return;
-        if (mediaItemList.size() == 0) {
-            ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
-            ((MainActivity) getActivity()). mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
-            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(false);
-            initial_tips.setVisibility(View.VISIBLE);
-        } else {
-            ((MainActivity) getActivity()). mRandomButton.setEnabled(true);
-            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(true);
-            initial_tips.setVisibility(View.GONE);
-        }
+        modifyRelativeUI(mediaItemList);
         mediaItems = mediaItemList;
         listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;
@@ -365,6 +356,19 @@ public class ContentFragment extends Fragment {
             for (int i = 0; i < mediaItemList.size(); i++) {
                 urls.add(mediaItemList.get(i).getGsyVideoModel());
             }
+        }
+    }
+
+    private void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
+        if (mediaItemList.size() == 0) {
+            ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
+            ((MainActivity) getActivity()). mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
+            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(false);
+            initial_tips.setVisibility(View.VISIBLE);
+        } else {
+            ((MainActivity) getActivity()). mRandomButton.setEnabled(true);
+            ((MainActivity) getActivity()). mPlayModeButton.setEnabled(true);
+            initial_tips.setVisibility(View.GONE);
         }
     }
 

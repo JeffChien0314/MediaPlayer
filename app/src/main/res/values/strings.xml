@@ -7,4 +7,5 @@ FxcMediaPlayer</string>
 name="fail">Connect Fail</string>
     <string name="Select">Select your device</string>
     <string name="initial_tips">Playlist Not Found</string>
+    <string name="Not_Playing">Not Playing</string>
 </resources>
