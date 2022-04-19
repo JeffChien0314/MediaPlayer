@@ -590,15 +590,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case Constants.STATE_RANDOM_CLOSE:
                 mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+                mRandomButton.setActivated(false);
+                mRandomButton.setBackgroundResource(R.drawable.random_bg);
                 break;
             case Constants.STATE_RANDOM_OPEN:
                 mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+                mRandomButton.setActivated(true);
+                mRandomButton.setBackgroundResource(R.drawable.random_bg);
                 break;
             case Constants.STATE_SINGLE_REPEAT:
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                mPlayModeButton.setActivated(true);
+                mPlayModeButton.setBackgroundResource(R.drawable.playmode_one_single_repeat_bg);
                 break;
             case Constants.STATE_ALL_REPEAT:
                 mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                mPlayModeButton.setActivated(false);
+                mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
                 break;
         }
     }
@@ -613,13 +621,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         playMode = 1;
                         state = Constants.STATE_SINGLE_REPEAT;
                         mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+                        mPlayModeButton.setActivated(true);
+                        mPlayModeButton.setBackgroundResource(R.drawable.playmode_one_single_repeat_bg);
                         //   MediaController.getInstance(this).setPlayerState(STATE_SINGLE_REPEAT, -1);
                         Log.i("main", "Jennifertest7=: " + playMode);
                         break;
                     case 1://单曲循环
                         playMode = 0;
                         state = Constants.STATE_ALL_REPEAT;
-                        mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+                        mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_active);//Sandra modify
+                        mPlayModeButton.setActivated(true);
+                        mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
                         // MediaController.getInstance(this).setPlayerState(STATE_ALL_REPEAT, -1);
                         Log.i("main", "Jennifertest8=: " + playMode);
                         break;
@@ -629,13 +641,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (randomOpen == false) {
                     randomOpen = true;
                     state = Constants.STATE_RANDOM_OPEN;
-                    mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+                  //  mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+                    mRandomButton.setActivated(true);
+                  //  mRandomButton.setBackgroundResource(R.drawable.random_bg);
                     //   MediaController.getInstance(this).setPlayerState(STATE_RANDOM_OPEN, -1);
                 } else {
                     randomOpen = false;
                     state = Constants.STATE_RANDOM_CLOSE;
                     // MediaController.getInstance(this).setPlayerState(STATE_RANDOM_CLOSE, -1);
-                    mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+                 //   mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+                    mRandomButton.setActivated(false);
+                 //   mRandomButton.setBackgroundResource(R.drawable.random_bg);
                 }
                 break;
         }
