@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
         mUsbFrameLayout.addView(csdMediaPlayer);
-        MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
+       // MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             mUsbFrameLayout.setVisibility(View.GONE);
             mBtPlayerLayer.showControlBtn();
