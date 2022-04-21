@@ -17,4 +17,5 @@
     <color name="tab_enable_selected_text_color">#FFFFFF</color>
 
     <color name="player_surface">#80000000</color>
+    <color name="bg_mask">#A6000000</color>
 </resources>

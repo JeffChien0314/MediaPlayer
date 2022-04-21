@@ -661,6 +661,10 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         super.startPlayLogic();
         saveData(); //保存Playing歌曲信息
         broadCastStateChanged(ACTION_MEDIAITEM_CHANGED_BROADCAST, MEDIAITEM_CHANGED);
+        mPrevious.setEnabled(true);
+        mNext.setEnabled(true);
+        mStart.setEnabled(true);
+        mNot_Playing.setText("");
     }
 
     @Override

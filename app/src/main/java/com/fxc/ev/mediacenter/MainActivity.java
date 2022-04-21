@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE = 4;
 
     private int playMode = 0;// 0循环播放,1单曲循环
-    protected CSDMediaPlayer csdMediaPlayer;
+    protected CSDMediaPlayer mCsdMediaPlayer;
     protected ImageView mPlayModeButton;
     protected ImageView mRandomButton;
     protected ImageView mInputSourceButton;
@@ -78,7 +80,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public TabLayout getmTabLayout() {
         return mTabLayout;
     }
-
+    protected ImageView mAlbum_photo;
+    protected ImageView mAlbum_photo_mask;
     private ViewPager mViewPager;
     private List<String> listTitles;
     private List<Fragment> fragments;
@@ -152,10 +155,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
+        mAlbum_photo = (ImageView) findViewById(R.id.main_activity_bg);
+        mAlbum_photo_mask = (ImageView) findViewById(R.id.main_activity_bg_mask);
         mViewPager = (ViewPager) findViewById(R.id.vp_view);
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
-        csdMediaPlayer = CSDMediaPlayer.getInstance(this);
-        csdMediaPlayer.setContext(this);
+        mCsdMediaPlayer = CSDMediaPlayer.getInstance(this);
+        mCsdMediaPlayer.setContext(this);
         mPlayModeButton = (ImageView) findViewById(R.id.play_mode);
         mRandomButton = (ImageView) findViewById(R.id.random);
         mInputSourceButton = (ImageView) findViewById(R.id.input_source_click_button);
@@ -169,15 +174,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         device_tips = (TextView) findViewById(R.id.device_tips);
-        csdMediaPlayer.getBackButton().setVisibility(View.GONE);
+        mCsdMediaPlayer.getBackButton().setVisibility(View.GONE);
         mbtFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_bt_view);
         mBtPlayerLayer = new BtplayerLayout(this);
         mbtFrameLayout.addView(mBtPlayerLayer);
         mUsbFrameLayout = (FrameLayout) findViewById(R.id.mediaPlayer_usb_view);
-        if (csdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
-            ((ViewGroup) csdMediaPlayer.getParent()).removeAllViews();
+        if (mCsdMediaPlayer.getParent() != null) {//Sandra@20220311 add-->
+            ((ViewGroup) mCsdMediaPlayer.getParent()).removeAllViews();
         }//Sandra@20220311 add to fix bug( The specified child already has a parent. You must call removeView() on the child's parent first..)
-        mUsbFrameLayout.addView(csdMediaPlayer);
+        mUsbFrameLayout.addView(mCsdMediaPlayer);
        // MediaController.getInstance(this).setCurrentSourceType(Constants.BLUETOOTH_DEVICE);//Sandra 臨時添加
         if (MediaController.getInstance(this).currentSourceType == BLUETOOTH_DEVICE) {
             mUsbFrameLayout.setVisibility(View.GONE);
@@ -203,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (BLUETOOTH_DEVICE == MediaController.getInstance(this).currentSourceType) {
 
                 } else {
-                    playMusic(csdMediaPlayer.getPlayPosition());
+                    playMusic(mCsdMediaPlayer.getPlayPosition());
                     device_tips.setText(mediaInfo.getDeviceItem().getDescription());
                 }
 
@@ -248,8 +253,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mMediaInfo = new MediaInfo(((ContentFragment) fragments.get(currentTab)).mediaItems, mDeviceItemUtil.getCurrentDevice());//Sandra@20220308 add
         currPosition = position; //这个是歌曲在列表中的位置，“上一曲”“下一曲”功能将会用到
         if (((ContentFragment) fragments.get(currentTab)).getUrls() != null && ((ContentFragment) fragments.get(currentTab)).getUrls().size() > 0) {
-            csdMediaPlayer.setUp(mMediaInfo, true, currPosition);
-            csdMediaPlayer.startPlayLogic();
+            mCsdMediaPlayer.setUp(mMediaInfo, true, currPosition);
+            mCsdMediaPlayer.startPlayLogic();
+            Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(position).getThumbBitmap());
+            mAlbum_photo.setBackground(drawable);
+            mAlbum_photo_mask.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -492,11 +501,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 device_tips.setText(mDeviceItemUtil.getCurrentDevice().getDescription());
             } else {
                 device_tips.setText(R.string.Select);
+                mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+                mAlbum_photo_mask.setVisibility(View.INVISIBLE);
             }
         } else {
             Log.i(TAG, "updateDeviceListView: setRelativeUIdisable");
             setRelativeUIdisable();
             device_tips.setText(R.string.paire);
+            mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+            mAlbum_photo_mask.setVisibility(View.INVISIBLE);
         }
         deviceListAdapter = new DeviceListAdapter(this, externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
         devicelistview.setAdapter(deviceListAdapter);
@@ -556,6 +569,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mBtPlayerLayer.updateMediaDetail(item);
                 break;
             case Constants.USB_DEVICE:
+                Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(pos).getThumbBitmap());
+                mAlbum_photo.setBackground(drawable);
+                mAlbum_photo_mask.setVisibility(View.VISIBLE);
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 if (-1 != pos) {
                     currPosition = pos;

@@ -4,9 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_portriat"
-    tools:context="com.fxc.ev.mediacenter.MainActivity">
-
+    
+tools:context="com.fxc.ev.mediacenter.MainActivity">
+    <ImageView
+        android:id="@+id/main_activity_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_portriat"
+    
+android:scaleType="center"/>
+    <ImageView
+        android:id="@+id/main_activity_bg_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_mask"
+        android:visibility="invisible"/>
     <include
         android:id="@+id/player"
         layout="@layout/layout_media_play_container"

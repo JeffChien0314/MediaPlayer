@@ -11,9 +11,12 @@
     android:layout_height="match_parent"
     android:background="@color/player_surface"
     android:gravity="left|top"
-    android:paddingLeft="30dp"
-    android:paddingTop="43dp"
-    android:textSize="28sp"
+    
+android:paddingLeft="15dp"
+    
+android:paddingTop="21dp"
+    
+android:textSize="12sp"
     android:textColor="@color/tab_disable_text_color"
     android:visibility="invisible"></TextView>
     <RelativeLayout
