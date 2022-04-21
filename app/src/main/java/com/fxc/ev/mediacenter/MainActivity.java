@@ -255,10 +255,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (((ContentFragment) fragments.get(currentTab)).getUrls() != null && ((ContentFragment) fragments.get(currentTab)).getUrls().size() > 0) {
             mCsdMediaPlayer.setUp(mMediaInfo, true, currPosition);
             mCsdMediaPlayer.startPlayLogic();
+            if (mMediaInfo.getMediaItems().get(position).isIfVideo()){
+                mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+                mAlbum_photo_mask.setVisibility(View.INVISIBLE);
+            }else {
             Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(position).getThumbBitmap());
             mAlbum_photo.setBackground(drawable);
             mAlbum_photo_mask.setVisibility(View.VISIBLE);
-
+            }
         }
     }
 
@@ -569,9 +573,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mBtPlayerLayer.updateMediaDetail(item);
                 break;
             case Constants.USB_DEVICE:
+                if (mMediaInfo.getMediaItems().get(pos).isIfVideo()){
+                    mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+                    mAlbum_photo_mask.setVisibility(View.INVISIBLE);
+                }else {
                 Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(pos).getThumbBitmap());
                 mAlbum_photo.setBackground(drawable);
                 mAlbum_photo_mask.setVisibility(View.VISIBLE);
+                }
+
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 if (-1 != pos) {
                     currPosition = pos;

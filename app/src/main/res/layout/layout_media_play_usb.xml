@@ -14,14 +14,20 @@
         android:textColor="@color/tab_disable_text_color"
         android:textSize="12sp"
         android:visibility="invisible"></TextView>
+    <ImageView
+        android:id="@+id/album_photo"
+        android:layout_width="300px"
+        android:layout_height="300px"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/img_album"/>
 
     <RelativeLayout
         android:id="@+id/surface_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/portriat_playlist"
         android:gravity="center">
-
+<!--android:background="@drawable/portriat_playlist"-->
     </RelativeLayout>
 
     <RelativeLayout

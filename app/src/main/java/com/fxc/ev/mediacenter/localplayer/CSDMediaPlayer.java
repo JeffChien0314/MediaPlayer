@@ -63,6 +63,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     private MediaInfo mediaInfo;
     private static CSDMediaPlayer mInstance;
     private TextView mNot_Playing;//Sandra@20220419 add according to UI SPEC
+    private ImageView mAlbum_photo;//Sandra@20220419 add according to UI SPEC
     private ImageView mStart,mPrevious, mNext, mRewind, mFwd;
     private TextView mRewindTotalTime, mFwdTotalTime;//jennifer add for 快进快退功能
     private int playMode = 0;
@@ -111,6 +112,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     @Override
     public void init(Context context) {
         super.init(context);
+        mAlbum_photo=findViewById(R.id.album_photo);
         mNot_Playing =findViewById(R.id.Not_Playing);
         mPrevious = findViewById(R.id.bt_previous);
         mNext = findViewById(R.id.bt_next);
@@ -232,7 +234,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
             mTitleTextView.setText(spanText);
             if (mediaInfo.getMediaItems().get(mPlayPosition) != null)
                 if (mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
-                    findViewById(R.id.surface_container).setBackground(null);
+                   // findViewById(R.id.surface_container).setBackground(null);
+                    findViewById(R.id.album_photo).setBackground(null);
                     ImageView imageView = new ImageView(getActivityContext());
                     imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     imageView.setImageBitmap(mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap());
@@ -241,7 +244,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 } else {
                     Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
                     Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
-                    findViewById(R.id.surface_container).setBackground(drawable);
+                    //findViewById(R.id.surface_container).setBackground(drawable);
+                    findViewById(R.id.album_photo).setBackground(drawable);
                 }
         }
         return set;
@@ -258,9 +262,11 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         if (!mediaInfo.getMediaItems().get(mPlayPosition).isIfVideo()) {
             Bitmap bm = mediaInfo.getMediaItems().get(mPlayPosition).getThumbBitmap();
             Drawable drawable = new BitmapDrawable(mContext.getResources(), bm);
-            to.findViewById(R.id.surface_container).setBackground(drawable);
+          //  to.findViewById(R.id.surface_container).setBackground(drawable);
+            to.findViewById(R.id.album_photo).setBackground(drawable);
         } else {
-            findViewById(R.id.surface_container).setBackground(null);
+        //    findViewById(R.id.surface_container).setBackground(null);
+            findViewById(R.id.album_photo).setBackground(null);
         }
 
     }
