@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fxc.ev.mediacenter.MainActivity">
+
     <TextView
     android:id="@+id/Not_Playing"
     android:layout_width="match_parent"
@@ -16,16 +17,20 @@ android:paddingLeft="15dp"
     
 android:paddingTop="21dp"
     
-android:textSize="12sp"
-    android:textColor="@color/tab_disable_text_color"
+android:textColor="@color/tab_disable_text_color"
+        android:textSize="12sp"
     android:visibility="invisible"></TextView>
+
     <RelativeLayout
         android:id="@+id/surface_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        
+android:background="@drawable/portriat_playlist"
         android:gravity="center"
-        android:background="@drawable/portriat_playlist">
-    </RelativeLayout>
+>
+</RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/thumb"
         android:layout_width="match_parent"
@@ -81,7 +86,9 @@ android:textSize="12sp"
                 android:layout_height="fill_parent"
                 android:paddingRight="16dp"
                 android:scaleType="center"
-                android:src="@drawable/video_enlarge" />
+                
+android:src="@drawable/video_enlarge"
+                android:visibility="gone"/>
         </LinearLayout>
 
 

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -139,6 +141,12 @@ public class ContentFragment extends Fragment {
                         TabLayout.Tab tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(0);
                         if (mediaInfo.getMediaItems().get(0).isIfVideo()) {
                             tab = ((MainActivity) getActivity()).getmTabLayout().getTabAt(1);
+                            ((MainActivity) getActivity()).mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+                            ((MainActivity) getActivity()).mAlbum_photo_mask.setVisibility(View.INVISIBLE);
+                        }else {
+                            Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mediaItems.get(  ((MainActivity) getActivity()).getCurrPosition()).getThumbBitmap());
+                            ((MainActivity) getActivity()).mAlbum_photo.setBackground(drawable);
+                            ((MainActivity) getActivity()).mAlbum_photo_mask.setVisibility(View.VISIBLE);
                         }
                         tab.select();
                     } else {
