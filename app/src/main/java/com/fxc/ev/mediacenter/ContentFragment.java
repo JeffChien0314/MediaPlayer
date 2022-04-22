@@ -18,6 +18,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -222,11 +223,8 @@ public class ContentFragment extends Fragment {
                 ((MainActivity) getActivity()).updateDeviceListView(/*false*/);
                 ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
             }
-
-
         }
     };
-
     @Override
     public void onPause() {
         super.onPause();
@@ -277,6 +275,8 @@ public class ContentFragment extends Fragment {
             ani_gif_playing.start();
             TextView totaltime = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
             totaltime.setVisibility(View.GONE);
+            RelativeLayout playlist_item = mediaFile_list.getChildAt(position - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playlist_item);
+            playlist_item.setActivated(true);
         }
     }
 
@@ -288,6 +288,8 @@ public class ContentFragment extends Fragment {
                 playing_icon.setAnimation(null);
                 TextView totaltime = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.totalTime);
                 totaltime.setVisibility(View.VISIBLE);
+                RelativeLayout playlist_item = mediaFile_list.getChildAt(lastPosition - mediaFile_list.getFirstVisiblePosition()).findViewById(R.id.playlist_item);
+                playlist_item.setActivated(false);
             }
         } catch (Exception e) {
             e.printStackTrace();

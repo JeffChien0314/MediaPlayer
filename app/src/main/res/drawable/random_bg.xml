@@ -2,7 +2,7 @@
 <selector
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false" android:drawable="@drawable/icon_shuffle_disable"></item>
+    <item android:state_activated="true" android:drawable="@drawable/icon_shuffle_active"></item>
     <item android:state_pressed="false" android:drawable="@drawable/icon_shuffle_normal"></item>
     <item android:state_pressed="true" android:drawable="@drawable/icon_shuffle_press"></item>
-    <item android:state_activated="true" android:drawable="@drawable/icon_shuffle_active"></item>
 </selector>

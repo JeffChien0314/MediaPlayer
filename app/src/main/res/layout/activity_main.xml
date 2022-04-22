@@ -4,36 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    
-tools:context="com.fxc.ev.mediacenter.MainActivity">
+    tools:context="com.fxc.ev.mediacenter.MainActivity">
 
     <ImageView
         android:id="@+id/main_activity_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/background_portriat"
-    
-android:scaleType="center" />
+        android:scaleType="center" />
 
     <ImageView
         android:id="@+id/main_activity_bg_mask"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/bg_mask"
-        
-android:visibility="invisible" />
+        android:visibility="invisible" />
 
     <include
         android:id="@+id/player"
         layout="@layout/layout_media_play_container"
         android:layout_width="match_parent"
-        android:layout_height="486px" />
+        android:layout_height="486px"
+        />
 
     <LinearLayout
         android:id="@+id/input_source_related"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/player"
+        android:background="@drawable/fxc_input_source_bg"
         android:orientation="vertical">
         <!-- app:layout_constraintTop_toBottomOf="@id/mediaPlayer_csd_container"-->
         <LinearLayout
@@ -128,8 +127,8 @@ android:visibility="invisible" />
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#03000000"
             android:orientation="vertical" />
+        <!-- android:background="#03000000"-->
     </LinearLayout>
 
 </com.fxc.ev.mediacenter.CustomViews>

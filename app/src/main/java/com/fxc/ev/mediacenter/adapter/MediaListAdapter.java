@@ -6,10 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
+import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import java.util.List;
@@ -67,6 +69,7 @@ public class MediaListAdapter extends BaseAdapter {
             viewHolder.musicDuration = (TextView) convertView.findViewById(R.id.totalTime);
             viewHolder.musicArtist = (TextView) convertView.findViewById(R.id.artistName);
             viewHolder.albumImage = (ImageView) convertView.findViewById(R.id.playlist_icon);
+            viewHolder.playlist_item= (RelativeLayout) convertView.findViewById(R.id.playlist_item);
             convertView.setTag(viewHolder);            //表示給View新增一個格外的資料，
         } else {
             viewHolder = (ViewHolder) convertView.getTag();//通過getTag的方法將資料取出來
@@ -76,7 +79,23 @@ public class MediaListAdapter extends BaseAdapter {
         viewHolder.musicArtist.setText(mediaItem.getArtist()+ "-" +mediaItem.getAlbum());//顯示藝術家
         viewHolder.musicDuration.setText(MediaItemUtil.formatTime(mediaItem.getDuration()));//顯示時長
         viewHolder.albumImage.setImageBitmap(mediaItem.getThumbBitmap());
-
+    /*    if (mediaItem.isIfVideo()){
+            if (CSDMediaPlayer.getInstance(context).getMediaInfo().getMediaItems().get(0).isIfVideo()){
+                if (position==CSDMediaPlayer.getInstance(context).getPlayPosition()){
+                    viewHolder.playlist_item.setActivated(true);
+                }else {
+                    viewHolder.playlist_item.setActivated(false);
+                }
+            }
+        }else {
+            if (!CSDMediaPlayer.getInstance(context).getMediaInfo().getMediaItems().get(0).isIfVideo()){
+                if (position==CSDMediaPlayer.getInstance(context).getPlayPosition()){
+                    viewHolder.playlist_item.setActivated(true);
+                }else {
+                    viewHolder.playlist_item.setActivated(false);
+                }
+            }
+        }*/
         return convertView;
     }
 
@@ -90,5 +109,6 @@ public class MediaListAdapter extends BaseAdapter {
         public TextView musicTitle;        //音樂標題
         public TextView musicDuration;    //音樂時長
         public TextView musicArtist;    //音樂藝術家
+        public RelativeLayout playlist_item;
     }
 }
