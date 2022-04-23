@@ -85,7 +85,7 @@ public class DeviceItemUtil {
         } catch (Exception e) {
             Log.d("jason", " e:" + e);
         }
-
+        try{
         if (BtMusicManager.getInstance().isEnabled()) {
             for (BluetoothDevice device : BtMusicManager.getInstance().getBondedDevices()) {
                 DeviceItem info = new DeviceItem();
@@ -101,6 +101,10 @@ public class DeviceItemUtil {
                 externalDeviceItems.add(info);
             }
         }
+        }catch (Exception e){
+            Log.i("", "isEnabled: e"+e);
+        }
+
         if (needNotify) broadCastDeviceChanged();
         return externalDeviceItems;
     }

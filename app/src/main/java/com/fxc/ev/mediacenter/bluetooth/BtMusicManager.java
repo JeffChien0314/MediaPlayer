@@ -216,7 +216,11 @@ public class BtMusicManager implements IBtMusicManager {
             mContext = context;
         initConnectDevice();
         //  registerBtReceiver(context);
+        try{
         if (!isEnabled()) return;
+        }catch (Exception e){
+            Log.i(TAG, "isEnabled: e"+e);
+        }
         registerProfile(context);
     }
 

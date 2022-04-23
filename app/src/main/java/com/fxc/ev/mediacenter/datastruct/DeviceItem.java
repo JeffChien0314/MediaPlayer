@@ -15,6 +15,25 @@ public class DeviceItem implements Parcelable {
     private String storagePath;//设备路径
     private String description;//设备名字
     private int resImage;//设备图片
+    private int lastMusicIndex=-1;//播放器加载的该设备的最后一首歌曲
+    private int lastVideoIndex=-1;//播放器加载的该设备的最后一个影片
+
+    public int getLastMusicIndex() {
+        return lastMusicIndex;
+    }
+
+    public void setLastMusicIndex(int lastMusicIndex) {
+        this.lastMusicIndex = lastMusicIndex;
+    }
+
+    public int getLastVideoIndex() {
+        return lastVideoIndex;
+    }
+
+    public void setLastVideoIndex(int lastVideoIndex) {
+        this.lastVideoIndex = lastVideoIndex;
+    }
+
     private int type = Constants.USB_DEVICE;//设备类型 0:USB usb; 1:bluetooth
     private boolean isRemovableResult;
     private BluetoothDevice bluetoothDevice;

@@ -44,9 +44,11 @@ import java.util.Date;
 import java.util.List;
 
 import static android.security.KeyStore.getApplicationContext;
+import static com.fxc.ev.mediacenter.MainActivity.currentTab;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
 
 /**
@@ -102,15 +104,22 @@ public class ContentFragment extends Fragment {
         mediaFile_list.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                Log.i(TAG, "onScrollChange: currentposition=" + (((MainActivity) getActivity()).getCurrPosition()));
+                Log.i(TAG, "onScrollChange: playingAnimation/resetAnimation");
                 for (int i = 0; i < mediaItems.size(); i++) {
-                    if (isVisiable(i) && (((MainActivity) getActivity()).getCurrPosition()) == i) {
-                        playingAnimation((((MainActivity) getActivity()).getCurrPosition()));
+                    if (currentTab==TYPE_MUSIC){//Sandra@20220423 modify-->
+                        if (isVisiable(i) && DeviceItemUtil.getInstance(mContext).getCurrentDevice().getLastMusicIndex()== i) {
+                            playingAnimation(DeviceItemUtil.getInstance(mContext).getCurrentDevice().getLastMusicIndex());
                     } else {
                         resetAnimation(i);
                     }
+                    }else {
+                        if (isVisiable(i) && DeviceItemUtil.getInstance(mContext).getCurrentDevice().getLastVideoIndex() == i) {
+                            playingAnimation(DeviceItemUtil.getInstance(mContext).getCurrentDevice().getLastVideoIndex());
+                        } else {
+                            resetAnimation(i);
+                        }
+                    }//<--Sandra@20220423 modify
                 }
-
             }
         });
         if (BLUETOOTH_DEVICE == MediaController.getInstance(mContext).currentSourceType) {
@@ -204,7 +213,7 @@ public class ContentFragment extends Fragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            playingAnimation(position);
+           // playingAnimation(position);//Sandra@20220423 delete 因为mediaFile_list的onScrollChange中已有相应处理，且能相应执行
             if (mDeviceItem != null) {
                 MediaController.getInstance(mContext).setCurrentSourceType(mDeviceItem.getType());
             }
@@ -370,16 +379,24 @@ public class ContentFragment extends Fragment {
     }
 
     private void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
+        try{
         if (mediaItemList.size() == 0) {
             ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
             ((MainActivity) getActivity()). mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
             ((MainActivity) getActivity()). mPlayModeButton.setEnabled(false);
             initial_tips.setVisibility(View.VISIBLE);
         } else {
+                if ( ((MainActivity) getActivity()). mRandomButton!=null)
             ((MainActivity) getActivity()). mRandomButton.setEnabled(true);
+                if ( ((MainActivity) getActivity()). mPlayModeButton!=null)
             ((MainActivity) getActivity()). mPlayModeButton.setEnabled(true);
+                if (initial_tips!=null)
             initial_tips.setVisibility(View.GONE);
         }
+        }catch (Exception e){
+            Log.i(TAG, "modifyRelativeUI: e"+e);
+        }
+
     }
 
 

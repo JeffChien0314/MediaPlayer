@@ -54,6 +54,8 @@ import java.util.List;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.USB_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
@@ -320,6 +322,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 changeTabSelect(tab);
+                if (mDeviceItemUtil!=null && mDeviceItemUtil.getCurrentDevice()!=null){//Sandra@20220423 add for
+                    int lastIndex=-1;
+                    if (currentTab==0){
+                        lastIndex= mDeviceItemUtil.getCurrentDevice().getLastMusicIndex();
+                        if (lastIndex<0){}else {
+                            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setSelectionFromTop(lastIndex, 0);//LastMusicIndex的显示在第一首
+                        }
+                    }else {
+                        lastIndex= mDeviceItemUtil.getCurrentDevice().getLastMusicIndex();
+                        if (lastIndex<0){}else{
+                            ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setSelectionFromTop(lastIndex, 0);//LastMusicIndex的显示在第一首
+                        }
+                    }
+                }
+
             }
 
             @Override
@@ -574,28 +591,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case Constants.USB_DEVICE:
                 if (mMediaInfo.getMediaItems().get(pos).isIfVideo()){
-                    mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
+                    mAlbum_photo.setBackgroundResource(R.color.bg_mask_video_playing);//此地方根据UI的建议改为全黑
                     mAlbum_photo_mask.setVisibility(View.INVISIBLE);
+                    mDeviceItemUtil.getCurrentDevice().setLastVideoIndex(pos);
                 }else {
                 Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(pos).getThumbBitmap());
                 mAlbum_photo.setBackground(drawable);
                 mAlbum_photo_mask.setVisibility(View.VISIBLE);
+                    mDeviceItemUtil.getCurrentDevice().setLastMusicIndex(pos);
                 }
-
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);
                 if (-1 != pos) {
                     currPosition = pos;
+                    if ((currentTab==TYPE_MUSIC && !mMediaInfo.getMediaItems().get(pos).isIfVideo()) ||(currentTab==TYPE_VIDEO && mMediaInfo.getMediaItems().get(pos).isIfVideo())  ){
+                        //Sandra@20220423 增加此判断条件，为避免播放音乐是查看Video，video列表的Active/滚动受到音乐播放状态的影；反之亦然。
                     ((ContentFragment) fragments.get(currentTab)).smoothScrollToPosition(currPosition);
-                    ((ContentFragment) fragments.get(currentTab)).playingAnimation(currPosition);
+                        //((ContentFragment) fragments.get(currentTab)).playingAnimation(activePosition);
+                        // Sandra@20220423 delete 因为mediaFile_list的onScrollChange中已有相应处理，且能相应执行
                     ((ContentFragment) fragments.get(currentTab)).mediaFile_list.post(new Runnable() {
                         @Override
                         public void run() {
-                            //((ContentFragment) fragments.get(currentTab)).mediaFile_list.smoothScrollToPositionFromTop(currPosition,0);
                             ((ContentFragment) fragments.get(currentTab)).mediaFile_list.setSelectionFromTop(currPosition, 0);//显示第几个item
                         }
                     });
                 }
-
+                }
                 break;
         }
     }
