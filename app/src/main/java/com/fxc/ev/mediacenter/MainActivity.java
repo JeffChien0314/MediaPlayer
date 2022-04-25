@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +31,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.adapter.DeviceListAdapter;
 import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
@@ -42,12 +39,12 @@ import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.util.BlurTransformation;
 import com.fxc.ev.mediacenter.util.Constants;
 import com.fxc.ev.mediacenter.util.DeviceItemUtil;
 import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -257,14 +254,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (((ContentFragment) fragments.get(currentTab)).getUrls() != null && ((ContentFragment) fragments.get(currentTab)).getUrls().size() > 0) {
             mCsdMediaPlayer.setUp(mMediaInfo, true, currPosition);
             mCsdMediaPlayer.startPlayLogic();
-            if (mMediaInfo.getMediaItems().get(position).isIfVideo()){
-                mAlbum_photo.setBackgroundResource(R.drawable.background_portriat);
-                mAlbum_photo_mask.setVisibility(View.INVISIBLE);
-            }else {
-            Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(position).getThumbBitmap());
-            mAlbum_photo.setBackground(drawable);
-            mAlbum_photo_mask.setVisibility(View.VISIBLE);
-            }
         }
     }
 
@@ -595,9 +584,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mAlbum_photo_mask.setVisibility(View.INVISIBLE);
                     mDeviceItemUtil.getCurrentDevice().setLastVideoIndex(pos);
                 }else {
-                Drawable drawable = new BitmapDrawable(getApplicationContext().getResources(), mMediaInfo.getMediaItems().get(pos).getThumbBitmap());
-                mAlbum_photo.setBackground(drawable);
-                mAlbum_photo_mask.setVisibility(View.VISIBLE);
+                    BlurTransformation blurTransformation= new BlurTransformation(getApplicationContext());
+                    blurTransformation. MediaBlurrAPI(mMediaInfo.getMediaItems().get(pos).getId(),mAlbum_photo);
+                  //  mAlbum_photo_mask.setVisibility(View.VISIBLE);
                     mDeviceItemUtil.getCurrentDevice().setLastMusicIndex(pos);
                 }
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);

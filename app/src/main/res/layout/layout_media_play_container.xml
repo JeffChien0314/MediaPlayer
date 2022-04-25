@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fxc.ev.mediacenter.MainActivity"
-    android:background="@color/player_mask">
-
+    >
+<!--android:background="@color/player_mask"-->
     <FrameLayout
         android:id="@+id/mediaPlayer_usb_view"
         android:layout_width="match_parent"
