@@ -29,6 +29,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -90,12 +92,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<Fragment> fragments;
     public static int currentTab = 0;
     private MediaInfo mMediaInfo;
+    //Sandra@20220428 modify-->
     //protected ListView devicelistview;
     private List<DeviceItem> externalDeviceItems = new ArrayList<DeviceItem>();
    // private DeviceListAdapter deviceListAdapter;
    private DeviceListAdapter deviceListAdapter_popup;
     private ListView devicelistview_popup;
     public  PopupWindow popWindow;
+    private int VisiableDeviceCount=8;
+    //<--Sandra@20220428 modify
     private DeviceItemUtil mDeviceItemUtil;
     public ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();
     private AnimationDrawable ani_gif_Connecting;
@@ -397,7 +402,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (device_tips.getVisibility() == View.VISIBLE) {
                 mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_active);
                 device_tips.setVisibility(View.INVISIBLE);
-                Log.i(TAG, "onInputSourceClick: 1-1");
                 initPopWindow(v);
               //  changeVisibleOfDeviceView(true);
             }
@@ -412,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         devicelistview_popup.setAdapter(deviceListAdapter_popup);
         deviceListAdapter_popup.notifyDataSetChanged();
         devicelistview_popup.invalidateViews();
+        setListViewHeight(devicelistview_popup);
         //1.构造一个PopupWindow，参数依次是加载的View，宽高
          popWindow = new PopupWindow(view,
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -465,6 +470,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
     }
+    private void setListViewHeight(ListView listView){
+        ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
+        if(listAdapter == null){
+            return;
+        }
+
+        View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
+        //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890这篇文章
+        itemView.measure(0,0);
+        int itemHeight = itemView.getMeasuredHeight(); //一项的高度
+        int itemCount = listAdapter.getCount();//得到总的项数
+        LinearLayout.LayoutParams layoutParams = null; //进行布局参数的设置
+        if(itemCount <= VisiableDeviceCount){
+            layoutParams = new LinearLayout.LayoutParams(420,itemHeight*itemCount);
+        }else if(itemCount > VisiableDeviceCount){
+            layoutParams = new LinearLayout.LayoutParams(420 ,itemHeight*VisiableDeviceCount);
+        }
+        layoutParams.setMargins(30,30,30,30);
+        listView.setLayoutParams(layoutParams);
+    }
+
     public void changeVisibleOfDeviceView(boolean ifopen) {
         if (ifopen) {
             mInputSourceButton.setBackgroundResource(R.drawable.icon_collapse_active);

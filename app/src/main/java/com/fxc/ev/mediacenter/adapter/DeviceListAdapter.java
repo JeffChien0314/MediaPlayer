@@ -2,6 +2,7 @@ package com.fxc.ev.mediacenter.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.constraint.ConstraintLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +63,7 @@ public class DeviceListAdapter extends BaseAdapter {
         if (convertView == null) {
             viewHolder = new ViewHolder();
             convertView = LayoutInflater.from(context).inflate(R.layout.device_item_layout, null);
-
+            viewHolder.device_item_popup = (ConstraintLayout) convertView.findViewById(R.id.device_item_popup);
             viewHolder.description = (TextView) convertView.findViewById(R.id.description);
             viewHolder.deviceImage = (ImageView) convertView.findViewById(R.id.device_icon);
             convertView.setTag(viewHolder);            //表示給View新增一個格外的資料，
@@ -75,10 +76,10 @@ public class DeviceListAdapter extends BaseAdapter {
             if (Constants.BLUETOOTH_DEVICE == MediaController.getInstance(context).currentSourceType
                     && BtMusicManager.getInstance().isA2dpActiveDevice(externalDeviceItem.getBluetoothDevice())) {
                 viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);
-                viewHolder.deviceImage.setActivated(true);
+                viewHolder.device_item_popup.setBackgroundResource(R.drawable.device_list_active_bg);
             } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
-                viewHolder.deviceImage.setActivated(false);
+                viewHolder.device_item_popup.setBackgroundResource(R.drawable.device_item_selector);
             }
 
         } else {
@@ -87,11 +88,11 @@ public class DeviceListAdapter extends BaseAdapter {
                     && CSDMediaPlayer.getInstance(context).getMediaInfo() != null
                     && CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem() != null
                     && externalDeviceItem.getStoragePath().equals(CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem().getStoragePath())) {
-                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
-                viewHolder.deviceImage.setActivated(true);
+                viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);
+                viewHolder.device_item_popup.setBackgroundResource(R.drawable.device_list_active_bg);
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
-                viewHolder.deviceImage.setActivated(false);
+                viewHolder.device_item_popup.setBackgroundResource(R.drawable.device_item_selector);
         }
         }
         if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
@@ -100,8 +101,8 @@ public class DeviceListAdapter extends BaseAdapter {
           //  viewHolder.connected_icon.setVisibility(View.GONE);
             viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
         }
-        if (position==externalDeviceItems.size()-1){
-            viewHolder.deviceImage.setImageResource(R.drawable.icon_pair);//TODO:
+        if (position == externalDeviceItems.size() - 1) {
+            viewHolder.deviceImage.setImageResource(R.drawable.icon_pair);
         }
         return convertView;
     }
@@ -112,6 +113,7 @@ public class DeviceListAdapter extends BaseAdapter {
      */
     public class ViewHolder {
         //所有控制元件物件引用
+        public ConstraintLayout device_item_popup;
         public ImageView deviceImage;    //設備圖片
         public TextView description;    //設備名字
 
