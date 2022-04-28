@@ -2,6 +2,8 @@
 <com.fxc.ev.mediacenter.CustomViews xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    
+android:id="@+id/custom_views"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fxc.ev.mediacenter.MainActivity">
@@ -93,22 +95,6 @@
                     android:onClick="onClick" />
             </LinearLayout>
 
-            <ListView
-                android:id="@+id/input_source_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/input_source_click_button_and_play_mode"
-                android:choiceMode="singleChoice"
-                android:drawSelectorOnTop="true"
-                android:scrollbars="vertical"
-                android:visibility="gone" />
-
-            <include
-                android:id="@+id/pair_device"
-                layout="@layout/device_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"></include>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"

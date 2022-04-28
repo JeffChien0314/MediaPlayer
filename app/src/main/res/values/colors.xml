@@ -24,4 +24,5 @@
     <color name="media_list_bg">#99000000</color>
     <color name="player_mask">#77000000</color>
     <color name="bg_mask_video_playing">#000000</color>
+    <color name="device_list_bg">#15284A</color>
 </resources>

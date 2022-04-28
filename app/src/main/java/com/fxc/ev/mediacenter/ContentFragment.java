@@ -190,7 +190,7 @@ public class ContentFragment extends Fragment {
         ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
         ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
         ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());//展示相應播放頁面，本地播放跟蓝牙播放切换时UI更新
-        ((MainActivity) getActivity()).updateDeviceListView(/*false*/);//更新設備前的圖標
+        ((MainActivity) getActivity()).updateDeviceListData(/*false*/);//更新設備前的圖標
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
         //jennifer add for 退出应用再进入list布局大小的控制-->
@@ -226,17 +226,18 @@ public class ContentFragment extends Fragment {
 
                 //   MediaController.getInstance(mContext).setPlayerState();
             }
-            if (mDeviceItem != null) {
+          /*  if (mDeviceItem != null) {
                 //  ((MainActivity) getActivity()).setPlayerLayer(mDeviceItem.getType());
                 ((MainActivity) getActivity()).device_tips.setText(mDeviceItem.getDescription());
-                ((MainActivity) getActivity()).updateDeviceListView(/*false*/);
+                ((MainActivity) getActivity()).updateDeviceListData(*//*false*//*);
                 ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
-            }
+            }*/
         }
     };
     @Override
     public void onPause() {
         super.onPause();
+        ((MainActivity) getActivity()).popWindow.dismiss();
         if (CSDMediaPlayer.getInstance(mContext).getMediaInfo() != null
                 && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems() != null
                 && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size() != 0) {//Sandra@20220315 add
@@ -324,7 +325,7 @@ public class ContentFragment extends Fragment {
                 updateMediaList(mediaItems);
                 ((MainActivity) getActivity()).device_tips.setText(deviceItem.getDescription());
             } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
-                ((MainActivity) getActivity()).updateDeviceListView(/*true*/);
+              //  ((MainActivity) getActivity()).updateDeviceListData(/*true*/);
                 if (deviceItem != null) {
                     ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
                     updateMediaList(mediaItems);
@@ -336,7 +337,7 @@ public class ContentFragment extends Fragment {
         } else {
             //  MediaController.getInstance(mContext).setCurrentSourceType(BLUETOOTH_DEVICE);
             CSDMediaPlayer.getInstance(getApplicationContext()).release();
-            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
+           // ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);//Sandra@20220427 delete 避免重複執行
             MediaController.getInstance(getApplicationContext()).setPlayerState(Constants.STATE_PLAY, -1);
 
             if (deviceItem.getBluetoothDevice().isConnected() && BtMusicManager.getInstance().isA2dpActiveDevice(deviceItem.getBluetoothDevice())) {

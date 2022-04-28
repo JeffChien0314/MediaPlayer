@@ -61,7 +61,8 @@ public class DeviceListAdapter extends BaseAdapter {
         DeviceListAdapter.ViewHolder viewHolder = null;
         if (convertView == null) {
             viewHolder = new ViewHolder();
-            convertView = LayoutInflater.from(context).inflate(R.layout.device_list, null);
+            convertView = LayoutInflater.from(context).inflate(R.layout.device_item_layout, null);
+
             viewHolder.description = (TextView) convertView.findViewById(R.id.description);
             viewHolder.deviceImage = (ImageView) convertView.findViewById(R.id.device_icon);
             convertView.setTag(viewHolder);            //表示給View新增一個格外的資料，
@@ -74,8 +75,10 @@ public class DeviceListAdapter extends BaseAdapter {
             if (Constants.BLUETOOTH_DEVICE == MediaController.getInstance(context).currentSourceType
                     && BtMusicManager.getInstance().isA2dpActiveDevice(externalDeviceItem.getBluetoothDevice())) {
                 viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);
+                viewHolder.deviceImage.setActivated(true);
             } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_bt);
+                viewHolder.deviceImage.setActivated(false);
             }
 
         } else {
@@ -85,8 +88,10 @@ public class DeviceListAdapter extends BaseAdapter {
                     && CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem() != null
                     && externalDeviceItem.getStoragePath().equals(CSDMediaPlayer.getInstance(context).getMediaInfo().getDeviceItem().getStoragePath())) {
                 viewHolder.deviceImage.setImageResource(R.drawable.device_of_player_icon);//TODO:
+                viewHolder.deviceImage.setActivated(true);
         } else {
             viewHolder.deviceImage.setImageResource(R.drawable.icon_usb);        //設備圖標
+                viewHolder.deviceImage.setActivated(false);
         }
         }
         if (mCurrentDevice != null && externalDeviceItem.equals(mCurrentDevice)) {
@@ -94,6 +99,9 @@ public class DeviceListAdapter extends BaseAdapter {
         } else {
           //  viewHolder.connected_icon.setVisibility(View.GONE);
             viewHolder.description.setTextColor(Color.parseColor("#40FFFFFF"));
+        }
+        if (position==externalDeviceItems.size()-1){
+            viewHolder.deviceImage.setImageResource(R.drawable.icon_pair);//TODO:
         }
         return convertView;
     }

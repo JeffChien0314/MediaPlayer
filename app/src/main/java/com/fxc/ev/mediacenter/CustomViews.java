@@ -31,6 +31,10 @@ public class CustomViews extends RelativeLayout {
     private boolean isDragUp=true;
     private boolean isDraging=false;
 
+    public boolean isDragUp() {
+        return isDragUp;
+    }
+
     String TAG = CustomViews.class.getSimpleName();
 
     public CustomViews(Context context) {
