@@ -166,9 +166,12 @@ android:src="@drawable/video_enlarge"
             android:layout_height="120px"
             android:layout_centerVertical="true"
             android:layout_marginLeft="240px"
-            android:layout_marginRight="120px"
+            
+android:layout_marginRight="90px"
             android:layout_toLeftOf="@+id/start"
             android:scaleType="fitXY"
+            
+android:visibility="invisible"
             android:src="@drawable/icon_skip_back_bg" />
 
         <ImageView
@@ -176,11 +179,14 @@ android:src="@drawable/video_enlarge"
             android:layout_width="120px"
             android:layout_height="100px"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="200px"
-            android:layout_toLeftOf="@+id/bt_previous"
+            
+android:layout_alignParentLeft="true"
+            
+android:layout_marginLeft="150px"
             android:scaleType="fitXY"
             android:src="@drawable/icon_rewind_normal"
-            android:visibility="gone" />
+            
+android:visibility="invisible" />
 
         <TextView
             android:id="@+id/rewind_content_display"
@@ -198,7 +204,8 @@ android:src="@drawable/video_enlarge"
             android:layout_width="120px"
             android:layout_height="120px"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="120px"
+            
+android:layout_marginLeft="90px"
             android:layout_marginRight="240px"
             android:layout_toRightOf="@+id/start"
             android:scaleType="fitXY"
@@ -209,11 +216,14 @@ android:src="@drawable/video_enlarge"
             android:layout_width="120px"
             android:layout_height="100px"
             android:layout_centerVertical="true"
-            android:layout_marginRight="190px"
-            android:layout_toRightOf="@+id/bt_next"
+            
+android:layout_alignParentRight="true"
+            
+android:layout_marginRight="150px"
             android:scaleType="fitXY"
             android:src="@drawable/icon_fast_fwd_normal"
-            android:visibility="gone" />
+            
+android:visibility="invisible" />
 
         <TextView
             android:id="@+id/fwd_content_display"

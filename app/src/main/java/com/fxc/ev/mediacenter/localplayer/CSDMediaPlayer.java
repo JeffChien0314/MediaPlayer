@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -40,6 +42,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import moe.codeest.enviews.ENDownloadView;
 import moe.codeest.enviews.ENPlayView;
@@ -47,6 +51,7 @@ import moe.codeest.enviews.ENPlayView;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static com.fxc.ev.mediacenter.util.Constants.*;
+import static com.shuyu.gsyvideoplayer.utils.CommonUtil.hideNavKey;
 
 /**
  * Created by Jennifer on 2022/1/17.
@@ -147,6 +152,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
                 }else{
                     mGesture.onTouchEvent(event);
                 }
+                showControlPanel();//Sandra@20220429 modify
                 if(event.getAction() == ACTION_UP){
                     //mDoubleClickCount=0;
                     startDismissControlViewTimer();
@@ -174,8 +180,62 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         //<--Sandra@20220419 add according to UI SPEC
     }
     //jennifer add for 快进快退功能<--
+    //Sandra@20220429 add-->
+    protected DismissControlViewTimerTask mDismissControlViewTimerTask;
+    protected Timer mDismissControlViewTimer;
+    protected void startDismissControlViewTimer() {
+        cancelDismissControlViewTimer();
+        mDismissControlViewTimer = new Timer();
+        mDismissControlViewTimerTask = new DismissControlViewTimerTask();
+        mDismissControlViewTimer.schedule(mDismissControlViewTimerTask, mDismissControlTime);
+    }
+    //触摸显示后隐藏的时间
+    protected int mDismissControlTime = 4000;
+    private class DismissControlViewTimerTask extends TimerTask {
 
+        @Override
+        public void run() {
+            if (mCurrentState != CURRENT_STATE_NORMAL
+                    && mCurrentState != CURRENT_STATE_ERROR
+                    && mCurrentState != CURRENT_STATE_AUTO_COMPLETE) {
+                if (getActivityContext() != null) {
+                    new Handler(Looper.getMainLooper()).post(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.i(TAG, "run:hideAllWidget（） ");
+                                    hideAllWidget();
+                                    setViewShowState(mLockScreen, GONE);
+                                    if (mHideKey && mIfCurrentIsFullscreen && mShowVKey) {
+                                        hideNavKey(mContext);
+                                    }
+                                }
+                            }
+                    );
+                }
+            }
+        }
+    }
+    protected void cancelDismissControlViewTimer() {
+        if (mDismissControlViewTimer != null) {
+            mDismissControlViewTimer.cancel();
+            mDismissControlViewTimer = null;
+        }
+        if (mDismissControlViewTimerTask != null) {
+            mDismissControlViewTimerTask.cancel();
+            mDismissControlViewTimerTask = null;
+        }
 
+    }
+        public void showControlPanel(){
+            setViewShowState(mPrevious, VISIBLE);
+            setViewShowState(mNext, VISIBLE);
+            setViewShowState(mStartButton, VISIBLE);
+            setViewShowState(mNot_Playing, VISIBLE);
+            setViewShowState(mTopContainer, VISIBLE);
+            setViewShowState(mBottomContainer, VISIBLE);
+        }
+        //Sandra@20220429 add<--
     /**
      * 设置播放URL
      *
@@ -342,8 +402,8 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     protected void changeUiToPreparingShow() {
         Debuger.printfLog("changeUiToPreparingShow");
 
-        setViewShowState(mTopContainer, VISIBLE);
-        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mTopContainer, INVISIBLE);
+        setViewShowState(mBottomContainer, INVISIBLE);//Sandra@20220429 modify
         setViewShowState(mStartButton, INVISIBLE);
         setViewShowState(mPrevious, INVISIBLE);
         setViewShowState(mNext, INVISIBLE);
@@ -366,18 +426,18 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
 
         Debuger.printfLog("changeUiToPlayingShow");
 
-        setViewShowState(mTopContainer, VISIBLE);
-        setViewShowState(mBottomContainer, VISIBLE);
+        setViewShowState(mTopContainer, INVISIBLE);
+        setViewShowState(mBottomContainer, INVISIBLE);
         if(isDoubleTouch){
             setViewShowState(mPrevious, INVISIBLE);
             setViewShowState(mNext, INVISIBLE);
             setViewShowState(mStartButton, INVISIBLE);
             setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
         }else{
-            setViewShowState(mPrevious, VISIBLE);
-            setViewShowState(mNext, VISIBLE);
-            setViewShowState(mStartButton, VISIBLE);
-            setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419
+            setViewShowState(mPrevious, INVISIBLE);
+            setViewShowState(mNext, INVISIBLE);
+            setViewShowState(mStartButton, INVISIBLE);
+            setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
             if (mLoadingProgressBar instanceof ENDownloadView) {
                 ((ENDownloadView) mLoadingProgressBar).reset();
             }
@@ -458,12 +518,12 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
     protected void changeUiToCompleteShow() {
         super.changeUiToCompleteShow();
         Debuger.printfLog("changeUiToCompleteShow");
-        setViewShowState(mPrevious, VISIBLE);
-        setViewShowState(mNext, VISIBLE);
-        setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419
-        setViewShowState(mStartButton, VISIBLE);
-        setViewShowState(mRewind, INVISIBLE);
-        setViewShowState(mFwd, INVISIBLE);
+        setViewShowState(mPrevious, INVISIBLE);//Sandra@20220419
+        setViewShowState(mNext, INVISIBLE);//Sandra@20220419
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419
+        setViewShowState(mStartButton, INVISIBLE);//Sandra@20220419
+        setViewShowState(mRewind, INVISIBLE);//Sandra@20220419
+        setViewShowState(mFwd, INVISIBLE);//Sandra@20220419
         setViewShowState(mRewindTotalTime, INVISIBLE);
         mRewindTotalTime.setText(null);
         setViewShowState(mFwdTotalTime, INVISIBLE);
@@ -482,7 +542,7 @@ public class CSDMediaPlayer extends ListGSYVideoPlayer implements View.OnClickLi
         setViewShowState(mFwd, INVISIBLE);
         setViewShowState(mRewindTotalTime, INVISIBLE);
         setViewShowState(mFwdTotalTime, INVISIBLE);
-        setViewShowState(mNot_Playing, VISIBLE);//Sandra@20220419 add
+        setViewShowState(mNot_Playing, INVISIBLE);//Sandra@20220419 add
     }
     protected void changeUiToPrepareingClear() {
         super.changeUiToPrepareingClear();

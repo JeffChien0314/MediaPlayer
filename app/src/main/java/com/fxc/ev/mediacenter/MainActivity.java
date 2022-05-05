@@ -657,14 +657,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mBtPlayerLayer.updateMediaDetail(item);
                 break;
             case Constants.USB_DEVICE:
+                mAlbum_photo_mask.setVisibility(View.VISIBLE);
                 if (mMediaInfo.getMediaItems().get(pos).isIfVideo()){
-                    mAlbum_photo.setBackgroundResource(R.color.bg_mask_video_playing);//此地方根据UI的建议改为全黑
-                    mAlbum_photo_mask.setVisibility(View.INVISIBLE);
+                    mAlbum_photo_mask.setBackgroundResource(R.color.bg_mask_video_playing);//此地方根据UI的建议改为全黑
                     mDeviceItemUtil.getCurrentDevice().setLastVideoIndex(pos);
                 }else {
                     BlurTransformation blurTransformation= new BlurTransformation(getApplicationContext());
                     blurTransformation. MediaBlurrAPI(mMediaInfo.getMediaItems().get(pos).getId(),mAlbum_photo);
-                  //  mAlbum_photo_mask.setVisibility(View.VISIBLE);
+                    mAlbum_photo_mask.setBackgroundResource(R.color.bg_mask);
                     mDeviceItemUtil.getCurrentDevice().setLastMusicIndex(pos);
                 }
                 ((ContentFragment) fragments.get(currentTab)).resetAnimation(currPosition);

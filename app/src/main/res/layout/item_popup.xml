@@ -9,7 +9,6 @@
         android:id="@+id/input_source_list_popup"
         android:layout_width="480px"
         android:layout_height="wrap_content"
-        android:maxHeight="720px"
         android:layout_margin="30px"
         android:choiceMode="singleChoice"
         android:drawSelectorOnTop="true"
