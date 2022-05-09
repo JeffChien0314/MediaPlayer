@@ -5,9 +5,11 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -98,7 +100,7 @@ public class MusicWidget extends AppWidgetProvider {
         if (!MediaPlayerService.isAlive) {
             applicationUtils.startService(context);
         }
-        //pushUpdate(context,appWidgetManager,null,null);
+        pushUpdate(context,appWidgetManager,null,null);
     }
 
     private void pushUpdate(Context context, AppWidgetManager appWidgetManager, MediaItem mediaItem, Boolean play_pause) {
@@ -122,20 +124,40 @@ public class MusicWidget extends AppWidgetProvider {
                 artistAndAlbum = artistAndAlbum + "-" + mediaItem.getAlbum();
             }
             remoteViews.setTextViewText(R.id.artist_album, artistAndAlbum);
-        }
-        //设定按钮图片
-        if (play_pause != null) {
-            if (play_pause) { //播放
-                remoteViews.setViewVisibility(R.id.player_pause, View.GONE);
-                remoteViews.setViewVisibility(R.id.player_play, View.VISIBLE);
-            } else { //暂停
-                remoteViews.setViewVisibility(R.id.player_pause, View.VISIBLE);
-                remoteViews.setViewVisibility(R.id.player_play, View.GONE);
+            //设定按钮图片
+            if (play_pause != null) {
+                if (play_pause) { //播放
+                    remoteViews.setViewVisibility(R.id.player_pause, View.GONE);
+                    remoteViews.setViewVisibility(R.id.player_play, View.VISIBLE);
+                } else { //暂停
+                    remoteViews.setViewVisibility(R.id.player_pause, View.VISIBLE);
+                    remoteViews.setViewVisibility(R.id.player_play, View.GONE);
+                }
             }
+           /* remoteViews.setViewVisibility(R.id.skip_fwd,View.VISIBLE);
+            remoteViews.setViewVisibility(R.id.skip_back, View.VISIBLE);
+            remoteViews.setViewVisibility(R.id.artist_album,  View.VISIBLE);
+            remoteViews.setViewVisibility(R.id.song_name,  View.VISIBLE);
+            remoteViews.setViewVisibility(R.id.layout_bg,  View.INVISIBLE);*/
+        }else {
+            //Sandra@20220507 add for 无播放内容的情形
+           /* remoteViews.setViewVisibility(R.id.player_pause, View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.player_play, View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.skip_fwd,View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.skip_back, View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.artist_album,  View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.song_name,  View.INVISIBLE);
+            remoteViews.setViewVisibility(R.id.layout_bg,  View.VISIBLE);*/
         }
 
+        //Sandra@20220507 add for 专辑图片显示-->
+       // Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mediaItem.getId());
+      //  uri = Uri.parse(uri + "/albumart");
+        // remoteViews.setImageViewUri(R.id.widget_container,uri);
+        // remoteViews.setImageViewResource(R.id.player_pause,R.drawable.album_pic);
+        //<--Sandra@20220507 add for 专辑图片显示
         ComponentName componentName = new ComponentName(context, MusicWidget.class);
-//        appWidgetManager.updateAppWidget(componentName, remoteViews);
+        appWidgetManager.updateAppWidget(componentName, remoteViews);
     }
 
 

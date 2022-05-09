@@ -237,7 +237,9 @@ public class ContentFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        ((MainActivity) getActivity()).popWindow.dismiss();
+        if ( ((MainActivity) getActivity()).popWindow!=null){
+            ((MainActivity) getActivity()).popWindow.dismiss();
+        }
         if (CSDMediaPlayer.getInstance(mContext).getMediaInfo() != null
                 && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems() != null
                 && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems().size() != 0) {//Sandra@20220315 add
