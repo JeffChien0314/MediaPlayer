@@ -110,7 +110,15 @@ public class MusicWidget extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.skip_fwd, getPendingIntent(context, R.id.skip_fwd));
         remoteViews.setOnClickPendingIntent(R.id.skip_back, getPendingIntent(context, R.id.skip_back));
         remoteViews.setOnClickPendingIntent(R.id.widget_open, getPendingIntent(context, R.id.widget_open));
-
+        if (play_pause != null) {
+            if (play_pause) { //播放
+                remoteViews.setViewVisibility(R.id.player_pause, View.GONE);
+                remoteViews.setViewVisibility(R.id.player_play, View.VISIBLE);
+            } else { //暂停
+                remoteViews.setViewVisibility(R.id.player_pause, View.VISIBLE);
+                remoteViews.setViewVisibility(R.id.player_play, View.GONE);
+            }
+        }
         //设置内容
         if (mediaItem != null) {
 
@@ -125,15 +133,6 @@ public class MusicWidget extends AppWidgetProvider {
             }
             remoteViews.setTextViewText(R.id.artist_album, artistAndAlbum);
             //设定按钮图片
-            if (play_pause != null) {
-                if (play_pause) { //播放
-                    remoteViews.setViewVisibility(R.id.player_pause, View.GONE);
-                    remoteViews.setViewVisibility(R.id.player_play, View.VISIBLE);
-                } else { //暂停
-                    remoteViews.setViewVisibility(R.id.player_pause, View.VISIBLE);
-                    remoteViews.setViewVisibility(R.id.player_play, View.GONE);
-                }
-            }
            /* remoteViews.setViewVisibility(R.id.skip_fwd,View.VISIBLE);
             remoteViews.setViewVisibility(R.id.skip_back, View.VISIBLE);
             remoteViews.setViewVisibility(R.id.artist_album,  View.VISIBLE);
@@ -149,7 +148,6 @@ public class MusicWidget extends AppWidgetProvider {
             remoteViews.setViewVisibility(R.id.song_name,  View.INVISIBLE);
             remoteViews.setViewVisibility(R.id.layout_bg,  View.VISIBLE);*/
         }
-
         //Sandra@20220507 add for 专辑图片显示-->
        // Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mediaItem.getId());
       //  uri = Uri.parse(uri + "/albumart");
