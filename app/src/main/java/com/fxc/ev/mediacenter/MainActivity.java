@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FrameLayout mUsbFrameLayout;
     private FrameLayout mbtFrameLayout;
     private BtplayerLayout mBtPlayerLayer;
-    private static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
+    public static int currPosition = 0;//list的当前选中项的索引值（第一项对应0）
     private boolean randomOpen = false;
     private TabLayout mTabLayout;
 

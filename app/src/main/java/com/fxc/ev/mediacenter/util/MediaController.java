@@ -8,9 +8,10 @@ import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
-
 import java.util.ArrayList;
 import java.util.List;
+import static com.fxc.ev.mediacenter.MainActivity.currPosition;
+import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 
 /**
  *
@@ -57,7 +58,21 @@ public class MediaController {
         }
 
     }
-
+    //Sandra@20220511 add for 与第三方/A02的媒资同步-->
+    public MediaItem getMediaItem(Context context){
+        MediaItem mediaItem=new MediaItem();
+        if (getDevices()!=null){
+            if (DeviceItemUtil.getInstance(context).getCurrentDevice()!=null){
+                if ( DeviceItemUtil.getInstance(context).getCurrentDevice().getType()==BLUETOOTH_DEVICE){
+                    return MediaBrowserConnecter.getInstance(context).getCurrentBtItem();
+                }else {
+                    return CSDMediaPlayer.getInstance(context).getMediaInfo().getMediaItems().get(currPosition);
+                }
+            }
+        }
+        return mediaItem;
+    }
+    //<--Sandra@20220511 add for 与第三方/A02的媒资同步
     /**
      * 给UI使用改变播放器状态
      *

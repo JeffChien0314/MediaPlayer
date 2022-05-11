@@ -456,7 +456,7 @@ public class MediaPlayerService extends Service {
                 applicationUtils.startService(getApplicationContext());
             }
             Log.i(TAG, "getMediaItem:mediaPlayer.getPlayPosition() " + mediaPlayer.getPlayPosition());
-            return mediaPlayer.getMediaInfo().getMediaItems().get(mediaPlayer.getPlayPosition());
+            return   MediaController.getInstance(getApplicationContext()).getMediaItem(getApplicationContext());
         }
 
         @Override

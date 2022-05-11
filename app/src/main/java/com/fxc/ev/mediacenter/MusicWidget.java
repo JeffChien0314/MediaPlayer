@@ -92,6 +92,7 @@ public class MusicWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+        MediaController.getInstance(context).getMediaItem(context);
         if (!MediaPlayerService.isAlive) {
             applicationUtils.startService(context);
         }
