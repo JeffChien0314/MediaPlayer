@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import static com.fxc.ev.mediacenter.MainActivity.currPosition;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
+import static com.fxc.ev.mediacenter.util.Constants.USB_DEVICE;
 
 /**
  *
@@ -72,6 +73,20 @@ public class MediaController {
         }
         return mediaItem;
     }
+/**
+ * time=-1表示蓝牙
+ * */
+    public long getCurrentProgress(Context context) {
+        long time=-1;
+        if (DeviceItemUtil.getInstance(context).getCurrentDevice()!=null){
+            if ( DeviceItemUtil.getInstance(context).getCurrentDevice().getType()==USB_DEVICE){
+                time=0;
+                time=CSDMediaPlayer.getInstance(context).getGSYVideoManager().getCurrentPosition();
+            }
+        }
+        return time;
+    }
+
     //<--Sandra@20220511 add for 与第三方/A02的媒资同步
     /**
      * 给UI使用改变播放器状态

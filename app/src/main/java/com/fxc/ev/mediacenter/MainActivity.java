@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int UPDATE_MEDIAITEM = 2;
     private final int UPDATE_BT_STATE = 3;
     private final int CLEAR_MEDIA_LIST_AND_SHOW_OTHER_DEVICE = 4;
+    private final int REGULAR_UPDATE =5;
 
     private int playMode = 0;// 0循环播放,1单曲循环
     protected CSDMediaPlayer mCsdMediaPlayer;
@@ -137,6 +138,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case UPDATE_BT_STATE:
                     updateStateButtonImg(message.arg1);
+                    break;
+                case REGULAR_UPDATE:
+                    if (mCsdMediaPlayer.getGSYVideoManager().isPlaying()){
+                        if(null==mCsdMediaPlayer) break;
+                        try {
+                            long progress = mCsdMediaPlayer.getGSYVideoManager()!= null
+                                    ? (long) mCsdMediaPlayer.getGSYVideoManager().getCurrentPosition()
+                                    : 0;
+                            if (MediaPlayerService.isAlive) {
+                                MediaPlayerService.callback2ClientCurrentDurationChange(progress);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        handler.sendEmptyMessageDelayed(REGULAR_UPDATE, 1000);
+                    }
                     break;
                 default:
                     break;
@@ -557,8 +574,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     handler.sendMessage(message);
                     //Sandra@20220511 add for 仪表盘媒资同步
                     if (MediaPlayerService.isAlive) {
+                        handler.sendEmptyMessage(REGULAR_UPDATE);
                         MediaPlayerService.callback2ClientContentChange(intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + ""));
-                        MediaPlayerService.callback2ClientCurrentDurationChange(10);//目前固定值10，待实现动态
                     }
                     break;
                 case Constants.ACTION_STATE_CHANGED_BROADCAST:
@@ -570,8 +587,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //Sandra@20220511 add for 仪表盘媒资同步
                     if (MediaPlayerService.isAlive) {
                         MediaPlayerService.callback2ClientPlayStateChange(state);
-                        MediaPlayerService.callback2ClientCurrentDurationChange(10);//目前固定值10，待实现动态
-                        Log.i(TAG, "onReceive: callback2ClientStateChange state "+state);
+                        if (state==Constants.STATE_PLAY){
+                            handler.sendEmptyMessage(REGULAR_UPDATE);
+                        }
                     }
                     break;
                 default:
@@ -669,7 +687,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case Constants.USB_DEVICE:
                 mAlbum_photo_mask.setVisibility(View.VISIBLE);
-                if (mMediaInfo.getMediaItems().get(pos).isIfVideo()){
+                if (mMediaInfo !=null && mMediaInfo.getMediaItems().get(pos).isIfVideo()){
                     mAlbum_photo_mask.setBackgroundResource(R.color.bg_mask_video_playing);//此地方根据UI的建议改为全黑
                     mDeviceItemUtil.getCurrentDevice().setLastVideoIndex(pos);
                 }else {

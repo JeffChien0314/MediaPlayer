@@ -445,9 +445,12 @@ public class MediaPlayerService extends Service {
     }
 
     private class MyBinder extends IMyAidlInterface.Stub {
+
+
         @Override
-        public String getName() throws RemoteException {
-            return "test";
+        public long getCurrentProgress() throws RemoteException {
+          //  return mediaPlayer.getGSYVideoManager().getCurrentPosition();
+            return MediaController.getInstance(getApplicationContext()).getCurrentProgress(getApplicationContext());
         }
 
         @Override
@@ -531,7 +534,7 @@ public class MediaPlayerService extends Service {
             mRemoteCallbackList.finishBroadcast();
         }
     }
-    public static void callback2ClientCurrentDurationChange(int currentDuration) {
+    public static void callback2ClientCurrentDurationChange(long currentDuration) {
         if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
             return;
         }
