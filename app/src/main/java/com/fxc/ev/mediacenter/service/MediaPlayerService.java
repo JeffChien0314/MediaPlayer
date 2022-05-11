@@ -15,15 +15,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.DeadObjectException;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.fxc.ev.mediacenter.ContentFragment;
+import com.fxc.ev.mediacenter.IDataChangeListener;
+import com.fxc.ev.mediacenter.IMyAidlInterface;
 import com.fxc.ev.mediacenter.bluetooth.BtMusicManager;
 import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
@@ -178,7 +182,7 @@ public class MediaPlayerService extends Service {
     public void onDestroy() {
         Log.i(TAG, "onDestroy: ");
         saveData();
-        if (myTask!=null) myTask.cancel(true);
+        if (myTask != null) myTask.cancel(true);
         mediaPlayer.release();
         mediaPlayer = null;
         unregisterReceiver();
@@ -189,8 +193,10 @@ public class MediaPlayerService extends Service {
 
     @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public MyBinder onBind(Intent intent) {
+        mRemoteCallbackList = new RemoteCallbackList<IDataChangeListener>();
+        MyBinder myBinder = new MyBinder();
+        return myBinder;
     }
 
     public void saveData() {
@@ -438,4 +444,119 @@ public class MediaPlayerService extends Service {
         }
     }
 
+    private class MyBinder extends IMyAidlInterface.Stub {
+        @Override
+        public String getName() throws RemoteException {
+            return "test";
+        }
+
+        @Override
+        public MediaItem getMediaItem() throws RemoteException {
+            if (!MediaPlayerService.isAlive) {
+                applicationUtils.startService(getApplicationContext());
+            }
+            Log.i(TAG, "getMediaItem:mediaPlayer.getPlayPosition() " + mediaPlayer.getPlayPosition());
+            return mediaPlayer.getMediaInfo().getMediaItems().get(mediaPlayer.getPlayPosition());
+        }
+
+        @Override
+        public void registerSetupNotification(IDataChangeListener listener) throws RemoteException {
+            if (listener != null) {
+                mRemoteCallbackList.register(listener);
+            }
+        }
+
+        @Override
+        public void unRegisterSetupNotification(IDataChangeListener listener) throws RemoteException {
+            if (listener != null) {
+                mRemoteCallbackList.unregister(listener);
+            }
+        }
+    }
+
+    private static RemoteCallbackList<IDataChangeListener> mRemoteCallbackList = null;
+    public static void callback2ClientPlayStateChange(int playState) {
+        if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
+            return;
+        }
+        synchronized (mRemoteCallbackList) {
+            //开始回调
+            mRemoteCallbackList.beginBroadcast();
+            int N = mRemoteCallbackList.getRegisteredCallbackCount();
+            Log.i("", "callback2Client N ==" + N);
+            for (int i = 0; i < N; i++) {
+                try {
+                    if (mRemoteCallbackList.getBroadcastItem(i) == null) {
+                        continue;
+                    }
+                    Log.i("", "callback2Client nodeData ==" + playState);
+                    //get出来以后调用dataCalback到客户端去
+                    mRemoteCallbackList.getBroadcastItem(i).onStateChange(playState);
+                } catch (DeadObjectException e) {
+                    if (mRemoteCallbackList.getBroadcastItem(i) != null)
+                        mRemoteCallbackList.unregister(mRemoteCallbackList.getBroadcastItem(i));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            //结束回调
+            mRemoteCallbackList.finishBroadcast();
+        }
+    }
+    public static void callback2ClientContentChange(MediaItem mediaItem) {
+        if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
+            return;
+        }
+        synchronized (mRemoteCallbackList) {
+            //开始回调
+            mRemoteCallbackList.beginBroadcast();
+            int N = mRemoteCallbackList.getRegisteredCallbackCount();
+            Log.i("", "callback2Client N ==" + N);
+            for (int i = 0; i < N; i++) {
+                try {
+                    if (mRemoteCallbackList.getBroadcastItem(i) == null) {
+                        continue;
+                    }
+                    Log.i("", "callback2Client nodeData ==" + mediaItem.getTitle());
+                    //get出来以后调用dataCalback到客户端去
+                    mRemoteCallbackList.getBroadcastItem(i).onContentChange(mediaItem);
+                } catch (DeadObjectException e) {
+                    if (mRemoteCallbackList.getBroadcastItem(i) != null)
+                        mRemoteCallbackList.unregister(mRemoteCallbackList.getBroadcastItem(i));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            //结束回调
+            mRemoteCallbackList.finishBroadcast();
+        }
+    }
+    public static void callback2ClientCurrentDurationChange(int currentDuration) {
+        if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
+            return;
+        }
+        synchronized (mRemoteCallbackList) {
+            //开始回调
+            mRemoteCallbackList.beginBroadcast();
+            int N = mRemoteCallbackList.getRegisteredCallbackCount();
+            Log.i("", "callback2Client N ==" + N);
+            for (int i = 0; i < N; i++) {
+                try {
+                    if (mRemoteCallbackList.getBroadcastItem(i) == null) {
+                        continue;
+                    }
+                    Log.i("", "callback2Client nodeData ==" + currentDuration);
+                    //get出来以后调用dataCalback到客户端去
+                    mRemoteCallbackList.getBroadcastItem(i).onDurationChange(currentDuration);
+                } catch (DeadObjectException e) {
+                    if (mRemoteCallbackList.getBroadcastItem(i) != null)
+                        mRemoteCallbackList.unregister(mRemoteCallbackList.getBroadcastItem(i));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            //结束回调
+            mRemoteCallbackList.finishBroadcast();
+        }
+    }
 }

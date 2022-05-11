@@ -33,7 +33,6 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.fxc.mediaplayer.R;
@@ -44,6 +43,7 @@ import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
+import com.fxc.ev.mediacenter.service.MediaPlayerService;
 import com.fxc.ev.mediacenter.util.BlurTransformation;
 import com.fxc.ev.mediacenter.util.Constants;
 import com.fxc.ev.mediacenter.util.DeviceItemUtil;
@@ -555,6 +555,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     message.setData(bundle);
                     message.what = UPDATE_MEDIAITEM;
                     handler.sendMessage(message);
+                    //Sandra@20220511 add for 仪表盘媒资同步
+                    if (MediaPlayerService.isAlive) {
+                        MediaPlayerService.callback2ClientContentChange(intent.getParcelableExtra(Constants.MEDIAITEM_CHANGED + ""));
+                        MediaPlayerService.callback2ClientCurrentDurationChange(10);//目前固定值10，待实现动态
+                    }
                     break;
                 case Constants.ACTION_STATE_CHANGED_BROADCAST:
                     int state = intent.getIntExtra(Constants.PLAYSTATE_CHANGED + "", -1);
@@ -562,6 +567,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     msg.arg1 = state;
                     msg.what = UPDATE_BT_STATE;
                     handler.sendMessage(msg);
+                    //Sandra@20220511 add for 仪表盘媒资同步
+                    if (MediaPlayerService.isAlive) {
+                        MediaPlayerService.callback2ClientPlayStateChange(state);
+                        MediaPlayerService.callback2ClientCurrentDurationChange(10);//目前固定值10，待实现动态
+                        Log.i(TAG, "onReceive: callback2ClientStateChange state "+state);
+                    }
                     break;
                 default:
                     break;

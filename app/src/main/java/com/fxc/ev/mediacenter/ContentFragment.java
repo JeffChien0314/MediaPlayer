@@ -48,7 +48,6 @@ import static com.fxc.ev.mediacenter.MainActivity.currentTab;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
-import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
 
 /**

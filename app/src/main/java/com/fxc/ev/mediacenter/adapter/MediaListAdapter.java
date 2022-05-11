@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
-import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
 import com.fxc.ev.mediacenter.util.MediaItemUtil;
 
 import java.util.List;

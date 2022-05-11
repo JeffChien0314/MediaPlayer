@@ -157,5 +157,14 @@ public class MediaItem implements Parcelable {
         dest.writeByte((byte) (ifVideo ? 1 : 0));
         dest.writeString(storagePath);
     }
-
+    public void readFromParcel(Parcel in) {
+        this.id = in.readLong();
+        this.title = in.readString();
+        this.album = in.readString();
+        this.artist = in.readString();
+        this. duration = in.readLong();
+        this.thumbBitmap = in.readParcelable(Bitmap.class.getClassLoader());
+        this. ifVideo = in.readByte() != 0;
+        this.storagePath=in.readString();
+    }
 }

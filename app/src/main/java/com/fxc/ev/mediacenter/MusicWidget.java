@@ -5,22 +5,17 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
-
-import com.fxc.ev.mediacenter.util.DeviceItemUtil;
 import com.fxc.ev.mediacenter.util.MediaController;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.example.fxc.mediaplayer.R;
 import com.fxc.ev.mediacenter.service.MediaPlayerService;
-import com.fxc.ev.mediacenter.util.MediaItemUtil;
 import com.fxc.ev.mediacenter.util.applicationUtils;
 import com.fxc.ev.mediacenter.util.Constants;
 

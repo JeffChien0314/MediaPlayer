@@ -1,13 +1,8 @@
 package com.fxc.ev.mediacenter.util;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.fxc.ev.mediacenter.bluetooth.ConnectBlueCallBack;
 import com.fxc.ev.mediacenter.bluetooth.client.MediaBrowserConnecter;
 import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
