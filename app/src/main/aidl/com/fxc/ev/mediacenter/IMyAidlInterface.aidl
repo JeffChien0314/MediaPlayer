@@ -4,7 +4,7 @@ import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.IDataChangeListener;
 
 interface IMyAidlInterface {
-               String getName();
+               long getCurrentProgress();
                MediaItem getMediaItem();
    void registerSetupNotification(IDataChangeListener listener);
    void unRegisterSetupNotification(IDataChangeListener listener);

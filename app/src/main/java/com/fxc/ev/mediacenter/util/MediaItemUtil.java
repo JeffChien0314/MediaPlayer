@@ -100,7 +100,7 @@ public class MediaItemUtil {
                     mediaItem.setId(id);
                     mediaItem.setTitle(title);
                     mediaItem.setArtist(artist);
-                    //  mediaItem.setAlbum(album);
+                      mediaItem.setAlbum(album);
                     //   mediaItem.setDisplayName(displayName);
                     //    mediaItem.setAlbumId(albumId);
                     mediaItem.setDuration(duration);
@@ -139,8 +139,8 @@ public class MediaItemUtil {
                         .getColumnIndex(MediaStore.Video.Media.TITLE))); // 視頻標題
                 String artist = cursor.getString(cursor
                         .getColumnIndex(MediaStore.Video.Media.ARTIST)); // 藝術家
-                /*String album = cursor.getString(cursor
-                        .getColumnIndex(MediaStore.Video.Media.ALBUM)); */   //專輯
+                String album = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Video.Media.ALBUM));    //專輯
             /*String displayName = cursor.getString(cursor
                     .getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));*/
                 //  long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.Media.ALBUM_ID));
@@ -162,7 +162,8 @@ public class MediaItemUtil {
                     mediaItem.setId(id);
                     mediaItem.setTitle(title);
                     mediaItem.setArtist(artist);
-                    // mediaItem.setAlbum(album);
+                     mediaItem.setAlbum(album);
+
                     // mediaItem.setDisplayName(displayName);
                     //   musicInfo.setAlbumId(albumId);
                     mediaItem.setDuration(duration);
@@ -254,7 +255,7 @@ public class MediaItemUtil {
             throw new IllegalArgumentException("Must specify an album or a song id");
         }
         try {
-            if (albumid < 0) {
+           /* if (albumid < 0) {
                 Uri uri = Uri.parse("content://media/external/audio/media/" + songid + "/albumart");
                 ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
                 if (pfd != null) {
@@ -267,7 +268,13 @@ public class MediaItemUtil {
                 if (pfd != null) {
                     FileDescriptor fd = pfd.getFileDescriptor();
                     bm = BitmapFactory.decodeFileDescriptor(fd);
-                }
+                }*/
+            Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songid);
+            uri= Uri.parse(uri+"/albumart");
+            ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
+            if (pfd != null) {
+                FileDescriptor fd = pfd.getFileDescriptor();
+                bm = BitmapFactory.decodeFileDescriptor(fd);
             }
         } catch (FileNotFoundException ex) {
 
