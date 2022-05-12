@@ -193,7 +193,7 @@ public class ContentFragment extends Fragment {
         listAdapter = new MediaListAdapter(mContext, mediaItems);
         mediaFile_list.setAdapter(listAdapter);
         //jennifer add for 退出应用再进入list布局大小的控制-->
-        ViewGroup.LayoutParams params = mediaFile_list.getLayoutParams();
+     /*   ViewGroup.LayoutParams params = mediaFile_list.getLayoutParams();
         if (isDeviceMenuOpen()) {
             if (MediaController.getInstance(mContext).getDevices().size() * 90 < 990) {
                 params.height = 1000 - (MediaController.getInstance(mContext).getDevices().size() * 90);
@@ -203,7 +203,7 @@ public class ContentFragment extends Fragment {
         } else {
             params.height = 1000;
         }
-        mediaFile_list.setLayoutParams(params);
+        mediaFile_list.setLayoutParams(params);*/
         //jennifer add for 退出应用再进入list布局大小的控制<--
 
     }
