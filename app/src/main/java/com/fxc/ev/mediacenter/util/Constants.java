@@ -2,6 +2,7 @@ package com.fxc.ev.mediacenter.util;
 
 public class Constants {
     public static final boolean cutDownBrowseFunction=true;
+    public static final String  ACTION_SERVICE_START_BROADCAST = "MediaPlayerService.start.orRestart";
     public static final String ACTION_STATE_CHANGED_BROADCAST = "MediaPlayer.stateChanged";
     public static final String ACTION_BT_STATE_INIT_BROADCAST = "BT_MediaPlayer.state.init";
     public static final String ACTION_MEDIAITEM_CHANGED_BROADCAST = "MediaPlayer.ITEMChanged";

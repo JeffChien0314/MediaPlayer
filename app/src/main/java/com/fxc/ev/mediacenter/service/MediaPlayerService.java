@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.NOTIFICATION_ID;
+import static com.fxc.ev.mediacenter.util.Constants.ACTION_SERVICE_START_BROADCAST;
 import static com.fxc.ev.mediacenter.util.DeviceItemUtil.ACTION_DEVICE_CHANGED;
 import static com.fxc.ev.mediacenter.util.DeviceItemUtil.ACTION_DEVICE_OF_LIST_LOST;
 
@@ -119,6 +120,7 @@ public class MediaPlayerService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
         isAlive = true;
+        sendBroadcastToOtherApp();
         registerReceiver();
         MediaBrowserConnecter.getInstance(this.getApplicationContext()).initBroswer();
         // mDeviceItemUtil = DeviceItemUtil.getInstance(this.getApplicationContext());
@@ -126,7 +128,14 @@ public class MediaPlayerService extends Service {
         resetPlayerCondition(this.getApplicationContext());
         getALLMediaItems();
     }
-
+    /* *
+    Sandra add for 添加广播通知第三方APP service已开启*/
+    public  void sendBroadcastToOtherApp(){
+        Intent intent = new Intent();
+        intent.setAction(ACTION_SERVICE_START_BROADCAST);//用隐式意图来启动广播
+        intent.putExtra("msg", "MediaPlayerService started");
+        sendBroadcast(intent);
+    };
     /**
      * 1.判断是否使用过设备
      * 2.判断是否有设备列表，及上次使用的设备是否还在
@@ -174,8 +183,8 @@ public class MediaPlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(this);
-        return START_NOT_STICKY;
-     // return START_STICKY;
+       // return START_NOT_STICKY;
+         return START_STICKY;
     }
 
     @Override
