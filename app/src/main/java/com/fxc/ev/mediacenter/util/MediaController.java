@@ -8,6 +8,8 @@ import com.fxc.ev.mediacenter.datastruct.DeviceItem;
 import com.fxc.ev.mediacenter.datastruct.MediaInfo;
 import com.fxc.ev.mediacenter.datastruct.MediaItem;
 import com.fxc.ev.mediacenter.localplayer.CSDMediaPlayer;
+import com.google.android.exoplayer.util.NalUnitUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import static com.fxc.ev.mediacenter.MainActivity.currPosition;
@@ -65,11 +67,15 @@ public class MediaController {
         if (getDevices()!=null){
             if (DeviceItemUtil.getInstance(context).getCurrentDevice()!=null){
                 if ( DeviceItemUtil.getInstance(context).getCurrentDevice().getType()==BLUETOOTH_DEVICE){
+                    if (MediaBrowserConnecter.getInstance(context)!= null){
                     return MediaBrowserConnecter.getInstance(context).getCurrentBtItem();
+                    }
                 }else {
+                    if (CSDMediaPlayer.getInstance(context).getMediaInfo()!=null && CSDMediaPlayer.getInstance(context).getMediaInfo().getMediaItems()!=null){
                     return CSDMediaPlayer.getInstance(context).getMediaInfo().getMediaItems().get(currPosition);
                 }
             }
+        }
         }
         return mediaItem;
     }

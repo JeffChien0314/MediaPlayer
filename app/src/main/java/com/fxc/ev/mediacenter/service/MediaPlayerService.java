@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -449,12 +450,25 @@ public class MediaPlayerService extends Service {
         @Override
         protected void onPostExecute(ArrayList<MediaItem> result) {
             super.onPostExecute(result);
-            MediaItemUtil.allDevicesMediaItems =result;
+            MediaItemUtil.allDevicesMediaItems = result;
         }
     }
 
     private class MyBinder extends IMyAidlInterface.Stub {
 
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)   {
+            try {
+                return super.onTransact(code, data, reply, flags);
+
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            return false;
+
+        }
 
         @Override
         public long getCurrentProgress() throws RemoteException {
@@ -487,6 +501,7 @@ public class MediaPlayerService extends Service {
     }
 
     private static RemoteCallbackList<IDataChangeListener> mRemoteCallbackList = null;
+
     public static void callback2ClientPlayStateChange(int playState) {
         if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
             return;
@@ -515,6 +530,7 @@ public class MediaPlayerService extends Service {
             mRemoteCallbackList.finishBroadcast();
         }
     }
+
     public static void callback2ClientContentChange(MediaItem mediaItem) {
         if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
             return;
@@ -543,6 +559,7 @@ public class MediaPlayerService extends Service {
             mRemoteCallbackList.finishBroadcast();
         }
     }
+
     public static void callback2ClientCurrentDurationChange(long currentDuration) {
         if (mRemoteCallbackList == null || mRemoteCallbackList.getRegisteredCallbackCount() <= 0) {
             return;

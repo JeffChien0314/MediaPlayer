@@ -11,7 +11,7 @@ import com.shuyu.gsyvideoplayer.model.GSYVideoModel;
  */
 
 public class MediaItem implements Parcelable {
-    private Long id; // 歌曲ID
+    private long id; // 歌曲ID
     private String title; // 歌曲名稱
     private String album; // 專輯
     private String artist; // 歌手名稱

@@ -37,7 +37,7 @@ public class MediaBrowserConnecter {
     private String className = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
     private static MediaBrowserConnecter mInstance;
     private boolean isBtPlaying = false;
-    public MediaItem currentBtItem;//需要通知UI显示内容
+    public MediaItem currentBtItem=new MediaItem();//需要通知UI显示内容
 
     public MediaItem getCurrentBtItem() {
         return currentBtItem;

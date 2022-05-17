@@ -40,7 +40,9 @@ android:name="MediaPlayer.ITEMChanged" />
         <service
             android:name="com.fxc.ev.mediacenter.service.MediaPlayerService"
             
-android:launchMode="singleInstance">
+android:enabled="true"
+
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="MediaPlayerService" />
             </intent-filter>

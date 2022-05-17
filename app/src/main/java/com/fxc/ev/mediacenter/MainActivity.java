@@ -429,7 +429,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.item_popup, null, true);
          devicelistview_popup=(ListView) view.findViewById(R.id.input_source_list_popup);
         updateDeviceListData();
-        deviceListAdapter_popup = new DeviceListAdapter(MainActivity.this,  externalDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
+        List<DeviceItem> popUPDeviceItems = new ArrayList<DeviceItem>();//Sandra@20220517 add for Fix 背景进程中数据已更新但是UI进程中 ListView没有更新导致闪退的问题；
+        for (int i=0;i<externalDeviceItems.size();i++){
+            popUPDeviceItems.add(externalDeviceItems.get(i));
+        }
+        deviceListAdapter_popup = new DeviceListAdapter(MainActivity.this,  popUPDeviceItems/*, mDeviceItemUtil.getCurrentDevice()*/);
         devicelistview_popup.setAdapter(deviceListAdapter_popup);
         deviceListAdapter_popup.notifyDataSetChanged();
         devicelistview_popup.invalidateViews();
@@ -453,8 +457,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // 拦截后 PopupWindow的onTouchEvent不被调用，这样点击外部区域无法dismiss
             }
         });
-        popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));    //要为popWindow设置一个背景才有效
-        popWindow.setFocusable( true );
+        popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));    //android6.0以下，要为popWindow设置一个背景才有效
+        popWindow.setFocusable(true);
         popWindow.update();
 
         //设置popupWindow显示的位置，参数依次是参照View，x轴的偏移量，y轴的偏移量
