@@ -238,6 +238,7 @@ public class ContentFragment extends Fragment {
         super.onPause();
         if ( ((MainActivity) getActivity()).popWindow!=null){
             ((MainActivity) getActivity()).popWindow.dismiss();
+            ((MainActivity) getActivity()).changeVisibleOfDeviceView(false);
         }
         if (CSDMediaPlayer.getInstance(mContext).getMediaInfo() != null
                 && CSDMediaPlayer.getInstance(mContext).getMediaInfo().getMediaItems() != null
@@ -324,7 +325,9 @@ public class ContentFragment extends Fragment {
             if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                 mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
                 updateMediaList(mediaItems);
+                if (((MainActivity) getActivity()).device_tips!=null){
                 ((MainActivity) getActivity()).device_tips.setText(deviceItem.getDescription());
+                }
             } else {//没有全部文件，就取抓取单个设备的文件，过程有Loading图画，然后更新文件列表，
               //  ((MainActivity) getActivity()).updateDeviceListData(/*true*/);
                 if (deviceItem != null) {

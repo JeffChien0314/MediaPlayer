@@ -730,22 +730,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mBtPlayerLayer.updateStateButtonImg(state);
                 break;
             case Constants.STATE_RANDOM_CLOSE:
-                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
+           //     mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_normal);
                 mRandomButton.setActivated(false);
                 mRandomButton.setBackgroundResource(R.drawable.random_bg);
                 break;
             case Constants.STATE_RANDOM_OPEN:
-                mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
+             //   mRandomButton.setBackgroundResource(R.drawable.icon_shuffle_active);
                 mRandomButton.setActivated(true);
                 mRandomButton.setBackgroundResource(R.drawable.random_bg);
                 break;
             case Constants.STATE_SINGLE_REPEAT:
-                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
+             //   mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_single_active);
                 mPlayModeButton.setActivated(true);
                 mPlayModeButton.setBackgroundResource(R.drawable.playmode_one_single_repeat_bg);
                 break;
             case Constants.STATE_ALL_REPEAT:
-                mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
+             //   mPlayModeButton.setBackgroundResource(R.drawable.icon_repeat_normal);
                 mPlayModeButton.setActivated(false);
                 mPlayModeButton.setBackgroundResource(R.drawable.playmode_bg);
                 break;

@@ -64,7 +64,7 @@ public class MediaItem implements Parcelable {
         super();
     }
 
-    public MediaItem(Long id, String title, String album, String artist, long duration, Bitmap thumbBitmap, GSYVideoModel gsyVideoModel, boolean ifVideo, String storagePath) {
+    public MediaItem(long id, String title, String album, String artist, long duration, Bitmap thumbBitmap, GSYVideoModel gsyVideoModel, boolean ifVideo, String storagePath) {
         this.id = id;
         this.title = title;
         this.album = album;
@@ -92,11 +92,11 @@ public class MediaItem implements Parcelable {
         this.thumbBitmap = thumbBitmap;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

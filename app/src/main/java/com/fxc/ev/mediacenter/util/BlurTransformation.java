@@ -24,7 +24,7 @@ import jp.wasabeef.glide.transformations.internal.FastBlur;
 import jp.wasabeef.glide.transformations.internal.RSBlur;
 
 /**
- * Created by Administrator on 2022/4/23.
+ * Created by Sandra on 2022/4/23.
  */
 
 public class BlurTransformation extends BitmapTransformation {
