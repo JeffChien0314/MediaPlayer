@@ -56,8 +56,10 @@ import java.util.List;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.USB_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.MUSIC;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.VIDEO;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
@@ -277,11 +279,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initTabData() {
         listTitles = new ArrayList<>();
         fragments = new ArrayList<>();
-        listTitles.add("Music");
-        listTitles.add("Video");
+        listTitles.add(MUSIC);
+        listTitles.add(VIDEO);
 
         for (int i = 0; i < listTitles.size(); i++) {
-            ContentFragment fragment = new ContentFragment(MainActivity.this);
+            ContentFragment fragment = new ContentFragment(MainActivity.this,listTitles.get(i));
             fragments.add(fragment);
         }
         //mTabLayout.setTabMode(TabLayout.SCROLL_AXIS_HORIZONTAL);//设置tab模式，当前为系统默认模式

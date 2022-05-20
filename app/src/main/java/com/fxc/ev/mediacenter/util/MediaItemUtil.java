@@ -36,6 +36,8 @@ import static com.fxc.ev.mediacenter.ContentFragment.printTime;
 public class MediaItemUtil {
     public static final int TYPE_MUSIC = 0;
     public static final int TYPE_VIDEO = 1;
+    public static final String MUSIC="Music";
+    public static final String VIDEO="Video";
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
     private static final BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
     public  static ArrayList<MediaItem> allDevicesMediaItems = new ArrayList<>();

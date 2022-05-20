@@ -47,7 +47,10 @@ import static android.security.KeyStore.getApplicationContext;
 import static com.fxc.ev.mediacenter.MainActivity.currentTab;
 import static com.fxc.ev.mediacenter.util.Constants.BLUETOOTH_DEVICE;
 import static com.fxc.ev.mediacenter.util.Constants.cutDownBrowseFunction;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.MUSIC;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_MUSIC;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.TYPE_VIDEO;
+import static com.fxc.ev.mediacenter.util.MediaItemUtil.VIDEO;
 import static com.fxc.ev.mediacenter.util.MediaItemUtil.getMusicInfos;
 
 /**
@@ -59,30 +62,17 @@ public class ContentFragment extends Fragment {
     public MediaListAdapter listAdapter;
     private View view;
     private Context mContext;
+    private String FragmentName ="";
     private TextView initial_tips;
     public ListView mediaFile_list;
     private List<GSYVideoModel> urls = new ArrayList<>();
     private AnimationDrawable ani_gif_playing;
     private DeviceItem mDeviceItem;
-    private boolean isDeviceMenuOpen = true;
-
-    public boolean isDeviceMenuOpen() {
-        return isDeviceMenuOpen;
-    }
-
-    public void setDeviceMenuOpen(boolean deviceMenuOpen) {
-        isDeviceMenuOpen = deviceMenuOpen;
-    }
-
-
-    public ContentFragment() {
-        super();
-    }
-
     @SuppressLint("ValidFragment")
-    public ContentFragment(Context context) {
+    public ContentFragment(Context context,String title) {
         super();
         mContext = context;
+        FragmentName =title;
     }
 
     @Nullable
@@ -384,6 +374,7 @@ public class ContentFragment extends Fragment {
     }
 
     private void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
+        if (judgeIfNeedUpdate()){
         try{
         if (mediaItemList.size() == 0) {
             ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
@@ -401,10 +392,29 @@ public class ContentFragment extends Fragment {
         }catch (Exception e){
             Log.i(TAG, "modifyRelativeUI: e"+e);
         }
-
+        }
     }
 
-
+   //Sandra@20220520 add-->
+    /**
+     * 解决onResume后Activity的组件如随机/循环控制按钮,显示异常的问题，
+    问题原因:不该两个ContFragment同时控制一个控件，应该判断是否为当前Fragment,再决定是否刷新*/
+    private boolean judgeIfNeedUpdate(){
+        boolean flag=false;
+        if (FragmentName !=null){
+            if (FragmentName.equals(MUSIC)){
+                if (currentTab==TYPE_MUSIC){
+                    flag=true;
+    }
+            }else if (FragmentName.equals(VIDEO)){
+                if (currentTab==TYPE_VIDEO){
+                    flag=true;
+                }
+            }
+        }
+        return flag;
+    };
+    //<--Sandra@20220520 add
     public ArrayList<MediaItem> filterAllMediaItemsOfSpecificDevice(int media_Type, DeviceItem deviceInfo) {
         if (deviceInfo == null || deviceInfo.getStoragePath() == null) {
             return null;
