@@ -586,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case Constants.ACTION_STATE_CHANGED_BROADCAST:
                     int state = intent.getIntExtra(Constants.PLAYSTATE_CHANGED + "", -1);
-                    if (mDeviceItemUtil.getCurrentDevice().getType()==BLUETOOTH_DEVICE){//Sandra@20220520 add fix 本地播放中按暂停键后Random按钮变Active的问题
+                    if (DeviceItemUtil.getInstance(context).getCurrentDevice()!=null && DeviceItemUtil.getInstance(context).getCurrentDevice().getType()==BLUETOOTH_DEVICE){//Sandra@20220520 add fix 本地播放中按暂停键后Random按钮变Active的问题
                     Message msg = new Message();
                     msg.arg1 = state;
                     msg.what = UPDATE_BT_STATE;

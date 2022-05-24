@@ -374,7 +374,7 @@ public class ContentFragment extends Fragment {
     }
 
     private void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
-        if (judgeIfNeedUpdate()){
+      //  if (judgeIfNeedUpdate()){
         try{
         if (mediaItemList.size() == 0) {
             ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
@@ -392,7 +392,7 @@ public class ContentFragment extends Fragment {
         }catch (Exception e){
             Log.i(TAG, "modifyRelativeUI: e"+e);
         }
-        }
+   //     }
     }
 
    //Sandra@20220520 add-->
