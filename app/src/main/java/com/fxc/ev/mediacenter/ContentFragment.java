@@ -315,6 +315,7 @@ public class ContentFragment extends Fragment {
             if (MediaItemUtil.allDevicesMediaItems.size() != 0) {//搜索全部执行完毕，可以去筛选
                 mediaItems = filterAllMediaItemsOfSpecificDevice(mediaType, deviceItem);
                 updateMediaList(mediaItems);
+                modifyRelativeUI(mediaItems);
                 if (((MainActivity) getActivity()).device_tips!=null){
                 ((MainActivity) getActivity()).device_tips.setText(deviceItem.getDescription());
                 }
@@ -323,6 +324,7 @@ public class ContentFragment extends Fragment {
                 if (deviceItem != null) {
                     ((MainActivity) getActivity()).getALLMediaItemsOfSpecificDevice(true, deviceItem, mediaType);
                     updateMediaList(mediaItems);
+                    modifyRelativeUI(mediaItems);
                 }
             }
             if (cutDownBrowseFunction) {
@@ -359,7 +361,6 @@ public class ContentFragment extends Fragment {
 
     public void updateMediaList(ArrayList<MediaItem> mediaItemList) {
         if (mediaItemList == null) return;
-        modifyRelativeUI(mediaItemList);
         mediaItems = mediaItemList;
         listAdapter = new MediaListAdapter(mContext, mediaItemList);
         if (mediaFile_list == null) return;
@@ -373,8 +374,7 @@ public class ContentFragment extends Fragment {
         }
     }
 
-    private void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
-      //  if (judgeIfNeedUpdate()){
+    public void modifyRelativeUI(ArrayList<MediaItem> mediaItemList) {
         try{
         if (mediaItemList.size() == 0) {
             ((MainActivity) getActivity()).mRandomButton.setEnabled(false);
@@ -392,29 +392,7 @@ public class ContentFragment extends Fragment {
         }catch (Exception e){
             Log.i(TAG, "modifyRelativeUI: e"+e);
         }
-   //     }
     }
-
-   //Sandra@20220520 add-->
-    /**
-     * 解决onResume后Activity的组件如随机/循环控制按钮,显示异常的问题，
-    问题原因:不该两个ContFragment同时控制一个控件，应该判断是否为当前Fragment,再决定是否刷新*/
-    private boolean judgeIfNeedUpdate(){
-        boolean flag=false;
-        if (FragmentName !=null){
-            if (FragmentName.equals(MUSIC)){
-                if (currentTab==TYPE_MUSIC){
-                    flag=true;
-    }
-            }else if (FragmentName.equals(VIDEO)){
-                if (currentTab==TYPE_VIDEO){
-                    flag=true;
-                }
-            }
-        }
-        return flag;
-    };
-    //<--Sandra@20220520 add
     public ArrayList<MediaItem> filterAllMediaItemsOfSpecificDevice(int media_Type, DeviceItem deviceInfo) {
         if (deviceInfo == null || deviceInfo.getStoragePath() == null) {
             return null;

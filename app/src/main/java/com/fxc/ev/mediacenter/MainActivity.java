@@ -1,3 +1,4 @@
+
 package com.fxc.ev.mediacenter;
 
 import android.Manifest;
@@ -127,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         // mediaItems.clear();
                         ArrayList<MediaItem> mediaItems2 = new ArrayList<>();
                         ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems2);
+                        ((ContentFragment) fragments.get(currentTab)).modifyRelativeUI(mediaItems2);
                         if (externalDeviceItems != null && externalDeviceItems.size() != 0) {
                             Toast.makeText(getApplicationContext(), "您的设备已断开连接，您可以选择其他设备", Toast.LENGTH_LONG);
                           //  devicelistview.setVisibility(View.VISIBLE);
@@ -324,6 +326,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
                     mediaItems = ((ContentFragment) fragments.get(currentTab)).filterAllMediaItemsOfSpecificDevice(currentTab, mDeviceItemUtil.getCurrentDevice());
                     ((ContentFragment) fragments.get(currentTab)).updateMediaList(mediaItems);
+                    ((ContentFragment) fragments.get(currentTab)).modifyRelativeUI(mediaItems);
+
                 } else {//单个抓取
                     if (mDeviceItemUtil.getCurrentDevice() != null) {
                         getALLMediaItemsOfSpecificDevice(true, mDeviceItemUtil.getCurrentDevice(), currentTab);//抓取单个设备的文件，并更新文件列表，过程有Loading图画
@@ -881,6 +885,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 connectAnimationStop(/*mDeviceItemUtil.getDeviceIndex(mDeviceItemUtil.getCurrentDevice())*/);
                 //  updateDeviceListData(/*false*/);
                 ((ContentFragment) fragments.get(currentTab)).updateMediaList(result);
+                ((ContentFragment) fragments.get(currentTab)).modifyRelativeUI(result);
                 device_tips.setText(deviceItem.getDescription());
                 //changeVisibleOfDeviceView(false);
                 ((ContentFragment) fragments.get(currentTab)).mediaItems = result;
